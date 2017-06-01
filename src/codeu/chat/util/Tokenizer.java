@@ -2,9 +2,6 @@ package codeu.chat.util;
 
 import java.io.IOException;
 
-/**
- * Created by Sharie on 5/26/2017.
- */
 public final class Tokenizer {
 
     private StringBuilder token;
