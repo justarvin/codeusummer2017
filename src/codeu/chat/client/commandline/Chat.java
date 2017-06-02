@@ -181,6 +181,20 @@ public final class Chat {
       }
     });
 
+    panel.register("info", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final ServerInfo info = context.getInfo();
+        if (info == null) {
+          system.out.println("ERROR: Server did not send valid info object.");
+        } else {
+          System.out.println("  Server Info: ");
+          System.out.format("   Version Number: %s\n", info;// Print the server info to the user in a pretty way
+        }
+      }
+    });
+
+
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
     return panel;

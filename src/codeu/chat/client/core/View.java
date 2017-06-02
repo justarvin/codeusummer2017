@@ -45,6 +45,23 @@ final class View implements BasicView {
     this.source = source;
   }
 
+  public ServerInfo getInfo() {
+    try (final Connection connection = this.source.connect()) {
+      Serializers.INTEGER.write(connection.out(), NetworkCode.SERVER_INFO_REQUEST);
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SERVER_INFO_RESPONSE) {
+        final Uuid version = Uuid.SERIALIZER.read(connection.in());
+        return new ServerInfo(version);
+      } else {
+        LOG.error("Unexpected Server Response.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception while connecting. Check log for details.");
+      LOG.error(ex, "Connection error occurred");
+    }
+    // If we get here it means something went wrong and null should be returned
+    return null;
+  }
+
   @Override
   public Collection<User> getUsers() {
 

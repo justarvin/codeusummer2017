@@ -47,4 +47,9 @@ public final class Context {
     }
     return users;
   }
+
+  public ServerInfo getInfo() {
+    return view.getInfo();
+  }
+
 }
