@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * Created by Sharie on 5/26/2017.
+ * Tests for command line parsing using Tokenizer class.
  */
 public final class TokenizerTest {
 
@@ -15,7 +15,6 @@ public final class TokenizerTest {
         assertEquals(tokenizer.next(), "hello world");
         assertEquals(tokenizer.next(), "how are you");
         assertEquals(tokenizer.next(), null);
-
     }
 
     @Test

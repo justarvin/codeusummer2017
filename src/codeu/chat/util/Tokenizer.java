@@ -2,6 +2,9 @@ package codeu.chat.util;
 
 import java.io.IOException;
 
+/**
+ * Helper class to tokenize command line input.
+ */
 public final class Tokenizer {
 
     private StringBuilder token;
