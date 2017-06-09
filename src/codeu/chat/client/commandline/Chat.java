@@ -186,10 +186,10 @@ public final class Chat {
       public void invoke(Scanner args) {
         final ServerInfo info = context.getInfo();
         if (info == null) {
-          // Communicate error to user - the server did not send us a valid
-            // info object.
+        // Communicate error to user - the server did not send us a valid info object.
+          LOG.error(ex, "Exception during call on server.");
         } else {
-          // Print the server info to the user in a pretty way
+          System.out.println( - info.startTime);// Print the server info to the user in a pretty way
         }
       }
     });
