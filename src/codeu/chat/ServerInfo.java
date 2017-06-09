@@ -1,3 +1,8 @@
+package codeu.chat.common;
+
+import codeu.chat.util.Time;
+
+
 public final class ServerInfo {
   public final Time startTime;
   public ServerInfo() {

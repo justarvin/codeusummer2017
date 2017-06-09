@@ -181,15 +181,16 @@ public final class Chat {
       }
     });
 
-    panel.register(“info”, new Panel.Command() {
+    panel.register("info", new Panel.Command() {
       @Override
       public void invoke(Scanner args) {
         final ServerInfo info = context.getInfo();
         if (info == null) {
         // Communicate error to user - the server did not send us a valid info object.
-          LOG.error(ex, "Exception during call on server.");
+          System.out.println("ERROR: Server did not send valid info object.");
+          //LOG.error(ex, "Exception during call on server.");
         } else {
-          System.out.println( - info.startTime);// Print the server info to the user in a pretty way
+          System.out.format("Server Time:", info);// Print the server info to the user in a pretty way
         }
       }
     });

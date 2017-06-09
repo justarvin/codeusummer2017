@@ -146,15 +146,16 @@ final class View implements BasicView {
       } else {
       // Communicate this error - the server did not respond with the type of
       // response we expected.
-        LOG.error(ex, "Exception during call on server.");
+        System.out.println("ERROR: Server did not respond with correct type of response.");
+        //LOG.error("Response from server failed.");
       }
     } catch (Exception ex) {
       // Communicate this error - something went wrong with the connection.
-        LOG.error(ex, "Exception during call on server.");
+        System.out.println("ERROR: Exception during call on server.");
+        //LOG.error(ex, "Exception during call on server.");
     }
       // If we get here it means something went wrong and null should be returned
         return null;
   }
-  
 
 }
