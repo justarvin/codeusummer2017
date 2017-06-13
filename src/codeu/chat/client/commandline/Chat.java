@@ -24,6 +24,8 @@ import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 
+import codeu.chat.common.ServerInfo;
+
 public final class Chat {
 
   // PANELS
@@ -181,15 +183,15 @@ public final class Chat {
       }
     });
 
-    panel.register("info", new Panel.Command() {
+    panel.register("SERVER_INFO", new Panel.Command() {
       @Override
       public void invoke(Scanner args) {
-        final ServerInfo info = context.getInfo();
-        if (info == null) {
-          system.out.println("ERROR: Server did not send valid info object.");
+        final ServerInfo SERVER_INFO = context.getInfo();
+        if (SERVER_INFO == null) {
+          System.out.println("ERROR: Server did not send valid info object.");
         } else {
           System.out.println("  Server Info: ");
-          System.out.format("   Version Number: %s\n", info;// Print the server info to the user in a pretty way
+          System.out.format("   Version Number: %s\n", SERVER_INFO);// Print the server info to the user in a pretty way
         }
       }
     });
@@ -221,6 +223,8 @@ public final class Chat {
         System.out.println("    Join the conversation as the current user.");
         System.out.println("  info");
         System.out.println("    Display all info for the current user");
+        System.out.println("  SERVER_INFO");
+        System.out.println("    Displays server info.");
         System.out.println("  back");
         System.out.println("    Go back to ROOT MODE.");
         System.out.println("  exit");
