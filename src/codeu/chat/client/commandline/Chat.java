@@ -113,8 +113,6 @@ public final class Chat {
                 System.out.println("    Add a new user with the given name.");
                 System.out.println("  u-sign-in <name>");
                 System.out.println("    Sign in as the user with the given name.");
-                System.out.println("  clear");
-                System.out.println("    Clear history.");
                 System.out.println("  exit");
                 System.out.println("    Exit the program.");
             }
@@ -186,14 +184,6 @@ public final class Chat {
                     }
                 }
                 return null;
-            }
-        });
-
-        panel.register("clear", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                context.clear();
-                System.out.println("History cleared");
             }
         });
 

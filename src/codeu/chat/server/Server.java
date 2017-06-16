@@ -176,19 +176,6 @@ public final class Server {
             }
         });
 
-        this.commands.put(NetworkCode.CLEAR_HISTORY_REQUEST, new Command() {
-            @Override
-            public void onMessage(InputStream in, OutputStream out) throws IOException {
-
-                File log = new File(persistentPath.getPath());
-                FileWriter writer = new FileWriter(log);
-                writer.write("");
-                writer.close();
-
-                Serializers.INTEGER.write(out, NetworkCode.CLEAR_HISTORY_RESPONSE);
-            }
-        });
-
         this.timeline.scheduleNow(new Runnable() {
             @Override
             public void run() {
