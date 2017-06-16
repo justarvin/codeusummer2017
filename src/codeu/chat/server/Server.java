@@ -16,13 +16,10 @@
 package codeu.chat.server;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.*;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
-import codeu.chat.common.LinearUuidGenerator;
 import codeu.chat.common.Message;
 import codeu.chat.common.NetworkCode;
 import codeu.chat.common.Relay;
@@ -176,6 +173,7 @@ public final class Server {
             }
         });
 
+        // Clean - A client wants to clean the log
         this.commands.put(NetworkCode.CLEAN_REQUEST, new Command() {
             @Override
             public void onMessage(InputStream in, OutputStream out) throws IOException {
@@ -188,10 +186,12 @@ public final class Server {
             }
         });
 
-        this.commands.put(NetworkCode.WRITE_TO_FILE_REQUEST, new Command() {
+        // Write to file - Write remaining contents of queue to file when client exits chat
+        this.commands.put(NetworkCode.WRITE_REST_OF_QUEUE_REQUEST, new Command() {
             @Override
             public void onMessage(InputStream in, OutputStream out) throws IOException {
                 try {
+
                     File log = new File(persistentPath.getPath());
                     BufferedWriter writer = new BufferedWriter(new FileWriter(log));
                     while (!logBuffer.isEmpty()) {
@@ -199,11 +199,12 @@ public final class Server {
                         writer.newLine();
                     }
                     writer.close();
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                Serializers.INTEGER.write(out, NetworkCode.WRITE_TO_FILE_RESPONSE);
+                Serializers.INTEGER.write(out, NetworkCode.WRITE_REST_OF_QUEUE_RESPONSE);
             }
         });
 
@@ -320,11 +321,13 @@ public final class Server {
     }
 
     private void process(String line) throws IOException {
+        //turns log string into an array of words
         String[] splitLog = line.split(" ");
 
         //uuid and time occupy the same spot in each format so they have been extracted ahead of time
         Uuid uuid = Uuid.parse(splitLog[1]);
         long time = Long.parseLong(splitLog[3]);
+
         switch (splitLog[0]) {
             case "ADD-USER":
                 String name = splitLog[2];
@@ -345,13 +348,13 @@ public final class Server {
     }
 
     public void restore(File persistentPath) {
-        File log = new File(persistentPath.getPath());
-        LOG.info(persistentPath.getPath());
-        try {
-            boolean created = log.createNewFile();
-            LOG.info(created+"");
 
-            //read in and restore state if the file existed already
+        File log = new File(persistentPath.getPath());
+
+        try {
+
+            boolean created = log.createNewFile(); // true if file created, false otherwise
+            //read in and restore state if the file existed
             if (!created) {
                 String line;
                 BufferedReader reader = new BufferedReader(new FileReader(log));
@@ -360,29 +363,29 @@ public final class Server {
                 }
                 reader.close();
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void checkBuffer() {
+    public void checkBuffer() {
+
         File log = new File(persistentPath.getPath());
 
         if (logBuffer.size() == 15) {
             try {
+
                 BufferedWriter writer = new BufferedWriter(new FileWriter(log));
                 for (int i = 0; i < 15; i++) {
                     writer.write(logBuffer.remove());
                     writer.newLine();
                 }
                 writer.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void writeToFile() {
-
     }
 }

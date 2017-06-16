@@ -192,6 +192,11 @@ public final class Chat {
             }
         });
 
+        // CLEAN
+        //
+        // Add a command to clean the transaction log when the user enters
+        // "clean" while on the root panel
+        //
         panel.register("clean", new Panel.Command() {
             @Override
             public void invoke(List<String> args) {
