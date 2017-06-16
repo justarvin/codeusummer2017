@@ -15,8 +15,7 @@
 
 package codeu.chat;
 
-import java.io.IOException;
-import java.io.File;
+import java.io.*;
 
 import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
@@ -33,85 +32,90 @@ import codeu.chat.util.connections.ServerConnectionSource;
 
 final class ServerMain {
 
-  private static final Logger.Log LOG = Logger.newLog(ServerMain.class);
+    private static final Logger.Log LOG = Logger.newLog(ServerMain.class);
 
-  public static void main(String[] args) {
+    public static void main(String[] args) {
 
-    Logger.enableConsoleOutput();
+        Logger.enableConsoleOutput();
 
-    try {
-      Logger.enableFileOutput("chat_server_log.log");
-    } catch (IOException ex) {
-      LOG.error(ex, "Failed to set logger to write to file");
+        try {
+            Logger.enableFileOutput("chat_server_log.log");
+        } catch (IOException ex) {
+            LOG.error(ex, "Failed to set logger to write to file");
+        }
+
+        LOG.info("============================= START OF LOG =============================");
+
+        Uuid id = null;
+        Secret secret = null;
+        int port = -1;
+        // This is the directory where it is safe to store data across runs
+        // of the server.
+        File persistentPath = null;
+        RemoteAddress relayAddress = null;
+
+        try {
+            id = Uuid.parse(args[0]);
+            secret = Secret.parse(args[1]);
+            port = Integer.parseInt(args[2]);
+            persistentPath = new File(args[3]);
+            relayAddress = args.length > 4 ? RemoteAddress.parse(args[4]) : null;
+        } catch (Exception ex) {
+            LOG.error(ex, "Failed to read command arguments");
+            System.exit(1);
+        }
+
+        if (!persistentPath.isDirectory()) {
+            LOG.error("%s does not exist", persistentPath);
+            System.exit(1);
+        }
+
+        try (
+                final ConnectionSource serverSource = ServerConnectionSource.forPort(port);
+                final ConnectionSource relaySource = relayAddress == null ? null : new ClientConnectionSource(relayAddress.host, relayAddress.port)
+        ) {
+
+            LOG.info("Starting server...");
+            runServer(id, secret, serverSource, relaySource, persistentPath);
+
+        } catch (IOException ex) {
+
+            LOG.error(ex, "Failed to establish connections");
+
+        }
     }
 
-    LOG.info("============================= START OF LOG =============================");
+    private static void runServer(Uuid id,
+                                  Secret secret,
+                                  ConnectionSource serverSource,
+                                  ConnectionSource relaySource,
+                                  File persistentPath) {
 
-    Uuid id = null;
-    Secret secret = null;
-    int port = -1;
-    // This is the directory where it is safe to store data accross runs
-    // of the server.
-    File persistentPath = null;
-    RemoteAddress relayAddress = null;
+        final Relay relay = relaySource == null ?
+                new NoOpRelay() :
+                new RemoteRelay(relaySource);
 
-    try {
-      id = Uuid.parse(args[0]);
-      secret = Secret.parse(args[1]);
-      port = Integer.parseInt(args[2]);
-      persistentPath = new File(args[3]);
-      relayAddress = args.length > 4 ? RemoteAddress.parse(args[4]) : null;
-    } catch (Exception ex) {
-      LOG.error(ex, "Failed to read command arguments");
-      System.exit(1);
+        File log = new File(persistentPath, "log.txt");
+        final Server server = new Server(id, secret, relay, log);
+
+        LOG.info("Created server.");
+
+        server.restore(log);
+
+        while (true) {
+            try {
+
+                LOG.info("Established connection...");
+                final Connection connection = serverSource.connect();
+                LOG.info("Connection established.");
+
+                server.handleConnection(connection);
+
+            } catch (IOException ex) {
+                LOG.error(ex, "Failed to establish connection.");
+            }
+        }
     }
 
-    if (!persistentPath.isDirectory()) {
-      LOG.error("%s does not exist", persistentPath);
-      System.exit(1);
-    }
 
-    try (
-        final ConnectionSource serverSource = ServerConnectionSource.forPort(port);
-        final ConnectionSource relaySource = relayAddress == null ? null : new ClientConnectionSource(relayAddress.host, relayAddress.port)
-    ) {
-
-      LOG.info("Starting server...");
-      runServer(id, secret, serverSource, relaySource);
-
-    } catch (IOException ex) {
-
-      LOG.error(ex, "Failed to establish connections");
-
-    }
-  }
-
-  private static void runServer(Uuid id,
-                                Secret secret,
-                                ConnectionSource serverSource,
-                                ConnectionSource relaySource) {
-
-    final Relay relay = relaySource == null ?
-                        new NoOpRelay() :
-                        new RemoteRelay(relaySource);
-
-    final Server server = new Server(id, secret, relay);
-
-    LOG.info("Created server.");
-
-    while (true) {
-
-      try {
-
-        LOG.info("Established connection...");
-        final Connection connection = serverSource.connect();
-        LOG.info("Connection established.");
-
-        server.handleConnection(connection);
-
-      } catch (IOException ex) {
-        LOG.error(ex, "Failed to establish connection.");
-      }
-    }
-  }
 }

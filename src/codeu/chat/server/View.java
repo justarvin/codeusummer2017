@@ -111,4 +111,9 @@ public final class View implements BasicView, SinglesView {
 
     return found;
   }
+
+  @Override
+  public void clear() {
+
+  }
 }

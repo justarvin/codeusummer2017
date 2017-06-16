@@ -47,4 +47,8 @@ public final class Context {
     }
     return users;
   }
+
+  public void clear() {
+    view.clear();
+  }
 }
