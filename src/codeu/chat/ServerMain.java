@@ -15,8 +15,6 @@
 
 package codeu.chat;
 
-import java.io.*;
-
 import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.server.NoOpRelay;
@@ -29,6 +27,9 @@ import codeu.chat.util.connections.ClientConnectionSource;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
 import codeu.chat.util.connections.ServerConnectionSource;
+
+import java.io.IOException;
+import java.io.File;
 
 final class ServerMain {
 
