@@ -52,19 +52,19 @@ public final class Model {
 
   private static final Comparator<String> STRING_COMPARE = String.CASE_INSENSITIVE_ORDER;
 
-  private final Store<Uuid, User> userById = new Store<>(UUID_COMPARE);
-  private final Store<Time, User> userByTime = new Store<>(TIME_COMPARE);
-  private final Store<String, User> userByText = new Store<>(STRING_COMPARE);
+  private Store<Uuid, User> userById = new Store<>(UUID_COMPARE);
+  private Store<Time, User> userByTime = new Store<>(TIME_COMPARE);
+  private Store<String, User> userByText = new Store<>(STRING_COMPARE);
 
-  private final Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
-  private final Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
-  private final Store<String, ConversationHeader> conversationByText = new Store<>(STRING_COMPARE);
+  private Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
+  private Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
+  private Store<String, ConversationHeader> conversationByText = new Store<>(STRING_COMPARE);
 
-  private final Store<Uuid, ConversationPayload> conversationPayloadById = new Store<>(UUID_COMPARE);
+  private Store<Uuid, ConversationPayload> conversationPayloadById = new Store<>(UUID_COMPARE);
 
-  private final Store<Uuid, Message> messageById = new Store<>(UUID_COMPARE);
-  private final Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
-  private final Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
+  private Store<Uuid, Message> messageById = new Store<>(UUID_COMPARE);
+  private Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
+  private Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
 
   public void add(User user) {
     userById.insert(user.id, user);
@@ -123,5 +123,21 @@ public final class Model {
 
   public StoreAccessor<String, Message> messageByText() {
     return messageByText;
+  }
+
+  public void clearStores() {
+    userById = new Store<>(UUID_COMPARE);
+    userByTime = new Store<>(TIME_COMPARE);
+    userByText = new Store<>(STRING_COMPARE);
+
+    conversationById = new Store<>(UUID_COMPARE);
+    conversationByTime = new Store<>(TIME_COMPARE);
+    conversationByText = new Store<>(STRING_COMPARE);
+
+    conversationPayloadById = new Store<>(UUID_COMPARE);
+
+    messageById = new Store<>(UUID_COMPARE);
+    messageByTime = new Store<>(TIME_COMPARE);
+    messageByText = new Store<>(STRING_COMPARE);
   }
 }

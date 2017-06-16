@@ -192,6 +192,9 @@ public final class Server {
                 writer.write("");
                 writer.close();
 
+                //clear current data in model
+                model.clearStores();
+
                 Serializers.INTEGER.write(out, NetworkCode.CLEAN_RESPONSE);
             }
         });
