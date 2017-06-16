@@ -36,8 +36,10 @@ public final class Chat {
     // panel to the top of the stack. When a command wants to go to the previous
     // panel all it needs to do is pop the top panel.
     private final Stack<Panel> panels = new Stack<>();
+    private Context context;
 
     public Chat(Context context) {
+        this.context = context;
         this.panels.push(createRootPanel(context));
     }
 
@@ -63,6 +65,7 @@ public final class Chat {
 
         if ("exit".equals(command)) {
             // The user does not want to process any more commands
+            context.writeRestOfQueue();
             return false;
         }
 
@@ -113,6 +116,8 @@ public final class Chat {
                 System.out.println("    Add a new user with the given name.");
                 System.out.println("  u-sign-in <name>");
                 System.out.println("    Sign in as the user with the given name.");
+                System.out.println("  clean");
+                System.out.println("    Clear history.");
                 System.out.println("  exit");
                 System.out.println("    Exit the program.");
             }
@@ -184,6 +189,13 @@ public final class Chat {
                     }
                 }
                 return null;
+            }
+        });
+
+        panel.register("clean", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+                context.clean();
             }
         });
 

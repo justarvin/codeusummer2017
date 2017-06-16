@@ -48,7 +48,11 @@ public final class Context {
     return users;
   }
 
-  public void clear() {
-    view.clear();
+  public void clean() {
+    view.clean();
+  }
+
+  public void writeRestOfQueue() {
+    view.writeRestOfQueue();
   }
 }

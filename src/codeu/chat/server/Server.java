@@ -176,6 +176,37 @@ public final class Server {
             }
         });
 
+        this.commands.put(NetworkCode.CLEAN_REQUEST, new Command() {
+            @Override
+            public void onMessage(InputStream in, OutputStream out) throws IOException {
+                File log = new File(persistentPath.getPath());
+                FileWriter writer = new FileWriter(log);
+                writer.write("");
+                writer.close();
+
+                Serializers.INTEGER.write(out, NetworkCode.CLEAN_RESPONSE);
+            }
+        });
+
+        this.commands.put(NetworkCode.WRITE_TO_FILE_REQUEST, new Command() {
+            @Override
+            public void onMessage(InputStream in, OutputStream out) throws IOException {
+                try {
+                    File log = new File(persistentPath.getPath());
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+                    while (!logBuffer.isEmpty()) {
+                        writer.write(logBuffer.remove());
+                        writer.newLine();
+                    }
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                Serializers.INTEGER.write(out, NetworkCode.WRITE_TO_FILE_RESPONSE);
+            }
+        });
+
         this.timeline.scheduleNow(new Runnable() {
             @Override
             public void run() {
@@ -329,13 +360,6 @@ public final class Server {
                 }
                 reader.close();
             }
-
-            //process any strings that didn't get written to file last time
-            while (!logBuffer.isEmpty()) {
-                LOG.info("buffer size: " + logBuffer.size());
-                process(logBuffer.remove());
-            }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -356,5 +380,9 @@ public final class Server {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void writeToFile() {
+
     }
 }
