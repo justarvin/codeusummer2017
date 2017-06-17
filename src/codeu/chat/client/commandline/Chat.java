@@ -109,6 +109,8 @@ public final class Chat {
         System.out.println("    Add a new user with the given name.");
         System.out.println("  u-sign-in <name>");
         System.out.println("    Sign in as the user with the given name.");
+        System.out.println("  server-info");
+        System.out.println("    Check Server Version Number.");
         System.out.println("  exit");
         System.out.println("    Exit the program.");
       }
@@ -183,7 +185,7 @@ public final class Chat {
       }
     });
 
-    panel.register("SERVER_INFO", new Panel.Command() {
+    panel.register("server-info", new Panel.Command() {
       @Override
       public void invoke(Scanner args) {
         final ServerInfo SERVER_INFO = context.getInfo();

@@ -55,6 +55,6 @@ public interface BasicView {
 
   // GET SERVER INFO
   //
-  ServerInfo getInfo();
+  // Collection<ServerInfo> getInfo();
 
 }

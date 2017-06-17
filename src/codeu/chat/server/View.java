@@ -42,13 +42,19 @@ import codeu.chat.util.store.StoreAccessor;
 public final class View implements BasicView, SinglesView {
 
   private final static Logger.Log LOG = Logger.newLog(View.class);
-
-  private final static ServerInfo SERVER_INFO = new ServerInfo();
-
+  // private final static ServerInfo SERVER_INFO = new ServerInfo();
+  //
+  // try {
+  //     SERVER_INFO = new ServerInfo();
+  //     } catch(IOException ex) {
+  //       System.out.println("ERROR: Response from server failed.");
+  //       LOG.error(ex, "Connection error occured.");
+  //     }
+  //
   // @Override
-  public ServerInfo getInfo() {
-    return SERVER_INFO;
-  }
+  // public Collection<ServerInfo> getInfo() {
+  //   return SERVER_INFO;
+  // }
 
   private final Model model;
 

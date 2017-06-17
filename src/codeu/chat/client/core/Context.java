@@ -51,7 +51,7 @@ public final class Context {
   }
 
   public ServerInfo getInfo() {
-    return ((View) view).getInfo();
+    return ((View)view).getInfo();
   }
 
 }

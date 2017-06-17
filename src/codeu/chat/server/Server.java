@@ -52,6 +52,7 @@ public final class Server {
   private static final int RELAY_REFRESH_MS = 5000;  // 5 seconds
   private static ServerInfo SERVER_INFO;
 
+
   private final Timeline timeline = new Timeline();
 
   private final Map<Integer, Command> commands = new HashMap<>();
@@ -73,18 +74,16 @@ public final class Server {
     this.controller = new Controller(id, model);
     this.relay = relay;
 
-    try{
-      SERVER_INFO = new ServerInfo();
-    } catch(Exception ex) {
-      System.out.println("ERROR: Response from server failed.");
-      LOG.error(ex, "Connection error occured.");
-
-    }
     //Request info version - user asks server for current info version
     this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
+        try{
+          SERVER_INFO = new ServerInfo();
+        } catch(IOException ex) {
+          LOG.error(ex, "Connection error occured.");
+        }
         Uuid.SERIALIZER.write(out, SERVER_INFO.version);
       }
     });
