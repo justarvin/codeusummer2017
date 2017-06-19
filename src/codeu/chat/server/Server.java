@@ -51,6 +51,8 @@ public final class Server {
   private static final Logger.Log LOG = Logger.newLog(Server.class);
 
   private static final int RELAY_REFRESH_MS = 5000;  // 5 seconds
+  //private static final ServerInfo info = new ServerInfo();
+  private static ServerInfo SERVER_INFO;
 
   private final Timeline timeline = new Timeline();
 
@@ -66,7 +68,6 @@ public final class Server {
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
 
-  private static final ServerInfo info = new ServerInfo();
 
   public Server(final Uuid id, final Secret secret, final Relay relay) {
 
@@ -74,6 +75,20 @@ public final class Server {
     this.secret = secret;
     this.controller = new Controller(id, model);
     this.relay = relay;
+
+
+    this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
+        try{
+          SERVER_INFO = new ServerInfo();
+        } catch(IOException ex) {
+          LOG.error(ex, "Connection error occured.");
+        }
+        Uuid.SERIALIZER.write(out, SERVER_INFO.version);
+      }
+    });
 
     // New Message - A client wants to add a new message to the back end.
     this.commands.put(NetworkCode.NEW_MESSAGE_REQUEST, new Command() {
@@ -173,14 +188,6 @@ public final class Server {
 
         Serializers.INTEGER.write(out, NetworkCode.GET_MESSAGES_BY_ID_RESPONSE);
         Serializers.collection(Message.SERIALIZER).write(out, messages);
-      }
-    });
-
-    this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
-      @Override
-      public void onMessage(InputStream in, OutputStream out) throws IOException {
-        Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
-        Uuid.SERIALIZER.write(out, info.version);
       }
     });
 

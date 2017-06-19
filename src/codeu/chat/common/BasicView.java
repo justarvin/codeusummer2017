@@ -20,6 +20,7 @@ import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
+import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Uuid;
 
 // BASIC VIEW
