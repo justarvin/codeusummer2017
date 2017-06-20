@@ -50,7 +50,7 @@ public final class Context {
     return users;
   }
 
-  public Info getInfo() {
+  public ServerInfo getInfo() {
     return view.getInfo();
   }
 

@@ -81,12 +81,7 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
-        try{
-          SERVER_INFO = new ServerInfo();
-        } catch(IOException ex) {
-          LOG.error(ex, "Connection error occured.");
-        }
-        Uuid.SERIALIZER.write(out, SERVER_INFO.version);
+        Time.SERIALIZER.write(out, view.getInfo().startTime);
       }
     });
 

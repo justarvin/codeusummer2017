@@ -25,6 +25,7 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 
 import codeu.chat.common.ServerInfo;
+import codeu.chat.util.Time;
 
 public final class Chat {
 
@@ -194,7 +195,8 @@ public final class Chat {
           System.out.println("ERROR: Server did not send valid info object.");
           //LOG.error(ex, "Exception during call on server.");
         } else {
-          System.out.format("Server Time:", info);// Print the server info to the user in a pretty way
+          // Print the server info to the user in a pretty way
+          System.out.println("The server has been running for "+ (Time.now().inMs() - info.startTime.inMs()) + " ms");
         }
       }
     });

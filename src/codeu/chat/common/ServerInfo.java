@@ -6,7 +6,7 @@ import codeu.chat.util.Time;
 
 public final class ServerInfo {
   public final Time startTime;
-  public ServerInfo() throws IOException {
+  public ServerInfo() {
     this.startTime = Time.now();
   }
   public ServerInfo(Time startTime) {
