@@ -14,18 +14,18 @@
 
 package codeu.chat.client.commandline;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
-import codeu.chat.util.Tokenizer;
-import codeu.chat.util.Time;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.util.Time;
+import codeu.chat.util.Tokenizer;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+import java.util.Scanner;
 
 public final class Chat {
 
