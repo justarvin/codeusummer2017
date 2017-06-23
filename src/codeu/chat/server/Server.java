@@ -52,7 +52,6 @@ public final class Server {
   private static final Logger.Log LOG = Logger.newLog(Server.class);
 
   private static final int RELAY_REFRESH_MS = 5000;  // 5 seconds
-  private static ServerInfo SERVER_INFO;
 
   private final Timeline timeline = new Timeline();
 
@@ -81,11 +80,6 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
-        try{
-          SERVER_INFO = new ServerInfo();
-        } catch(IOException ex) {
-          LOG.error(ex, "Connection error occured.");
-        }
         final ServerInfo serverInfo = view.getInfo();
         Uuid.SERIALIZER.write(out, serverInfo.getVersion());
         Time.SERIALIZER.write(out, serverInfo.getStartTime());
