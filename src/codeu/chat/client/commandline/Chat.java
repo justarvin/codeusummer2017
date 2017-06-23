@@ -87,21 +87,6 @@ public final class Chat {
     // is willing to take another command, the function will return true. If
     // the system wants to exit, the function will return false.
     //
-    public boolean handleCommand(String line) throws IOException {
-
-        final List<String> args = new ArrayList<>();
-        final Tokenizer tokenizer = new Tokenizer(line);
-        for (String token = tokenizer.next(); token != null; token = tokenizer.next()) {
-            args.add(token);
-        }
-        final String command = args.get(0);
-        args.remove(0);
-
-    // U-SIGN-IN (sign in user)
-    //
-    // Add a command to sign-in as a user when the user enters "u-sign-in"
-    // while on the root panel.
-    //
     panel.register("u-sign-in", new Panel.Command() {
       @Override
       public void invoke(Scanner args) {
