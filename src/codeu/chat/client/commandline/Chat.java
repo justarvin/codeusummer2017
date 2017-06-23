@@ -24,23 +24,43 @@ import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.util.Tokenizer;
-
-import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Time;
+import codeu.chat.common.ServerInfo;
 
 public final class Chat {
 
-    // PANELS
-    //
-    // We are going to use a stack of panels to track where in the application
-    // we are. The command will always be routed to the panel at the top of the
-    // stack. When a command wants to go to another panel, it will add a new
-    // panel to the top of the stack. When a command wants to go to the previous
-    // panel all it needs to do is pop the top panel.
-    private final Stack<Panel> panels = new Stack<>();
+  // PANELS
+  //
+  // We are going to use a stack of panels to track where in the application
+  // we are. The command will always be routed to the panel at the top of the
+  // stack. When a command wants to go to another panel, it will add a new
+  // panel to the top of the stack. When a command wants to go to the previous
+  // panel all it needs to do is pop the top panel.
+  private final Stack<Panel> panels = new Stack<>();
 
-    public Chat(Context context) {
-        this.panels.push(createRootPanel(context));
+  public Chat(Context context) {
+    this.panels.push(createRootPanel(context));
+  }
+
+  // HANDLE COMMAND
+  //
+  // Take a single line of input and parse a command from it. If the system
+  // is willing to take another command, the function will return true. If
+  // the system wants to exit, the function will return false.
+  //
+  public boolean handleCommand(String line) {
+
+    final Scanner tokens = new Scanner(line.trim());
+
+    final String command = tokens.hasNext() ? tokens.next() : "";
+
+    // Because "exit" and "back" are applicable to every panel, handle
+    // those commands here to avoid having to implement them for each
+    // panel.
+
+    if ("exit".equals(command)) {
+      // The user does not want to process any more commands
+      return false;
     }
 
     // HANDLE COMMAND
@@ -56,7 +76,7 @@ public final class Chat {
         System.out.println("  u-sign-in <name>");
         System.out.println("    Sign in as the user with the given name.");
         System.out.println("  server-info");
-        System.out.println("    Check how long the server has been running.");
+        System.out.println("    Returns server info.");
         System.out.println("  exit");
         System.out.println("    Exit the program.");
       }
@@ -111,6 +131,78 @@ public final class Chat {
     });
 
     panel.register("server-info", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final ServerInfo SERVER_INFO = context.getInfo();
+        if (SERVER_INFO == null) {
+          System.out.println("ERROR: Server did not send valid info object.");
+        } else {
+          System.out.println("  Server Info: ");
+          System.out.format("   Version Number: %s\n", SERVER_INFO.SERVER_VERSION);// Print the server info to the user in a pretty way
+          System.out.println("The server has been running since " + SERVER_INFO.startTime.inMs());
+        }
+      }
+    });
+
+
+    // Now that the panel has all its commands registered, return the panel
+    // so that it can be used.
+    return panel;
+  }
+
+  private Panel createUserPanel(final UserContext user) {
+
+    final Panel panel = new Panel();
+
+    // HELP
+    //
+    // Add a command that will print a list of all commands and their
+    // descriptions when the user enters "help" while on the user panel.
+    //
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        System.out.println("USER MODE");
+        System.out.println("  c-list");
+        System.out.println("    List all conversations that the current user can interact with.");
+        System.out.println("  c-add <title>");
+        System.out.println("    Add a new conversation with the given title and join it as the current user.");
+        System.out.println("  c-join <title>");
+        System.out.println("    Join the conversation as the current user.");
+        System.out.println("  info");
+        System.out.println("    Display all info for the current user");
+        System.out.println("  SERVER_INFO");
+        System.out.println("    Displays server info.");
+        System.out.println("  back");
+        System.out.println("    Go back to ROOT MODE.");
+        System.out.println("  exit");
+        System.out.println("    Exit the program.");
+      }
+    });
+
+    // C-LIST (list conversations)
+    //
+    // Add a command that will print all conversations when the user enters
+    // "c-list" while on the user panel.
+    //
+    panel.register("c-list", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        for (final ConversationContext conversation : user.conversations()) {
+          System.out.format(
+              "CONVERSATION %s (UUID:%s)\n",
+              conversation.conversation.title,
+              conversation.conversation.id);
+        }
+      }
+    });
+
+    // C-ADD (add conversation)
+    //
+    // Add a command that will create and join a new conversation when the user
+    // enters "c-add" while on the user panel.
+    //
+    panel.register("c-add", new Panel.Command() {
       @Override
       public void invoke(Scanner args) {
         final ServerInfo info = context.getInfo();

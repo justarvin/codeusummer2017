@@ -54,6 +54,4 @@ public interface BasicView {
   Collection<Message> getMessages(Collection<Uuid> ids);
 
   ServerInfo getInfo();
-
-
 }
