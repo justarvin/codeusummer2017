@@ -9,9 +9,13 @@ public final class ServerInfo {
   private final Uuid version;
   private final static String SERVER_VERSION = "1.0.0";
   
-  public ServerInfo() throws IOException {
+  public ServerInfo() {
     this.startTime = Time.now();
-    this.version = Uuid.parse(SERVER_VERSION);
+    try {
+      this.version = Uuid.parse(SERVER_VERSION);
+    } catch (IOException e) {
+      this.version = Uuid.NULL;
+    }
   }
   
   public ServerInfo(Uuid version, Time startTime) {
