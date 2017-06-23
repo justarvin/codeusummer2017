@@ -56,6 +56,7 @@ public final class View implements BasicView, SinglesView {
   //   return SERVER_INFO;
   // }
 
+  private static final ServerInfo info = new ServerInfo();
   private final Model model;
 
   public View(Model model) {
@@ -124,5 +125,10 @@ public final class View implements BasicView, SinglesView {
     }
 
     return found;
+  }
+
+  @Override
+  public ServerInfo getInfo() {
+    return info;
   }
 }

@@ -34,12 +34,14 @@ import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
+import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
+
 
 public final class Server {
 
@@ -51,7 +53,6 @@ public final class Server {
 
   private static final int RELAY_REFRESH_MS = 5000;  // 5 seconds
   private static ServerInfo SERVER_INFO;
-
 
   private final Timeline timeline = new Timeline();
 
@@ -66,6 +67,7 @@ public final class Server {
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
+
 
   public Server(final Uuid id, final Secret secret, final Relay relay) {
 
@@ -85,6 +87,7 @@ public final class Server {
           LOG.error(ex, "Connection error occured.");
         }
         Uuid.SERIALIZER.write(out, SERVER_INFO.version);
+        Time.SERIALIZER.write(out, view.getInfo().startTime);
       }
     });
 
