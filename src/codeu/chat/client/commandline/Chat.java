@@ -42,19 +42,23 @@ public final class Chat {
     this.panels.push(createRootPanel(context));
   }
 
-  // HANDLE COMMAND
+  // CREATE ROOT PANEL
   //
-  // Take a single line of input and parse a command from it. If the system
-  // is willing to take another command, the function will return true. If
-  // the system wants to exit, the function will return false.
+  // Create a panel for the root of the application. Root in this context means
+  // the first panel and the only panel that should always be at the bottom of
+  // the panels stack.
   //
-  public boolean handleCommand(String line) {
+  // The root panel is for commands that require no specific contextual information.
+  // This is before a user has signed in. Most commands handled by the root panel
+  // will be user selection focused.
+  //
+  private Panel createRootPanel(final Context context) {
+    final Panel panel = new Panel();
 
-    final Scanner tokens = new Scanner(line.trim());
-
-    final String command = tokens.hasNext() ? tokens.next() : "";
-
-    // HANDLE COMMAND
+    // HELP
+    //
+    // Add a command to print a list of all commands and their description when
+    // the user for "help" while on the root panel.
     //
     panel.register("help", new Panel.Command() {
       @Override
@@ -150,16 +154,6 @@ public final class Chat {
         }
       }
     });
-
-
-    // Because "exit" and "back" are applicable to every panel, handle
-    // those commands here to avoid having to implement them for each
-    // panel.
-
-    if ("exit".equals(command)) {
-      // The user does not want to process any more commands
-      return false;
-    }
 
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
