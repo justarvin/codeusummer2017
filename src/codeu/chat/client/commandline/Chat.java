@@ -41,6 +41,49 @@ public final class Chat {
   public Chat(Context context) {
     this.panels.push(createRootPanel(context));
   }
+  
+    // HANDLE COMMAND
+    //
+    // Take a single line of input and parse a command from it. If the system
+    // is willing to take another command, the function will return true. If
+    // the system wants to exit, the function will return false.
+    //
+    public boolean handleCommand(String line) throws IOException {
+
+        final List<String> args = new ArrayList<>();
+        final Tokenizer tokenizer = new Tokenizer(line);
+        for (String token = tokenizer.next(); token != null; token = tokenizer.next()) {
+            args.add(token);
+        }
+        final String command = args.get(0);
+        args.remove(0);
+
+        // Because "exit" and "back" are applicable to every panel, handle
+        // those commands here to avoid having to implement them for each
+        // panel.
+
+        if ("exit".equals(command)) {
+            // The user does not want to process any more commands
+            return false;
+        }
+
+        // Do not allow the root panel to be removed.
+        if ("back".equals(command) && panels.size() > 1) {
+            panels.pop();
+            return true;
+        }
+
+        if (panels.peek().handleCommand(command, args)) {
+            // the command was handled
+            return true;
+        }
+
+        // If we get to here it means that the command was not correctly handled
+        // so we should let the user know. Still return true as we want to continue
+        // processing future commands.
+        System.out.println("ERROR: Unsupported command");
+        return true;
+    }
 
   // CREATE ROOT PANEL
   //
