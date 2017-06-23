@@ -195,13 +195,14 @@ public final class Chat {
       panel.register("server-info", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        final ServerInfo SERVER_INFO = context.getInfo();
-        if (SERVER_INFO == null) {
+        final ServerInfo serverInfo = context.getInfo();
+        if (serverInfo == null) {
           System.out.println("ERROR: Server did not send valid info object.");
         } else {
+          // Print the server info to the user in a pretty way.
           System.out.println("  Server Info: ");
-          System.out.format("   Version Number: %s\n", SERVER_INFO.SERVER_VERSION);// Print the server info to the user in a pretty way
-          System.out.println("The server has been running since " + SERVER_INFO.startTime.inMs());
+          System.out.format("   Version Number: %s\n", serverInfo.getVersion());
+          System.out.println("The server has been running since " + serverInfo.getStartTime().inMs());
         }
       }
       });
