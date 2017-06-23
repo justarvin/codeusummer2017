@@ -11,11 +11,13 @@ public final class ServerInfo {
   
   public ServerInfo() {
     this.startTime = Time.now();
+    Uuid serverVersion = Uuid.NULL;
     try {
-      this.version = Uuid.parse(SERVER_VERSION);
+      serverVersion = Uuid.parse(SERVER_VERSION);
     } catch (IOException e) {
-      this.version = Uuid.NULL;
+      // Do nothing.
     }
+    this.version = serverVersion;
   }
   
   public ServerInfo(Uuid version, Time startTime) {
