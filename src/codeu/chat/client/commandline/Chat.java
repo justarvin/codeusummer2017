@@ -193,7 +193,7 @@ public final class Chat {
       // Command to show info about the server.  
       panel.register("server-info", new Panel.Command() {
       @Override
-      public void invoke(Scanner args) {
+      public void invoke(List<String> args) {
         final ServerInfo SERVER_INFO = context.getInfo();
         if (SERVER_INFO == null) {
           System.out.println("ERROR: Server did not send valid info object.");
