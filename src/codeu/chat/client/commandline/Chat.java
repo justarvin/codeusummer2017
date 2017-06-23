@@ -112,6 +112,8 @@ public final class Chat {
                 System.out.println("    Add a new user with the given name.");
                 System.out.println("  u-sign-in <name>");
                 System.out.println("    Sign in as the user with the given name.");
+                System.out.println("  server-info");
+                System.out.println("    Returns information about the server.");
                 System.out.println("  exit");
                 System.out.println("    Exit the program.");
             }
@@ -185,6 +187,23 @@ public final class Chat {
                 return null;
             }
         });
+  
+      // SERVER-INFO
+      //
+      // Command to show info about the server.  
+      panel.register("server-info", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final ServerInfo SERVER_INFO = context.getInfo();
+        if (SERVER_INFO == null) {
+          System.out.println("ERROR: Server did not send valid info object.");
+        } else {
+          System.out.println("  Server Info: ");
+          System.out.format("   Version Number: %s\n", SERVER_INFO.SERVER_VERSION);// Print the server info to the user in a pretty way
+          System.out.println("The server has been running since " + SERVER_INFO.startTime.inMs());
+        }
+      }
+      });
 
         // Now that the panel has all its commands registered, return the panel
         // so that it can be used.
