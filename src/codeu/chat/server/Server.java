@@ -86,8 +86,9 @@ public final class Server {
         } catch(IOException ex) {
           LOG.error(ex, "Connection error occured.");
         }
-        Uuid.SERIALIZER.write(out, SERVER_INFO.version);
-        Time.SERIALIZER.write(out, view.getInfo().startTime);
+        final ServerInfo serverInfo = view.getInfo();
+        Uuid.SERIALIZER.write(out, serverInfo.getVersion());
+        Time.SERIALIZER.write(out, serverInfo.getStartTime());
       }
     });
 
