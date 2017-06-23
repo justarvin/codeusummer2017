@@ -33,12 +33,14 @@ import codeu.chat.common.NetworkCode;
 import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.User;
+import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
+
 
 public final class Server {
 
@@ -49,6 +51,8 @@ public final class Server {
   private static final Logger.Log LOG = Logger.newLog(Server.class);
 
   private static final int RELAY_REFRESH_MS = 5000;  // 5 seconds
+  //private static final ServerInfo info = new ServerInfo();
+  private static ServerInfo SERVER_INFO;
 
   private final Timeline timeline = new Timeline();
 
@@ -64,12 +68,22 @@ public final class Server {
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
 
+
   public Server(final Uuid id, final Secret secret, final Relay relay) {
 
     this.id = id;
     this.secret = secret;
     this.controller = new Controller(id, model);
     this.relay = relay;
+
+
+    this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.SERVER_INFO_RESPONSE);
+        Time.SERIALIZER.write(out, view.getInfo().startTime);
+      }
+    });
 
     // New Message - A client wants to add a new message to the back end.
     this.commands.put(NetworkCode.NEW_MESSAGE_REQUEST, new Command() {

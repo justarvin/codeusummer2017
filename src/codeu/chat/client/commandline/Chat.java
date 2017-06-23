@@ -25,6 +25,9 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.util.Tokenizer;
 
+import codeu.chat.common.ServerInfo;
+import codeu.chat.util.Time;
+
 public final class Chat {
 
     // PANELS
@@ -42,6 +45,24 @@ public final class Chat {
 
     // HANDLE COMMAND
     //
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        System.out.println("ROOT MODE");
+        System.out.println("  u-list");
+        System.out.println("    List all users.");
+        System.out.println("  u-add <name>");
+        System.out.println("    Add a new user with the given name.");
+        System.out.println("  u-sign-in <name>");
+        System.out.println("    Sign in as the user with the given name.");
+        System.out.println("  server-info");
+        System.out.println("    Check how long the server has been running.");
+        System.out.println("  exit");
+        System.out.println("    Exit the program.");
+      }
+    });
+
+    // U-LIST (user list)
     // Take a single line of input and parse a command from it. If the system
     // is willing to take another command, the function will return true. If
     // the system wants to exit, the function will return false.
@@ -56,6 +77,61 @@ public final class Chat {
         final String command = args.get(0);
         args.remove(0);
 
+    // U-SIGN-IN (sign in user)
+    //
+    // Add a command to sign-in as a user when the user enters "u-sign-in"
+    // while on the root panel.
+    //
+    panel.register("u-sign-in", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final String name = args.hasNext() ? args.nextLine().trim() : "";
+        if (name.length() > 0) {
+          final UserContext user = findUser(name);
+          if (user == null) {
+            System.out.format("ERROR: Failed to sign in as '%s'\n", name);
+          } else {
+            panels.push(createUserPanel(user));
+          }
+        } else {
+          System.out.println("ERROR: Missing <username>");
+        }
+      }
+
+      // Find the first user with the given name and return a user context
+      // for that user. If no user is found, the function will return null.
+      private UserContext findUser(String name) {
+        for (final UserContext user : context.allUsers()) {
+          if (user.user.name.equals(name)) {
+            return user;
+          }
+        }
+        return null;
+      }
+    });
+
+    panel.register("server-info", new Panel.Command() {
+      @Override
+      public void invoke(Scanner args) {
+        final ServerInfo info = context.getInfo();
+        if (info == null) {
+        // Communicate error to user - the server did not send us a valid info object.
+          System.out.println("ERROR: Server did not send valid info object.");
+          //LOG.error(ex, "Exception during call on server.");
+        } else {
+          // Print the server info to the user in a pretty way
+          System.out.println("The server has been running for "+ (Time.now().inMs() - info.startTime.inMs()) + " ms");
+        }
+      }
+    });
+
+
+    // Now that the panel has all its commands registered, return the panel
+    // so that it can be used.
+    return panel;
+  }
+
+  private Panel createUserPanel(final UserContext user) {
         // Because "exit" and "back" are applicable to every panel, handle
         // those commands here to avoid having to implement them for each
         // panel.
