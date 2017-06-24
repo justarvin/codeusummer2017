@@ -101,8 +101,6 @@ final class ServerMain {
 
     LOG.info("Created server.");
 
-    server.restore(log);
-
     while (true) {
       try {
 

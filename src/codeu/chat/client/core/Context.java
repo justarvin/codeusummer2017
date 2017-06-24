@@ -49,10 +49,10 @@ public final class Context {
   }
 
   public void clean() {
-    view.clean();
+    controller.clean();
   }
 
   public void writeRestOfQueue() {
-    view.writeRestOfQueue();
+    controller.writeRestOfQueue();
   }
 }

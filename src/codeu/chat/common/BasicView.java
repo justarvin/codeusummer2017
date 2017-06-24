@@ -46,8 +46,4 @@ public interface BasicView {
   //
   //   Return all messages whose id is found in the given collection.
   Collection<Message> getMessages(Collection<Uuid> ids);
-
-  void clean();
-
-  void writeRestOfQueue();
 }

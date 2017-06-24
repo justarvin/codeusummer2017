@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 public class StorageTest {
 
     private Model model;
-    private BasicController controller;
+    private Controller controller;
 
     @Before
     public void doBefore() {
@@ -33,7 +33,7 @@ public class StorageTest {
         Uuid id = new Uuid(4);
         File persistentPath = new File("logfiles");
         File log = new File(persistentPath.getPath());
-        controller = new Controller(id, model);
+        controller = new Controller(id, model, persistentPath);
         Server server = new Server(id, secret, null, persistentPath);
 
         User user = controller.newUser("user");
@@ -42,10 +42,10 @@ public class StorageTest {
         //numbers are keeping track of how many log strings have
         // been written after new user and new conversation
         for (int i = 3; i <= 17; i++) {
-            server.checkBuffer();
+            controller.checkBuffer();
             controller.newMessage(user.id, conversation.id, "message "+i);
         }
 
-        assertEquals(2, Server.logBuffer.size());
+        assertEquals(2, Server.getLogBuffer().size());
     }
 }

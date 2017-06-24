@@ -101,13 +101,4 @@ public final class View implements BasicView, SinglesView {
     return found;
   }
 
-  @Override
-  public void clean() {
-    // must implement from BasicView interface
-  }
-
-  @Override
-  public void writeRestOfQueue() {
-    // must implement from BasicView interface
-  }
 }

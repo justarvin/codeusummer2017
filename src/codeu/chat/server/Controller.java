@@ -14,35 +14,48 @@
 
 package codeu.chat.server;
 
-import codeu.chat.common.*;
+import codeu.chat.common.BasicController;
+import codeu.chat.common.ConversationHeader;
+import codeu.chat.common.ConversationPayload;
+import codeu.chat.common.Message;
+import codeu.chat.common.RandomUuidGenerator;
+import codeu.chat.common.RawController;
+import codeu.chat.common.User;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
+import codeu.chat.util.TransactionLog;
 import codeu.chat.util.Uuid;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Queue;
 
 public final class Controller implements RawController, BasicController {
 
-  private final String SPACE = " ";
   private final static Logger.Log LOG = Logger.newLog(Controller.class);
 
   private final Model model;
   private final Uuid.Generator uuidGenerator;
+  private final File persistentPath;
 
-  public Controller(Uuid serverId, Model model) {
+  public Controller(Uuid serverId, Model model, File persistentPath) {
     this.model = model;
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
+    this.persistentPath = persistentPath;
+
+    TransactionLog.restore(persistentPath, this);
+    LOG.info("restored called");
   }
 
   @Override
   public Message newMessage(Uuid author, Uuid conversation, String body) {
     Uuid id = createId();
     Time time = Time.now();
-    String messageLog = "ADD-MESSAGE" + SPACE +
-            id + SPACE +
-            body + SPACE +
-            time.inMs() + SPACE +
-            conversation + SPACE +
-            author;
-    Server.logBuffer.add(messageLog);
+
+    Object[] params = new Object[]{id, body, time.inMs(), conversation, author};
+    checkBuffer();
+    TransactionLog.writeLog("message", params);
 
     return newMessage(id, author, conversation, body, time);
   }
@@ -51,11 +64,10 @@ public final class Controller implements RawController, BasicController {
   public User newUser(String name) {
     Uuid id = createId();
     Time time = Time.now();
-    String userLog = "ADD-USER" + SPACE +
-            id + SPACE +
-            name + SPACE +
-            time.inMs();
-    Server.logBuffer.add(userLog);
+
+    Object[] params = new Object[]{id, name, time.inMs()};
+    checkBuffer();
+    TransactionLog.writeLog("user", params);
 
     return newUser(id, name, time);
   }
@@ -64,12 +76,10 @@ public final class Controller implements RawController, BasicController {
   public ConversationHeader newConversation(String title, Uuid owner) {
     Uuid id = createId();
     Time time = Time.now();
-    String conversationLog = "ADD-CONVERSATION" + SPACE +
-            id + SPACE +
-            title + SPACE +
-            time.inMs() + SPACE +
-            owner;
-    Server.logBuffer.add(conversationLog);
+
+    Object[] params = new Object[]{id, title, time.inMs(), owner};
+    checkBuffer();
+    TransactionLog.writeLog("conversation", params);
 
     return newConversation(id, title, owner, time);
   }
@@ -77,6 +87,7 @@ public final class Controller implements RawController, BasicController {
   @Override
   public Message newMessage(Uuid id, Uuid author, Uuid conversation, String body, Time creationTime) {
 
+    System.out.println("add");
     final User foundUser = model.userById().first(author);
     final ConversationPayload foundConversation = model.conversationPayloadById().first(conversation);
 
@@ -188,6 +199,27 @@ public final class Controller implements RawController, BasicController {
 
   private boolean isIdFree(Uuid id) {
     return !isIdInUse(id);
+  }
+
+  public void checkBuffer() {
+
+    File log = new File(persistentPath.getPath());
+    Queue<String> logBuffer = Server.getLogBuffer();
+
+    if (logBuffer.size() == 15) {
+      try {
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+        for (int i = 0; i < 15; i++) {
+          writer.write(logBuffer.remove());
+          writer.newLine();
+        }
+        writer.close();
+
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
 }

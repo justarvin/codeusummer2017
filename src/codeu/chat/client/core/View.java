@@ -135,36 +135,4 @@ final class View implements BasicView {
 
     return messages;
   }
-
-  public void clean() {
-    try (final Connection connection = source.connect()) {
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.CLEAN_REQUEST);
-
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CLEAN_RESPONSE) {
-        System.out.println("Cleaned history.");
-      } else {
-        LOG.error("Response from server failed.");
-      }
-    } catch (Exception ex) {
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(ex, "Exception during call on server.");
-    }
-  }
-
-  public void writeRestOfQueue() {
-    try (final Connection connection = source.connect()) {
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.WRITE_REST_OF_QUEUE_REQUEST);
-
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.WRITE_REST_OF_QUEUE_RESPONSE) {
-        LOG.info("Saved.");
-      } else {
-        LOG.error("Response from server failed.");
-      }
-    } catch (Exception ex) {
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(ex, "Exception during call on server.");
-    }
-  }
 }

@@ -15,12 +15,32 @@
 
 package codeu.chat.server;
 
-import codeu.chat.common.*;
-import codeu.chat.util.*;
+import codeu.chat.common.ConversationHeader;
+import codeu.chat.common.ConversationPayload;
+import codeu.chat.common.Message;
+import codeu.chat.common.NetworkCode;
+import codeu.chat.common.Relay;
+import codeu.chat.common.Secret;
+import codeu.chat.common.User;
+import codeu.chat.util.Logger;
+import codeu.chat.util.Serializers;
+import codeu.chat.util.Time;
+import codeu.chat.util.Timeline;
+import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
-
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 
 public final class Server {
 
@@ -46,16 +66,14 @@ public final class Server {
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
 
-  private File persistentPath;
-  static Queue<String> logBuffer = new ArrayDeque<>();
+  private static Queue<String> logBuffer = new ArrayDeque<>();
 
   public Server(final Uuid id, final Secret secret, final Relay relay, File persistentPath) {
 
     this.id = id;
     this.secret = secret;
-    this.controller = new Controller(id, model);
+    this.controller = new Controller(id, model, persistentPath);
     this.relay = relay;
-    this.persistentPath = persistentPath;
 
     // New Message - A client wants to add a new message to the back end.
     this.commands.put(NetworkCode.NEW_MESSAGE_REQUEST, new Command() {
@@ -66,7 +84,6 @@ public final class Server {
         final Uuid conversation = Uuid.SERIALIZER.read(in);
         final String content = Serializers.STRING.read(in);
 
-        checkBuffer();
         final Message message = controller.newMessage(author, conversation, content);
 
         Serializers.INTEGER.write(out, NetworkCode.NEW_MESSAGE_RESPONSE);
@@ -86,7 +103,6 @@ public final class Server {
 
         final String name = Serializers.STRING.read(in);
 
-        checkBuffer();
         final User user = controller.newUser(name);
 
         Serializers.INTEGER.write(out, NetworkCode.NEW_USER_RESPONSE);
@@ -102,7 +118,6 @@ public final class Server {
         final String title = Serializers.STRING.read(in);
         final Uuid owner = Uuid.SERIALIZER.read(in);
 
-        checkBuffer();
         final ConversationHeader conversation = controller.newConversation(title, owner);
 
         Serializers.INTEGER.write(out, NetworkCode.NEW_CONVERSATION_RESPONSE);
@@ -188,7 +203,7 @@ public final class Server {
           File log = new File(persistentPath.getPath());
           BufferedWriter writer = new BufferedWriter(new FileWriter(log));
           while (!logBuffer.isEmpty()) {
-            writer.write(logBuffer.remove());
+            writer.append(logBuffer.remove());
             writer.newLine();
           }
           writer.close();
@@ -313,72 +328,7 @@ public final class Server {
     };
   }
 
-  private void process(String line) throws IOException {
-    //turns log string into an array of words
-    String[] splitLog = line.split(" ");
-
-    //uuid and time occupy the same spot in each format so they have been extracted ahead of time
-    Uuid uuid = Uuid.parse(splitLog[1]);
-    long time = Long.parseLong(splitLog[3]);
-
-    switch (splitLog[0]) {
-      case "ADD-USER":
-        String name = splitLog[2];
-        controller.newUser(uuid, name, Time.fromMs(time));
-        break;
-      case "ADD-CONVERSATION":
-        String title = splitLog[2];
-        Uuid owner = Uuid.parse(splitLog[4]);
-        controller.newConversation(uuid, title, owner, Time.fromMs(time));
-        break;
-      case "ADD-MESSAGE":
-        String message = splitLog[2];
-        Uuid conversationUuid = Uuid.parse(splitLog[4]);
-        Uuid senderUuid = Uuid.parse(splitLog[5]);
-        controller.newMessage(uuid, senderUuid, conversationUuid, message, Time.fromMs(time));
-        break;
-    }
-  }
-
-  public void restore(File persistentPath) {
-
-    File log = new File(persistentPath.getPath());
-
-    try {
-
-      boolean created = log.createNewFile(); // true if file created, false otherwise
-      //read in and restore state if the file existed
-      if (!created) {
-        String line;
-        BufferedReader reader = new BufferedReader(new FileReader(log));
-        while ((line = reader.readLine()) != null) {
-          process(line);
-        }
-        reader.close();
-      }
-
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public void checkBuffer() {
-
-    File log = new File(persistentPath.getPath());
-
-    if (logBuffer.size() == 15) {
-      try {
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(log));
-        for (int i = 0; i < 15; i++) {
-          writer.write(logBuffer.remove());
-          writer.newLine();
-        }
-        writer.close();
-
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
+  public static Queue<String> getLogBuffer() {
+    return logBuffer;
   }
 }
