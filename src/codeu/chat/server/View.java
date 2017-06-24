@@ -17,12 +17,14 @@ package codeu.chat.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.SinglesView;
 import codeu.chat.common.User;
+
 import codeu.chat.util.Logger;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.StoreAccessor;

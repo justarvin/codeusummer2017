@@ -22,20 +22,20 @@ import codeu.chat.common.NetworkCode;
 import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.User;
+
 import codeu.chat.util.Logger;
 import codeu.chat.util.Serializers;
-import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
-import java.io.BufferedReader;
+
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;

@@ -112,7 +112,7 @@ final class Controller implements BasicController {
   // CLEAN
   //
   // Cleans all existing information from the server and transaction log.
-  public void clean() {
+  void clean() {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.CLEAN_REQUEST);
@@ -132,7 +132,7 @@ final class Controller implements BasicController {
   //
   // When the client uses the exit command to close the application,
   // any logs that have not yet been written to the log will be written.
-  public void writeRestOfQueue() {
+  void writeRestOfQueue() {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.WRITE_REST_OF_QUEUE_REQUEST);

@@ -21,10 +21,12 @@ import codeu.chat.common.Message;
 import codeu.chat.common.RandomUuidGenerator;
 import codeu.chat.common.RawController;
 import codeu.chat.common.User;
+
 import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.TransactionLog;
 import codeu.chat.util.Uuid;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
