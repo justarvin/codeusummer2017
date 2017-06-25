@@ -20,7 +20,7 @@ import java.io.OutputStream;
 
 public interface Serializer<T> {
 
-  void write(OutputStream out, T value) throws IOException;
+  void  write(OutputStream out, T value) throws IOException;
 
   T read(InputStream in) throws IOException;
 
