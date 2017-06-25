@@ -15,12 +15,16 @@
 package codeu.chat.server;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.LinearUuidGenerator;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
+import codeu.chat.util.Interest;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.Store;
@@ -66,6 +70,13 @@ public final class Model {
   private final Store<Uuid, Message> messageById = new Store<>(UUID_COMPARE);
   private final Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
   private final Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
+
+  private final Map<Uuid, Interest> interestsByID = new HashMap<>();
+
+  //from user/conversation id to the set of users who care
+  private final Map<Uuid, Set<Uuid>> watchers = new HashMap<>();
+
+
 
   public void add(User user) {
     userById.insert(user.id, user);
@@ -124,5 +135,13 @@ public final class Model {
 
   public StoreAccessor<String, Message> messageByText() {
     return messageByText;
+  }
+
+  public Map<Uuid, Set<Uuid>> interestedByID() {
+    return watchers;
+  }
+
+  public Map<Uuid, Interest> userInterests() {
+    return interestsByID;
   }
 }

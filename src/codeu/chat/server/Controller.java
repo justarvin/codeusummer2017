@@ -14,8 +14,6 @@
 
 package codeu.chat.server;
 
-import java.util.Collection;
-
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -23,6 +21,7 @@ import codeu.chat.common.Message;
 import codeu.chat.common.RandomUuidGenerator;
 import codeu.chat.common.RawController;
 import codeu.chat.common.User;
+import codeu.chat.util.Interest;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
@@ -66,6 +65,7 @@ public final class Controller implements RawController, BasicController {
 
       message = new Message(id, Uuid.NULL, Uuid.NULL, creationTime, author, body);
       model.add(message);
+      updateStatus("conversation", conversation);
       LOG.info("Message added: %s", message.id);
 
       // Find and update the previous "last" message so that it's "next" value
@@ -108,7 +108,6 @@ public final class Controller implements RawController, BasicController {
 
       user = new User(id, name, creationTime);
       model.add(user);
-
       LOG.info(
           "newUser success (user.id=%s user.name=%s user.time=%s)",
           id,
@@ -137,6 +136,8 @@ public final class Controller implements RawController, BasicController {
     if (foundOwner != null && isIdFree(id)) {
       conversation = new ConversationHeader(id, owner, creationTime, title);
       model.add(conversation);
+      updateStatus("user", id);
+
       LOG.info("Conversation added: " + id);
     }
 
@@ -167,5 +168,28 @@ public final class Controller implements RawController, BasicController {
   }
 
   private boolean isIdFree(Uuid id) { return !isIdInUse(id); }
+
+  private void updateStatus(String type, Uuid id) {
+
+    // status update for a conversation, wanna know how many messages added since last update.
+    if (type.equals("conversation")) {
+
+      // if there is a set of people who are interested in this conversation
+      if (model.interestedByID().containsKey(id)) {
+        for (Uuid user : model.interestedByID().get(id)) {
+          Interest myInterests = model.userInterests().get(user);
+          myInterests.increaseMessageCount(id);
+        }
+      }
+
+    } else { //status update for a user
+
+        if (model.interestedByID().containsKey(id)) {
+          for (Uuid user : model.interestedByID().get(id)) {
+            model.userInterests().get(user).addConversation(id);
+          }
+        }
+    }
+  }
 
 }
