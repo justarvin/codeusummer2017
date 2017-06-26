@@ -14,6 +14,9 @@
 
 package codeu.chat.util.store;
 
+import codeu.chat.util.Interest;
+import codeu.chat.util.Logger;
+
 import java.util.Comparator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -24,9 +27,11 @@ public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
   // To make the code simpler - use a dummy link for the first link in this
   // list. The root link is never read from. To avoid reading from this link
   // the "next" value is used more than the "this" or "current" reference.
-  private final StoreLink<KEY, VALUE> rootLink = new StoreLink<>(null, null, null);
+  private final StoreLink<KEY, VALUE> rootLink = new StoreLink<>(null, null, null, null);
 
   private final NavigableMap<KEY, StoreLink<KEY, VALUE>> index;
+
+  private final static Logger.Log LOG = Logger.newLog(Store.class);
 
   private final Comparator<KEY> comparator;
 
@@ -49,7 +54,12 @@ public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
 
     // "current.next" may be null, but "current" can never be null. So it
     // should always be safe to call to current.
-    final StoreLink<KEY, VALUE> newLink = new StoreLink<>(key, value, current.next);
+    StoreLink<KEY, VALUE> newLink = null;
+    if (current == rootLink) {
+       newLink = new StoreLink<>(key, value, current.next, rootLink);
+    } else {
+       newLink = new StoreLink<>(key, value, current.next, current);
+    }
     current.next = newLink;
 
     // Before adding the link to the index, first check if the hint has an
@@ -65,6 +75,10 @@ public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     if (closestLink == null || comparator.compare(newLink.key, closestLink.key) != 0) {
       index.put(key, newLink);
     }
+  }
+
+  public void clear(KEY key) {
+    index.remove(key);
   }
 
   @Override

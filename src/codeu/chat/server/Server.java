@@ -30,9 +30,12 @@ import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
-import codeu.chat.util.*;
+import codeu.chat.util.Logger;
+import codeu.chat.util.Serializers;
+import codeu.chat.util.Time;
+import codeu.chat.util.Timeline;
+import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
-
 
 public final class Server {
 
@@ -212,6 +215,7 @@ public final class Server {
         final Uuid owner = Uuid.SERIALIZER.read(in);
         final String name = Serializers.STRING.read(in);
         Collection<ConversationHeader> conversations = view.getUserUpdate(owner, name);
+        LOG.info(conversations.size()+"");
 
         Serializers.INTEGER.write(out, NetworkCode.USER_UPDATE_RESPONSE);
         Serializers.collection(ConversationHeader.SERIALIZER).write(out, conversations);

@@ -6,6 +6,7 @@ import codeu.chat.server.Model;
 import codeu.chat.util.store.Store;
 import codeu.chat.util.store.StoreAccessor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +42,13 @@ public class Interest {
   }
 
   public Iterable<ConversationHeader> getUserUpdate(Uuid id) {
-    return userUpdates.at(id);
+    Iterable<ConversationHeader> update = userUpdates.at(id);
+    if (userUpdates.first(id) == null) {
+      update = new ArrayList<>();
+    }
+    userUpdates.clear(id);
+    LOG.info("first: "+userUpdates.first(id));
+    return update;
   }
 
   public int getConversationUpdate(Uuid conversation) {

@@ -14,10 +14,7 @@
 
 package codeu.chat.server;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -73,10 +70,11 @@ public final class Model {
   private final Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
   private final Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
 
-  private final Map<Uuid, Interest> interestsByID = new HashMap<>();
+  private Map<Uuid, Interest> interestsByID = new HashMap<>();
 
   //from user/conversation id to the uuid's of the users who care
-  private final Store<Uuid, Uuid> watchers = new Store<>(UUID_COMPARE);
+  //Store<Uuid, Uuid> watchers = new Store<>(UUID_COMPARE);
+  private Store<Uuid, Uuid> watching = new Store<>(UUID_COMPARE);
 
   public void add(User user) {
     userById.insert(user.id, user);
@@ -137,15 +135,12 @@ public final class Model {
     return messageByText;
   }
 
-  public StoreAccessor<Uuid, Uuid> interestedByID() {
-    return watchers;
+  public Store<Uuid, Uuid> interestedByID() {
+    return watching;
   }
 
   public void addWatch(Uuid interest, Uuid owner) {
-    watchers.insert(interest, owner);
-    for (Uuid u : watchers.at(interest)) {
-      LOG.info(u+"");
-    }
+    watching.insert(interest, owner);
   }
 
   public Map<Uuid, Interest> userInterests() {

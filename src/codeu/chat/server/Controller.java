@@ -26,7 +26,8 @@ import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
-import java.util.Iterator;
+import java.util.HashSet;
+
 
 public final class Controller implements RawController, BasicController {
 
@@ -61,7 +62,6 @@ public final class Controller implements RawController, BasicController {
     User userInterest = model.userByText().first(name);
     model.addWatch(userInterest.id, owner);
 
-    LOG.info(model.interestedByID().first(userInterest.id)+"");
     LOG.info("Interest added");
   }
 
@@ -69,6 +69,7 @@ public final class Controller implements RawController, BasicController {
   public void newConversationInterest(String title, Uuid owner) {
 
     ConversationHeader conversationInterest = model.conversationByText().first(title);
+
     Interest myInterests = model.userInterests().get(owner);
     myInterests.addConversationInterest(conversationInterest.id);
 
@@ -90,7 +91,14 @@ public final class Controller implements RawController, BasicController {
 
       message = new Message(id, Uuid.NULL, Uuid.NULL, creationTime, author, body);
       model.add(message);
-      updateStatus("conversation", conversation, author);
+      updateMessageCounts(conversation);
+
+      //conversations that owner added to
+      for (Uuid user : model.interestedByID().at(author)) {
+        ConversationHeader c = model.conversationById().first(conversation);
+        model.userInterests().get(user).addConversation(author, c);
+      }
+
       LOG.info("Message added: %s", message.id);
 
       // Find and update the previous "last" message so that it's "next" value
@@ -163,7 +171,7 @@ public final class Controller implements RawController, BasicController {
     if (foundOwner != null && isIdFree(id)) {
       conversation = new ConversationHeader(id, owner, creationTime, title);
       model.add(conversation);
-      updateStatus("user", id, owner);
+      updateConversations(id, owner);
 
       LOG.info("Conversation added: " + id);
     }
@@ -196,36 +204,18 @@ public final class Controller implements RawController, BasicController {
 
   private boolean isIdFree(Uuid id) { return !isIdInUse(id); }
 
-  private void updateStatus(String type, Uuid interest, Uuid owner) {
+  private void updateConversations(Uuid interest, Uuid owner) {
 
-    LOG.info("updating");
+    for (Uuid u : model.interestedByID().at(owner)) {
+      ConversationHeader conversation = model.conversationById().first(interest);
+      model.userInterests().get(u).addConversation(owner, conversation);
+    }
+  }
 
-    // status update for a conversation, wanna know how many messages added since last update.
-    if (type.equals("conversation")) {
-
-      //how many messages added to conversation id/interest
-      for (Uuid user : model.interestedByID().at(interest)) {
-        Interest myInterests = model.userInterests().get(user);
-        myInterests.increaseMessageCount(interest);
-      }
-
-      //conversations that owner added to
-      for (Uuid user : model.interestedByID().at(owner)) {
-        ConversationHeader conversation = model.conversationById().first(interest);
-        model.userInterests().get(user).addConversation(owner, conversation);
-      }
-
-    } else { //status update for a user
-
-      // user : interested in the user interest
-      LOG.info(model.interestedByID().first(interest)+"");
-      for (Uuid u : model.interestedByID().at(interest)) {
-        ConversationHeader conversation = model.conversationById().first(interest);
-        System.out.println(conversation.title);
-        LOG.info(conversation.title);
-        model.userInterests().get(u).addConversation(owner, conversation);
-      }
-
+  public void updateMessageCounts(Uuid conversation) {
+    for (Uuid user : model.interestedByID().at(conversation)) {
+      Interest myInterests = model.userInterests().get(user);
+      myInterests.increaseMessageCount(conversation);
     }
   }
 

@@ -122,14 +122,12 @@ public final class View implements BasicView, SinglesView {
 
   @Override
   public Collection<ConversationHeader> getUserUpdate(Uuid owner, String name) {
-//    User user = model.userByText().first(name);
-//    Collection<ConversationHeader> conversations = new ArrayList<>();
-//    for (ConversationHeader c : model.userInterests().get(owner).getUserUpdate(user.id)) {
-//      conversations.add(c);
-//    }
-//    return conversations;
-
-    return intersect(model.userInterests().get(owner).getUpdates(), Arrays.asList(owner));
+    User user = model.userByText().first(name);
+    Collection<ConversationHeader> conversations = new ArrayList<>();
+    for (ConversationHeader c : model.userInterests().get(owner).getUserUpdate(user.id)) {
+      conversations.add(c);
+    }
+    return conversations;
   }
 
   @Override
