@@ -14,6 +14,12 @@
 
 package codeu.chat.client.commandline;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+
+import codeu.chat.common.ServerInfo;
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
@@ -39,7 +45,8 @@ public final class Chat {
 
   public Chat(Context context) {
     this.context = context;
-    this.panels.push(createRootPanel(context));
+    this.panels.push(
+      (context));
   }
 
   // HANDLE COMMAND
@@ -117,6 +124,8 @@ public final class Chat {
         System.out.println("    Sign in as the user with the given name.");
         System.out.println("  clean");
         System.out.println("    Clear history.");
+        System.out.println("  server-info");
+        System.out.println("    Returns information about the server.");
         System.out.println("  exit");
         System.out.println("    Exit the program.");
       }
@@ -202,6 +211,24 @@ public final class Chat {
         context.clean();
       }
     });
+    
+    // SERVER-INFO
+      //
+      // Command to show info about the server.  
+      panel.register("server-info", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final ServerInfo serverInfo = context.getInfo();
+        if (serverInfo == null) {
+          System.out.println("ERROR: Server did not send valid info object.");
+        } else {
+          // Print the server info to the user in a pretty way.
+          System.out.println("  Server Info: ");
+          System.out.format("   Version Number: %s\n", serverInfo.getVersion());
+          System.out.println("The server has been running since " + serverInfo.getStartTime().inMs());
+        }
+      }
+      });
 
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
