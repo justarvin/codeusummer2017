@@ -28,4 +28,6 @@ public interface StoreAccessor<KEY, VALUE> {
 
   Iterable<VALUE> range(KEY start, KEY end);
 
+  void clear(KEY id);
+
 }

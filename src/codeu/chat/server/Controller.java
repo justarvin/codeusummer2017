@@ -82,13 +82,13 @@ public final class Controller implements RawController, BasicController {
   @Override
   public void removeUserInterest(String name, Uuid owner) {
     User userInterest = model.userByText().first(name);
-    model.removeWatch(userInterest.id, owner);
+    model.removeUserWatch(userInterest.id, owner);
   }
 
   @Override
   public void removeConversationInterest(String title, Uuid owner) {
     ConversationHeader conversationInterest = model.conversationByText().first(title);
-    model.removeWatch(conversationInterest.id, owner);
+    model.removeConversationWatch(conversationInterest.id, owner);
   }
 
   @Override
@@ -106,7 +106,7 @@ public final class Controller implements RawController, BasicController {
       updateMessageCounts(conversation);
 
       //conversations that owner added to
-      for (Uuid user : model.interestedByID().at(author)) {
+      for (Uuid user : model.interestedByID().get(author)) {
         ConversationHeader c = model.conversationById().first(conversation);
         model.userInterests().get(user).addConversation(author, c);
       }
@@ -218,14 +218,14 @@ public final class Controller implements RawController, BasicController {
 
   private void updateConversations(Uuid interest, Uuid owner) {
 
-    for (Uuid u : model.interestedByID().at(owner)) {
+    for (Uuid u : model.interestedByID().get(owner)) {
       ConversationHeader conversation = model.conversationById().first(interest);
       model.userInterests().get(u).addConversation(owner, conversation);
     }
   }
 
   public void updateMessageCounts(Uuid conversation) {
-    for (Uuid user : model.interestedByID().at(conversation)) {
+    for (Uuid user : model.interestedByID().get(conversation)) {
       Interest myInterests = model.userInterests().get(user);
       myInterests.increaseMessageCount(conversation);
     }

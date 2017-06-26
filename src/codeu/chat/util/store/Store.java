@@ -72,21 +72,9 @@ public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
   }
 
+  @Override
   public void clear(KEY key) {
     index.remove(key);
-  }
-
-  public void removeValue(KEY key, VALUE value) {
-    StoreLink<KEY, VALUE> link = index.get(key);
-    LOG.info(link.value+"");
-    if (link.value == value) {
-      link = null;
-    } else {
-      while (link.next.value != value) {
-        link = link.next;
-      }
-      link.next = link.next.next;
-    }
   }
 
   @Override

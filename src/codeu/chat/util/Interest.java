@@ -49,7 +49,11 @@ public class Interest {
     return messages;
   }
 
-  public StoreAccessor<Uuid, ConversationHeader> getUpdates() {
+  public StoreAccessor<Uuid, ConversationHeader> userUpdates() {
     return userUpdates;
+  }
+
+  public Map<Uuid, Integer> conversationUpdates() {
+    return conversationUpdates;
   }
 }

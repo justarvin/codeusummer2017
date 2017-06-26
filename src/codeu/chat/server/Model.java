@@ -73,8 +73,7 @@ public final class Model {
   private Map<Uuid, Interest> interestsByID = new HashMap<>();
 
   //from user/conversation id to the uuid's of the users who care
-  //Store<Uuid, Uuid> watchers = new Store<>(UUID_COMPARE);
-  private Store<Uuid, Uuid> watching = new Store<>(UUID_COMPARE);
+  private Map<Uuid, Set<Uuid>> watching = new HashMap<>();
 
   public void add(User user) {
     userById.insert(user.id, user);
@@ -135,18 +134,27 @@ public final class Model {
     return messageByText;
   }
 
-  public Store<Uuid, Uuid> interestedByID() {
+  public Map<Uuid, Set<Uuid>> interestedByID() {
     return watching;
   }
 
   public void addWatch(Uuid interest, Uuid owner) {
-    watching.insert(interest, owner);
+    if (!watching.containsKey(interest)) {
+      watching.put(interest, new HashSet<>());
+    }
+    watching.get(interest).add(owner);
   }
 
-  public void removeWatch(Uuid interest, Uuid owner) {
-    LOG.info("removewatch");
-    watching.removeValue(interest, owner);
+  public void removeUserWatch(Uuid interest, Uuid owner) {
+    watching.get(interest).remove(owner);
+    interestsByID.get(owner).userUpdates().clear(interest);
   }
+
+  public void removeConversationWatch(Uuid interest, Uuid owner) {
+    watching.get(interest).remove(owner);
+    interestsByID.get(owner).conversationUpdates().put(interest, 0);
+  }
+
 
   public Map<Uuid, Interest> userInterests() {
     return interestsByID;
