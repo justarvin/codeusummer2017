@@ -14,8 +14,6 @@
 
 package codeu.chat.util.store;
 
-import codeu.chat.util.Logger;
-
 import java.util.Comparator;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -23,7 +21,6 @@ import java.util.TreeMap;
 
 public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
 
-  private final static Logger.Log LOG = Logger.newLog(Store.class);
   // To make the code simpler - use a dummy link for the first link in this
   // list. The root link is never read from. To avoid reading from this link
   // the "next" value is used more than the "this" or "current" reference.
