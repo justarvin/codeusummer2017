@@ -103,10 +103,12 @@ public final class Controller implements RawController, BasicController {
       model.add(message);
       updateMessageCounts(conversation);
 
-      //conversations that owner added to
-      for (Uuid user : model.interestedByID().get(author)) {
-        ConversationHeader c = model.conversationById().first(conversation);
-        model.userInterests().get(user).addConversation(author, c);
+      //keeping track of conversations that this owner, who may be an interest, added to
+      if (model.interestedByID().containsKey(author)) {
+        for (Uuid user : model.interestedByID().get(author)) {
+          ConversationHeader c = model.conversationById().first(conversation);
+          model.userInterests().get(user).addConversation(author, c);
+        }
       }
 
       LOG.info("Message added: %s", message.id);
@@ -215,7 +217,6 @@ public final class Controller implements RawController, BasicController {
   private boolean isIdFree(Uuid id) { return !isIdInUse(id); }
 
   private void updateConversations(Uuid interest, Uuid owner) {
-
     for (Uuid u : model.interestedByID().get(owner)) {
       ConversationHeader conversation = model.conversationById().first(interest);
       model.userInterests().get(u).addConversation(owner, conversation);
@@ -228,5 +229,4 @@ public final class Controller implements RawController, BasicController {
       myInterests.increaseMessageCount(conversation);
     }
   }
-
 }

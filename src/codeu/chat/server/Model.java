@@ -155,7 +155,6 @@ public final class Model {
     interestsByID.get(owner).conversationUpdates().put(interest, 0);
   }
 
-
   public Map<Uuid, Interest> userInterests() {
     return interestsByID;
   }
