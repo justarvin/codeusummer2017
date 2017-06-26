@@ -45,8 +45,7 @@ public final class Chat {
 
   public Chat(Context context) {
     this.context = context;
-    this.panels.push(
-      (context));
+    this.panels.push(createRootPanel(context));
   }
 
   // HANDLE COMMAND
