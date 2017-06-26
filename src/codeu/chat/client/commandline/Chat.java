@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;

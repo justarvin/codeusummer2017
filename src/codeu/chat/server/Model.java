@@ -14,15 +14,16 @@
 
 package codeu.chat.server;
 
-import java.util.*;
-
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
-import codeu.chat.common.LinearUuidGenerator;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
 import codeu.chat.util.Interest;
-import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.Store;
@@ -30,7 +31,6 @@ import codeu.chat.util.store.StoreAccessor;
 
 public final class Model {
 
-  private final static Logger.Log LOG = Logger.newLog(Model.class);
   public static final Comparator<Uuid> UUID_COMPARE = new Comparator<Uuid>() {
 
     @Override

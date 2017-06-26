@@ -14,8 +14,6 @@
 
 package codeu.chat.util.store;
 
-import codeu.chat.server.Controller;
-import codeu.chat.util.Interest;
 import codeu.chat.util.Logger;
 
 import java.util.Comparator;

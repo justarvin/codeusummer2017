@@ -26,8 +26,6 @@ import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
-import java.util.HashSet;
-
 
 public final class Controller implements RawController, BasicController {
 
