@@ -154,4 +154,52 @@ final class Controller implements BasicController {
       LOG.error(e, "Exception during call on server.");
     }
   }
+
+  @Override
+  public void removeUserInterest(String title, Uuid owner) {
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_USER_INTEREST_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
+      Uuid.SERIALIZER.write(connection.out(), owner);
+
+      LOG.info("Remove interest: request completed.");
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_USER_INTEREST_RESPONSE) {
+        LOG.info("Remove interest: response completed.");
+      } else {
+        LOG.error("Remove interest: request failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  @Override
+  public void removeConversationInterest(String title, Uuid owner) {
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_CONVERSATION_INTEREST_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
+      Uuid.SERIALIZER.write(connection.out(), owner);
+
+      LOG.info("Remove interest: request completed.");
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_CONVERSATION_INTEREST_RESPONSE) {
+        LOG.info("Remove interest: response completed.");
+      } else {
+        LOG.error("Remove interest: request failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+
 }

@@ -80,6 +80,18 @@ public final class Controller implements RawController, BasicController {
   }
 
   @Override
+  public void removeUserInterest(String name, Uuid owner) {
+    User userInterest = model.userByText().first(name);
+    model.removeWatch(userInterest.id, owner);
+  }
+
+  @Override
+  public void removeConversationInterest(String title, Uuid owner) {
+    ConversationHeader conversationInterest = model.conversationByText().first(title);
+    model.removeWatch(conversationInterest.id, owner);
+  }
+
+  @Override
   public Message newMessage(Uuid id, Uuid author, Uuid conversation, String body, Time creationTime) {
 
     final User foundUser = model.userById().first(author);

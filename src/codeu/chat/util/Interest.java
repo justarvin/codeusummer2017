@@ -1,7 +1,6 @@
 package codeu.chat.util;
 
 import codeu.chat.common.ConversationHeader;
-import codeu.chat.server.Controller;
 import codeu.chat.server.Model;
 import codeu.chat.util.store.Store;
 import codeu.chat.util.store.StoreAccessor;
@@ -11,8 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Interest {
-
-  private final static Logger.Log LOG = Logger.newLog(Interest.class);
 
   //maps from a conversation I'm interested in to the number of messages since the last update.
   private Map<Uuid, Integer> conversationUpdates;
@@ -31,14 +28,10 @@ public class Interest {
 
   public void increaseMessageCount(Uuid conversation) {
     conversationUpdates.put(conversation, conversationUpdates.get(conversation) + 1);
-    LOG.info(conversationUpdates.get(conversation)+"");
   }
 
   public void addConversation(Uuid interest, ConversationHeader c) {
     userUpdates.insert(interest, c);
-    for (ConversationHeader conv : userUpdates.at(interest)) {
-      LOG.info(conv.title);
-    }
   }
 
   public Iterable<ConversationHeader> getUserUpdate(Uuid id) {
@@ -47,7 +40,6 @@ public class Interest {
       update = new ArrayList<>();
     }
     userUpdates.clear(id);
-    LOG.info("first: "+userUpdates.first(id));
     return update;
   }
 

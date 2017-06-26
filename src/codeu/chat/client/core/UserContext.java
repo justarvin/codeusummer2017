@@ -63,6 +63,14 @@ public final class UserContext {
     controller.newConversationInterest(title, owner);
   }
 
+  public void removeUserInterest(String name, Uuid owner) {
+    controller.removeUserInterest(name, owner);
+  }
+
+  public void removeConversationInterest(String title, Uuid owner) {
+    controller.removeConversationInterest(title, owner);
+  }
+
   public Iterable<ConversationContext> getUserUpdate(Uuid owner, String name) {
     final Collection<ConversationContext> all = new ArrayList<>();
     for (final ConversationHeader conversation : view.getUserUpdate(owner, name)) {

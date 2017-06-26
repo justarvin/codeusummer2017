@@ -18,12 +18,11 @@ final class StoreLink<KEY, VALUE> {
 
   public final KEY key;
   public final VALUE value;
-  public StoreLink<KEY, VALUE> prev, next;
+  public StoreLink<KEY, VALUE> next;
 
-  public StoreLink(KEY key, VALUE value, StoreLink<KEY, VALUE> next, StoreLink<KEY, VALUE> prev) {
+  public StoreLink(KEY key, VALUE value, StoreLink<KEY, VALUE> next) {
     this.key = key;
     this.value = value;
     this.next = next;
-    this.prev = prev;
   }
 }

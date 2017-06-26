@@ -388,6 +388,29 @@ public final class Chat {
           }
         });
 
+        // REMOVE USER INTEREST
+        //
+        // Removes the given user as an interest for this user.
+        panel.register("i-remove-user", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+                final String name = args.get(0);
+                user.removeUserInterest(name, user.user.id);
+            }
+        });
+
+        // REMOVE CONVERSATION INTEREST
+        //
+        // Removes the given conversation as an interest for this user.
+        panel.register("i-remove-conv", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+                final String title = args.get(0);
+                user.removeConversationInterest(title, user.user.id);
+            }
+        });
+
+
         // Now that the panel has all its commands registered, return the panel
         // so that it can be used.
         return panel;

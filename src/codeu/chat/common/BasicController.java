@@ -55,4 +55,8 @@ public interface BasicController {
 
   void newConversationInterest(String title, Uuid owner);
 
+  void removeUserInterest(String name, Uuid owner);
+
+  void removeConversationInterest(String title, Uuid owner);
+
 }

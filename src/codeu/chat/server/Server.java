@@ -181,7 +181,7 @@ public final class Server {
       }
     });
 
-    // Add interest - A client wants to add a user interest
+    // Add user interest - A client wants to add a user interest
     this.commands.put(NetworkCode.NEW_USER_INTEREST_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
@@ -194,7 +194,7 @@ public final class Server {
       }
     });
 
-    // Add interest - A client wants to add a conversation interest
+    // Add conversation interest - A client wants to add a conversation interest
     this.commands.put(NetworkCode.NEW_CONVERSATION_INTEREST_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
@@ -206,6 +206,33 @@ public final class Server {
         Serializers.INTEGER.write(out, NetworkCode.NEW_CONVERSATION_INTEREST_RESPONSE);
       }
     });
+
+    // Remove user interest - A client wants to remove a user interest
+    this.commands.put(NetworkCode.REMOVE_USER_INTEREST_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final String name = Serializers.STRING.read(in);
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        controller.removeUserInterest(name, owner);
+
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_USER_INTEREST_RESPONSE);
+      }
+    });
+
+    // Remove conversation interest - A client wants to remove a conversation interest
+    this.commands.put(NetworkCode.REMOVE_CONVERSATION_INTEREST_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final String title = Serializers.STRING.read(in);
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        controller.removeConversationInterest(title, owner);
+
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_CONVERSATION_INTEREST_RESPONSE);
+      }
+    });
+
 
     // Get user update -- a client wants to get the status update for a user
     this.commands.put(NetworkCode.USER_UPDATE_REQUEST, new Command() {

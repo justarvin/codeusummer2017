@@ -143,6 +143,11 @@ public final class Model {
     watching.insert(interest, owner);
   }
 
+  public void removeWatch(Uuid interest, Uuid owner) {
+    LOG.info("removewatch");
+    watching.removeValue(interest, owner);
+  }
+
   public Map<Uuid, Interest> userInterests() {
     return interestsByID;
   }
