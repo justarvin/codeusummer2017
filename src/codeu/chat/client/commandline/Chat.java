@@ -26,11 +26,6 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.util.Tokenizer;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
 public final class Chat {
 
   // PANELS
@@ -549,90 +544,4 @@ public final class Chat {
         // so that it can be used.
         return panel;
     }
-
-  private Panel createConversationPanel(final ConversationContext conversation) {
-
-    final Panel panel = new Panel();
-
-    // HELP
-    //
-    // Add a command that will print all the commands and their descriptions
-    // when the user enters "help" while on the conversation panel.
-    //
-    panel.register("help", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        System.out.println("USER MODE");
-        System.out.println("  m-list");
-        System.out.println("    List all messages in the current conversation.");
-        System.out.println("  m-add <message>");
-        System.out.println("    Add a new message to the current conversation as the current user.");
-        System.out.println("  info");
-        System.out.println("    Display all info about the current conversation.");
-        System.out.println("  back");
-        System.out.println("    Go back to USER MODE.");
-        System.out.println("  exit");
-        System.out.println("    Exit the program.");
-      }
-    });
-
-    // M-LIST (list messages)
-    //
-    // Add a command to print all messages in the current conversation when the
-    // user enters "m-list" while on the conversation panel.
-    //
-    panel.register("m-list", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        System.out.println("--- start of conversation ---");
-        for (MessageContext message = conversation.firstMessage();
-             message != null;
-             message = message.next()) {
-          System.out.println();
-          System.out.format("USER : %s\n", message.message.author);
-          System.out.format("SENT : %s\n", message.message.creation);
-          System.out.println();
-          System.out.println(message.message.content);
-          System.out.println();
-        }
-        System.out.println("---  end of conversation  ---");
-      }
-    });
-
-    // M-ADD (add message)
-    //
-    // Add a command to add a new message to the current conversation when the
-    // user enters "m-add" while on the conversation panel.
-    //
-    panel.register("m-add", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        final String message = args.get(0);
-        if (message.length() > 0) {
-          conversation.add(message);
-        } else {
-          System.out.println("ERROR: Messages must contain text");
-        }
-      }
-    });
-
-    // INFO
-    //
-    // Add a command to print info about the current conversation when the user
-    // enters "info" while on the conversation panel.
-    //
-    panel.register("info", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        System.out.println("Conversation Info:");
-        System.out.format("  Title : %s\n", conversation.conversation.title);
-        System.out.format("  Id    : UUID:%s\n", conversation.conversation.id);
-        System.out.format("  Owner : %s\n", conversation.conversation.owner);
-      }
-    });
-
-    // Now that the panel has all its commands registered, return the panel
-    // so that it can be used.
-    return panel;
-  }
 }
