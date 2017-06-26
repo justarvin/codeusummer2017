@@ -201,5 +201,42 @@ final class Controller implements BasicController {
     }
   }
 
+  // CLEAN
+  //
+  // Cleans all existing information from the server and transaction log.
+  void clean() {
+    try (final Connection connection = source.connect()) {
 
+      Serializers.INTEGER.write(connection.out(), NetworkCode.CLEAN_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CLEAN_RESPONSE) {
+        System.out.println("Cleaned history.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+  }
+
+  // WRITE REST OF QUEUE
+  //
+  // When the client uses the exit command to close the application,
+  // any logs that have not yet been written to the log will be written.
+  void writeRestOfQueue() {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.WRITE_REST_OF_QUEUE_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.WRITE_REST_OF_QUEUE_RESPONSE) {
+        LOG.info("Saved.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+  }
 }

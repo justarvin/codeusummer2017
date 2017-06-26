@@ -24,6 +24,8 @@ import codeu.chat.common.Message;
 import codeu.chat.common.User;
 import codeu.chat.util.Uuid;
 
+import java.io.File;
+
 public final class BasicControllerTest {
 
   private Model model;
@@ -32,7 +34,7 @@ public final class BasicControllerTest {
   @Before
   public void doBefore() {
     model = new Model();
-    controller = new Controller(Uuid.NULL, model);
+    controller = new Controller(Uuid.NULL, model, new File("test"));
   }
 
   @Test

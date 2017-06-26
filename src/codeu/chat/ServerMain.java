@@ -15,9 +15,6 @@
 
 package codeu.chat;
 
-import java.io.IOException;
-import java.io.File;
-
 import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.server.NoOpRelay;
@@ -30,6 +27,9 @@ import codeu.chat.util.connections.ClientConnectionSource;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
 import codeu.chat.util.connections.ServerConnectionSource;
+
+import java.io.File;
+import java.io.IOException;
 
 final class ServerMain {
 
@@ -50,7 +50,7 @@ final class ServerMain {
     Uuid id = null;
     Secret secret = null;
     int port = -1;
-    // This is the directory where it is safe to store data accross runs
+    // This is the directory where it is safe to store data across runs
     // of the server.
     File persistentPath = null;
     RemoteAddress relayAddress = null;
@@ -72,12 +72,12 @@ final class ServerMain {
     }
 
     try (
-        final ConnectionSource serverSource = ServerConnectionSource.forPort(port);
-        final ConnectionSource relaySource = relayAddress == null ? null : new ClientConnectionSource(relayAddress.host, relayAddress.port)
+            final ConnectionSource serverSource = ServerConnectionSource.forPort(port);
+            final ConnectionSource relaySource = relayAddress == null ? null : new ClientConnectionSource(relayAddress.host, relayAddress.port)
     ) {
 
       LOG.info("Starting server...");
-      runServer(id, secret, serverSource, relaySource);
+      runServer(id, secret, serverSource, relaySource, persistentPath);
 
     } catch (IOException ex) {
 
@@ -89,18 +89,19 @@ final class ServerMain {
   private static void runServer(Uuid id,
                                 Secret secret,
                                 ConnectionSource serverSource,
-                                ConnectionSource relaySource) {
+                                ConnectionSource relaySource,
+                                File persistentPath) {
 
     final Relay relay = relaySource == null ?
-                        new NoOpRelay() :
-                        new RemoteRelay(relaySource);
+            new NoOpRelay() :
+            new RemoteRelay(relaySource);
 
-    final Server server = new Server(id, secret, relay);
+    File log = new File(persistentPath, "log.txt");
+    final Server server = new Server(id, secret, relay, log);
 
     LOG.info("Created server.");
 
     while (true) {
-
       try {
 
         LOG.info("Established connection...");
@@ -114,4 +115,6 @@ final class ServerMain {
       }
     }
   }
+
+
 }

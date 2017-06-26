@@ -16,6 +16,8 @@ package codeu.chat.client.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import codeu.chat.common.BasicView;
+import codeu.chat.common.User;
 
 import codeu.chat.common.BasicView;
 import codeu.chat.common.User;
@@ -47,6 +49,14 @@ public final class Context {
     return users;
   }
 
+  public void clean() {
+    controller.clean();
+  }
+
+  public void writeRestOfQueue() {
+    controller.writeRestOfQueue();
+  }
+  
   public ServerInfo getInfo() {
     return view.getInfo();
   }

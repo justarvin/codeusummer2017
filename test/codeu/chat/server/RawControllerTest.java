@@ -25,6 +25,8 @@ import codeu.chat.common.User;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
+import java.io.File;
+
 public final class RawControllerTest {
 
   private Model model;
@@ -37,7 +39,7 @@ public final class RawControllerTest {
   @Before
   public void doBefore() {
     model = new Model();
-    controller = new Controller(Uuid.NULL, model);
+    controller = new Controller(Uuid.NULL, model, new File("test"));
 
     userId = new Uuid(1);
     conversationId = new Uuid(2);

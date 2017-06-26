@@ -24,6 +24,7 @@ import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.SinglesView;
 import codeu.chat.common.User;
+
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Uuid;
@@ -125,4 +126,5 @@ public final class View implements BasicView, SinglesView {
     Uuid conversation = model.conversationByText().first(title).id;
     return model.userInterests().get(owner).getConversationUpdate(conversation);
   }
+
 }
