@@ -26,6 +26,8 @@ import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
+import java.util.Iterator;
+
 public final class Controller implements RawController, BasicController {
 
   private final static Logger.Log LOG = Logger.newLog(Controller.class);
@@ -54,6 +56,29 @@ public final class Controller implements RawController, BasicController {
   }
 
   @Override
+  public void newUserInterest(String name, Uuid owner) {
+
+    User userInterest = model.userByText().first(name);
+    model.addWatch(userInterest.id, owner);
+
+    LOG.info(model.interestedByID().first(userInterest.id)+"");
+    LOG.info("Interest added");
+  }
+
+  @Override
+  public void newConversationInterest(String title, Uuid owner) {
+
+    ConversationHeader conversationInterest = model.conversationByText().first(title);
+    Interest myInterests = model.userInterests().get(owner);
+    myInterests.addConversationInterest(conversationInterest.id);
+
+    // save owner as someone interested in conversationInterest
+    model.addWatch(conversationInterest.id, owner);
+
+    LOG.info("Conversation interest added");
+  }
+
+  @Override
   public Message newMessage(Uuid id, Uuid author, Uuid conversation, String body, Time creationTime) {
 
     final User foundUser = model.userById().first(author);
@@ -65,7 +90,7 @@ public final class Controller implements RawController, BasicController {
 
       message = new Message(id, Uuid.NULL, Uuid.NULL, creationTime, author, body);
       model.add(message);
-      updateStatus("conversation", conversation);
+      updateStatus("conversation", conversation, author);
       LOG.info("Message added: %s", message.id);
 
       // Find and update the previous "last" message so that it's "next" value
@@ -108,6 +133,8 @@ public final class Controller implements RawController, BasicController {
 
       user = new User(id, name, creationTime);
       model.add(user);
+      model.userInterests().put(id, new Interest());
+
       LOG.info(
           "newUser success (user.id=%s user.name=%s user.time=%s)",
           id,
@@ -136,7 +163,7 @@ public final class Controller implements RawController, BasicController {
     if (foundOwner != null && isIdFree(id)) {
       conversation = new ConversationHeader(id, owner, creationTime, title);
       model.add(conversation);
-      updateStatus("user", id);
+      updateStatus("user", id, owner);
 
       LOG.info("Conversation added: " + id);
     }
@@ -169,26 +196,36 @@ public final class Controller implements RawController, BasicController {
 
   private boolean isIdFree(Uuid id) { return !isIdInUse(id); }
 
-  private void updateStatus(String type, Uuid id) {
+  private void updateStatus(String type, Uuid interest, Uuid owner) {
+
+    LOG.info("updating");
 
     // status update for a conversation, wanna know how many messages added since last update.
     if (type.equals("conversation")) {
 
-      // if there is a set of people who are interested in this conversation
-      if (model.interestedByID().containsKey(id)) {
-        for (Uuid user : model.interestedByID().get(id)) {
-          Interest myInterests = model.userInterests().get(user);
-          myInterests.increaseMessageCount(id);
-        }
+      //how many messages added to conversation id/interest
+      for (Uuid user : model.interestedByID().at(interest)) {
+        Interest myInterests = model.userInterests().get(user);
+        myInterests.increaseMessageCount(interest);
+      }
+
+      //conversations that owner added to
+      for (Uuid user : model.interestedByID().at(owner)) {
+        ConversationHeader conversation = model.conversationById().first(interest);
+        model.userInterests().get(user).addConversation(owner, conversation);
       }
 
     } else { //status update for a user
 
-        if (model.interestedByID().containsKey(id)) {
-          for (Uuid user : model.interestedByID().get(id)) {
-            model.userInterests().get(user).addConversation(id);
-          }
-        }
+      // user : interested in the user interest
+      LOG.info(model.interestedByID().first(interest)+"");
+      for (Uuid u : model.interestedByID().at(interest)) {
+        ConversationHeader conversation = model.conversationById().first(interest);
+        System.out.println(conversation.title);
+        LOG.info(conversation.title);
+        model.userInterests().get(u).addConversation(owner, conversation);
+      }
+
     }
   }
 

@@ -30,11 +30,7 @@ import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
-import codeu.chat.util.Logger;
-import codeu.chat.util.Serializers;
-import codeu.chat.util.Time;
-import codeu.chat.util.Timeline;
-import codeu.chat.util.Uuid;
+import codeu.chat.util.*;
 import codeu.chat.util.connections.Connection;
 
 
@@ -179,6 +175,60 @@ public final class Server {
 
         Serializers.INTEGER.write(out, NetworkCode.GET_MESSAGES_BY_ID_RESPONSE);
         Serializers.collection(Message.SERIALIZER).write(out, messages);
+      }
+    });
+
+    // Add interest - A client wants to add a user interest
+    this.commands.put(NetworkCode.NEW_USER_INTEREST_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final String name = Serializers.STRING.read(in);
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        controller.newUserInterest(name, owner);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_USER_INTEREST_RESPONSE);
+      }
+    });
+
+    // Add interest - A client wants to add a conversation interest
+    this.commands.put(NetworkCode.NEW_CONVERSATION_INTEREST_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final String title = Serializers.STRING.read(in);
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        controller.newConversationInterest(title, owner);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_CONVERSATION_INTEREST_RESPONSE);
+      }
+    });
+
+    // Get user update -- a client wants to get the status update for a user
+    this.commands.put(NetworkCode.USER_UPDATE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        final String name = Serializers.STRING.read(in);
+        Collection<ConversationHeader> conversations = view.getUserUpdate(owner, name);
+
+        Serializers.INTEGER.write(out, NetworkCode.USER_UPDATE_RESPONSE);
+        Serializers.collection(ConversationHeader.SERIALIZER).write(out, conversations);
+      }
+    });
+
+    // Get conversation update -- a client wants to get the conversation update for a user
+    this.commands.put(NetworkCode.CONVERSATION_UPDATE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        final Uuid owner = Uuid.SERIALIZER.read(in);
+        final String name = Serializers.STRING.read(in);
+        int messages = view.getConversationUpdate(owner, name);
+
+        Serializers.INTEGER.write(out, NetworkCode.CONVERSATION_UPDATE_RESPONSE);
+        Serializers.INTEGER.write(out, messages);
       }
     });
 

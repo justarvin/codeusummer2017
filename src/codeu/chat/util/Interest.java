@@ -1,45 +1,56 @@
 package codeu.chat.util;
 
+import codeu.chat.common.ConversationHeader;
+import codeu.chat.server.Controller;
+import codeu.chat.server.Model;
+import codeu.chat.util.store.Store;
+import codeu.chat.util.store.StoreAccessor;
+
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 public class Interest {
 
-  private Uuid user;
-
-  //sets of my interests
-  private HashSet<Uuid> conversationInterests, userInterests;
+  private final static Logger.Log LOG = Logger.newLog(Interest.class);
 
   //maps from a conversation I'm interested in to the number of messages since the last update.
   private Map<Uuid, Integer> conversationUpdates;
 
   //maps from a user I'm interested in to the set of conversations they created/added to.
-  private Map<Uuid, HashSet<Uuid>> userUpdates;
+  private Store<Uuid, ConversationHeader> userUpdates;
 
-  public Interest(Uuid user) {
-    this.user = user;
+  public Interest() {
     conversationUpdates = new HashMap<>();
-    userUpdates = new HashMap<>();
+    userUpdates = new Store<>(Model.UUID_COMPARE);
   }
 
-  public void addConversationInterest(Uuid id) {
-    conversationInterests.add(id);
-    conversationUpdates.put(id, 0);
+  public void addConversationInterest(Uuid conversation) {
+    conversationUpdates.put(conversation, 0);
   }
 
-  public void addUserInterest(Uuid id) {
-    userInterests.add(id);
-    userUpdates.put(id, new HashSet<>());
+  public void increaseMessageCount(Uuid conversation) {
+    conversationUpdates.put(conversation, conversationUpdates.get(conversation) + 1);
+    LOG.info(conversationUpdates.get(conversation)+"");
   }
 
-  public void increaseMessageCount(Uuid id) {
-    conversationUpdates.put(id, conversationUpdates.get(id) + 1);
+  public void addConversation(Uuid interest, ConversationHeader c) {
+    userUpdates.insert(interest, c);
+    for (ConversationHeader conv : userUpdates.at(interest)) {
+      LOG.info(conv.title);
+    }
   }
 
-  public void addConversation(Uuid id) {
-    userUpdates.get(user).add(id);
+  public Iterable<ConversationHeader> getUserUpdate(Uuid id) {
+    return userUpdates.at(id);
   }
 
+  public int getConversationUpdate(Uuid conversation) {
+    int messages = conversationUpdates.get(conversation);
+    conversationUpdates.put(conversation, 0);
+    return messages;
+  }
 
+  public StoreAccessor<Uuid, ConversationHeader> getUpdates() {
+    return userUpdates;
+  }
 }

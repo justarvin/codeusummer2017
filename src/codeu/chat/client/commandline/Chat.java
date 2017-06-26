@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
@@ -233,6 +234,14 @@ public final class Chat {
                 System.out.println("    Join the conversation as the current user.");
                 System.out.println("  info");
                 System.out.println("    Display all info for the current user");
+                System.out.println("  u-status <name>");
+                System.out.println("    Display status update for the user with the given name.");
+                System.out.println("  c-status <name>");
+                System.out.println("    Display status update for the conversation with the given name.");
+                System.out.println("  i-add-user <name>");
+                System.out.println("    Add the user with the given name as an interest.");
+                System.out.println("  i-add-conv <title>");
+                System.out.println("    Add the conversation with the given title as an interest.");
                 System.out.println("  back");
                 System.out.println("    Go back to ROOT MODE.");
                 System.out.println("  exit");
@@ -312,6 +321,37 @@ public final class Chat {
             }
         });
 
+        // STATUS UPDATE
+        //
+        // Displays status update for a specified user.
+        //
+        panel.register("u-status", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String name = args.get(0);
+            System.out.format("Conversations created or added to by %s since last update\n", name);
+            for (final ConversationContext conversation : user.getUserUpdate(user.user.id, name)) {
+              System.out.format(
+                      "CONVERSATION %s (UUID:%s)\n",
+                      conversation.conversation.title,
+                      conversation.conversation.id);
+            }
+          }
+        });
+
+        // STATUS UPDATE
+        //
+        // Displays status update for a specified conversation.
+        //
+        panel.register("c-status", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String title = args.get(0);
+            int messages = user.getConversationUpdate(user.user.id, title);
+            System.out.println("Number of new messages since last update: " + messages);
+          }
+        });
+
         // INFO
         //
         // Add a command that will print info about the current context when the
@@ -324,6 +364,28 @@ public final class Chat {
                 System.out.format("  Name : %s\n", user.user.name);
                 System.out.format("  Id   : UUID:%s\n", user.user.id);
             }
+        });
+
+        // ADD USER INTEREST
+        //
+        // Add a user interest for this user.
+        panel.register("i-add-user", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+              final String name = args.get(0);
+              user.addUserInterest(name, user.user.id);
+            }
+        });
+
+        // ADD CONVERSATION INTEREST
+        //
+        // Add a conversation interest for this user.
+        panel.register("i-add-conv", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            final String title = args.get(0);
+            user.addConversationInterest(title, user.user.id);
+          }
         });
 
         // Now that the panel has all its commands registered, return the panel

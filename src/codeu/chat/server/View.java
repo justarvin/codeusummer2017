@@ -42,19 +42,6 @@ import codeu.chat.util.store.StoreAccessor;
 public final class View implements BasicView, SinglesView {
 
   private final static Logger.Log LOG = Logger.newLog(View.class);
-  // private final static ServerInfo SERVER_INFO = new ServerInfo();
-  //
-  // try {
-  //     SERVER_INFO = new ServerInfo();
-  //     } catch(IOException ex) {
-  //       System.out.println("ERROR: Response from server failed.");
-  //       LOG.error(ex, "Connection error occured.");
-  //     }
-  //
-  // @Override
-  // public Collection<ServerInfo> getInfo() {
-  //   return SERVER_INFO;
-  // }
 
   private static final ServerInfo info = new ServerInfo();
   private final Model model;
@@ -73,6 +60,7 @@ public final class View implements BasicView, SinglesView {
   public Collection<ConversationHeader> getConversations() {
     return all(model.conversationById());
   }
+
 
   @Override
   public Collection<ConversationPayload> getConversationPayloads(Collection<Uuid> ids) {
@@ -130,5 +118,23 @@ public final class View implements BasicView, SinglesView {
   @Override
   public ServerInfo getInfo() {
     return info;
+  }
+
+  @Override
+  public Collection<ConversationHeader> getUserUpdate(Uuid owner, String name) {
+//    User user = model.userByText().first(name);
+//    Collection<ConversationHeader> conversations = new ArrayList<>();
+//    for (ConversationHeader c : model.userInterests().get(owner).getUserUpdate(user.id)) {
+//      conversations.add(c);
+//    }
+//    return conversations;
+
+    return intersect(model.userInterests().get(owner).getUpdates(), Arrays.asList(owner));
+  }
+
+  @Override
+  public int getConversationUpdate(Uuid owner, String title) {
+    Uuid conversation = model.conversationByText().first(title).id;
+    return model.userInterests().get(owner).getConversationUpdate(conversation);
   }
 }

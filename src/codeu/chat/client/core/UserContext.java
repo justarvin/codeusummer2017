@@ -21,6 +21,7 @@ import codeu.chat.common.BasicController;
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.User;
+import codeu.chat.util.Interest;
 import codeu.chat.util.Uuid;
 
 public final class UserContext {
@@ -53,4 +54,25 @@ public final class UserContext {
 
     return all;
   }
+
+  public void addUserInterest(String name, Uuid owner) {
+    controller.newUserInterest(name, owner);
+  }
+
+  public void addConversationInterest(String title, Uuid owner) {
+    controller.newConversationInterest(title, owner);
+  }
+
+  public Iterable<ConversationContext> getUserUpdate(Uuid owner, String name) {
+    final Collection<ConversationContext> all = new ArrayList<>();
+    for (final ConversationHeader conversation : view.getUserUpdate(owner, name)) {
+      all.add(new ConversationContext(user, conversation, view, controller));
+    }
+    return all;
+  }
+
+  public int getConversationUpdate(Uuid owner, String title) {
+    return view.getConversationUpdate(owner, title);
+  }
+
 }

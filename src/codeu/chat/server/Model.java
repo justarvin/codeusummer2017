@@ -25,6 +25,7 @@ import codeu.chat.common.LinearUuidGenerator;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
 import codeu.chat.util.Interest;
+import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.Store;
@@ -32,7 +33,8 @@ import codeu.chat.util.store.StoreAccessor;
 
 public final class Model {
 
-  private static final Comparator<Uuid> UUID_COMPARE = new Comparator<Uuid>() {
+  private final static Logger.Log LOG = Logger.newLog(Model.class);
+  public static final Comparator<Uuid> UUID_COMPARE = new Comparator<Uuid>() {
 
     @Override
     public int compare(Uuid a, Uuid b) {
@@ -73,10 +75,8 @@ public final class Model {
 
   private final Map<Uuid, Interest> interestsByID = new HashMap<>();
 
-  //from user/conversation id to the set of users who care
-  private final Map<Uuid, Set<Uuid>> watchers = new HashMap<>();
-
-
+  //from user/conversation id to the uuid's of the users who care
+  private final Store<Uuid, Uuid> watchers = new Store<>(UUID_COMPARE);
 
   public void add(User user) {
     userById.insert(user.id, user);
@@ -137,8 +137,15 @@ public final class Model {
     return messageByText;
   }
 
-  public Map<Uuid, Set<Uuid>> interestedByID() {
+  public StoreAccessor<Uuid, Uuid> interestedByID() {
     return watchers;
+  }
+
+  public void addWatch(Uuid interest, Uuid owner) {
+    watchers.insert(interest, owner);
+    for (Uuid u : watchers.at(interest)) {
+      LOG.info(u+"");
+    }
   }
 
   public Map<Uuid, Interest> userInterests() {
