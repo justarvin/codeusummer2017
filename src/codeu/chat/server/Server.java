@@ -12,15 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package codeu.chat.server;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -37,17 +29,12 @@ import codeu.chat.util.Timeline;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 
-import codeu.chat.common.ServerInfo;
-import codeu.chat.util.*;
-import codeu.chat.util.connections.Connection;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
@@ -201,6 +188,45 @@ public final class Server {
       }
     });
 
+    // Clean - A client wants to clean the log
+    this.commands.put(NetworkCode.CLEAN_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        File log = new File(persistentPath.getPath());
+        FileWriter writer = new FileWriter(log);
+        writer.write("");
+        writer.close();
+
+        //clear current data in model
+        model.clearStores();
+
+        Serializers.INTEGER.write(out, NetworkCode.CLEAN_RESPONSE);
+      }
+    });
+
+    // Write to file - Write remaining contents of queue to file when client exits chat
+    this.commands.put(NetworkCode.WRITE_REST_OF_QUEUE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        try {
+
+          File log = new File(persistentPath.getPath());
+          BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+          while (!logBuffer.isEmpty()) {
+            writer.append(logBuffer.remove());
+            writer.newLine();
+          }
+          writer.close();
+
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+
+        Serializers.INTEGER.write(out, NetworkCode.WRITE_REST_OF_QUEUE_RESPONSE);
+
+      }
+    });
+
     // Add user interest - A client wants to add a user interest
     this.commands.put(NetworkCode.NEW_USER_INTEREST_REQUEST, new Command() {
       @Override
@@ -262,7 +288,7 @@ public final class Server {
         final Uuid owner = Uuid.SERIALIZER.read(in);
         final String name = Serializers.STRING.read(in);
         Collection<ConversationHeader> conversations = view.getUserUpdate(owner, name);
-        LOG.info(conversations.size()+"");
+        LOG.info(conversations.size() + "");
 
         Serializers.INTEGER.write(out, NetworkCode.USER_UPDATE_RESPONSE);
         Serializers.collection(ConversationHeader.SERIALIZER).write(out, conversations);
@@ -280,42 +306,6 @@ public final class Server {
 
         Serializers.INTEGER.write(out, NetworkCode.CONVERSATION_UPDATE_RESPONSE);
         Serializers.INTEGER.write(out, messages);
-
-    // Clean - A client wants to clean the log
-    this.commands.put(NetworkCode.CLEAN_REQUEST, new Command() {
-      @Override
-      public void onMessage(InputStream in, OutputStream out) throws IOException {
-        File log = new File(persistentPath.getPath());
-        FileWriter writer = new FileWriter(log);
-        writer.write("");
-        writer.close();
-
-        //clear current data in model
-        model.clearStores();
-
-        Serializers.INTEGER.write(out, NetworkCode.CLEAN_RESPONSE);
-      }
-    });
-
-    // Write to file - Write remaining contents of queue to file when client exits chat
-    this.commands.put(NetworkCode.WRITE_REST_OF_QUEUE_REQUEST, new Command() {
-      @Override
-      public void onMessage(InputStream in, OutputStream out) throws IOException {
-        try {
-
-          File log = new File(persistentPath.getPath());
-          BufferedWriter writer = new BufferedWriter(new FileWriter(log));
-          while (!logBuffer.isEmpty()) {
-            writer.append(logBuffer.remove());
-            writer.newLine();
-          }
-          writer.close();
-
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-
-        Serializers.INTEGER.write(out, NetworkCode.WRITE_REST_OF_QUEUE_RESPONSE);
 
       }
     });
@@ -342,6 +332,7 @@ public final class Server {
       }
     });
   }
+
 
   public void handleConnection(final Connection connection) {
     timeline.scheduleNow(new Runnable() {

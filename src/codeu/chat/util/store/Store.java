@@ -49,7 +49,7 @@ public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
 
     // "current.next" may be null, but "current" can never be null. So it
     // should always be safe to call to current.
-    StoreLink<KEY, VALUE> newLink = new StoreLink<>(key, value, current.next);
+    final StoreLink<KEY, VALUE> newLink = new StoreLink<>(key, value, current.next);
     current.next = newLink;
 
     // Before adding the link to the index, first check if the hint has an

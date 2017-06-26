@@ -23,7 +23,7 @@ import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
-import codeu.chat.util.Interest;
+import codeu.chat.util.InterestStore;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.Store;
@@ -70,7 +70,7 @@ public final class Model {
   private Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
   private Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
 
-  private Map<Uuid, Interest> interestsByID = new HashMap<>();
+  private Map<Uuid, InterestStore> interestsByID = new HashMap<>();
 
   //from user/conversation id to the uuid's of the users who care
   private Map<Uuid, Set<Uuid>> watching = new HashMap<>();
@@ -155,8 +155,9 @@ public final class Model {
     interestsByID.get(owner).conversationUpdates().put(interest, 0);
   }
 
-  public Map<Uuid, Interest> userInterests() {
+  public Map<Uuid, InterestStore> userInterests() {
     return interestsByID;
+  }
 
   public void clearStores() {
     userById = new Store<>(UUID_COMPARE);

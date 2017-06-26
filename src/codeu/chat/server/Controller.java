@@ -21,7 +21,7 @@ import codeu.chat.common.Message;
 import codeu.chat.common.RandomUuidGenerator;
 import codeu.chat.common.RawController;
 import codeu.chat.common.User;
-import codeu.chat.util.Interest;
+import codeu.chat.util.InterestStore;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
 import codeu.chat.util.TransactionLog;
@@ -92,7 +92,7 @@ public final class Controller implements RawController, BasicController {
     User userInterest = model.userByText().first(name);
     model.addWatch(userInterest.id, owner);
 
-    LOG.info("Interest added");
+    LOG.info("InterestStore added");
   }
 
   @Override
@@ -100,7 +100,7 @@ public final class Controller implements RawController, BasicController {
 
     ConversationHeader conversationInterest = model.conversationByText().first(title);
 
-    Interest myInterests = model.userInterests().get(owner);
+    InterestStore myInterests = model.userInterests().get(owner);
     myInterests.addConversationInterest(conversationInterest.id);
 
     // save owner as someone interested in conversationInterest
@@ -186,7 +186,7 @@ public final class Controller implements RawController, BasicController {
 
       user = new User(id, name, creationTime);
       model.add(user);
-      model.userInterests().put(id, new Interest());
+      model.userInterests().put(id, new InterestStore());
 
       LOG.info(
               "newUser success (user.id=%s user.name=%s user.time=%s)",
@@ -281,7 +281,7 @@ public final class Controller implements RawController, BasicController {
 
   public void updateMessageCounts(Uuid conversation) {
     for (Uuid user : model.interestedByID().get(conversation)) {
-      Interest myInterests = model.userInterests().get(user);
+      InterestStore myInterests = model.userInterests().get(user);
       myInterests.increaseMessageCount(conversation);
     }
   }
