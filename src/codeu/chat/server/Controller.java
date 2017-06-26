@@ -14,8 +14,6 @@
 
 package codeu.chat.server;
 
-import java.util.Collection;
-
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -23,9 +21,17 @@ import codeu.chat.common.Message;
 import codeu.chat.common.RandomUuidGenerator;
 import codeu.chat.common.RawController;
 import codeu.chat.common.User;
+
 import codeu.chat.util.Logger;
 import codeu.chat.util.Time;
+import codeu.chat.util.TransactionLog;
 import codeu.chat.util.Uuid;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Queue;
 
 public final class Controller implements RawController, BasicController {
 
@@ -33,30 +39,57 @@ public final class Controller implements RawController, BasicController {
 
   private final Model model;
   private final Uuid.Generator uuidGenerator;
+  private final File persistentPath;
 
-  public Controller(Uuid serverId, Model model) {
+  public Controller(Uuid serverId, Model model, File persistentPath) {
     this.model = model;
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
+    this.persistentPath = persistentPath;
+
+    TransactionLog.restore(persistentPath, this);
+    LOG.info("restored called");
   }
 
   @Override
   public Message newMessage(Uuid author, Uuid conversation, String body) {
-    return newMessage(createId(), author, conversation, body, Time.now());
+    Uuid id = createId();
+    Time time = Time.now();
+
+    Object[] params = new Object[]{id, body, time.inMs(), conversation, author};
+    checkBuffer();
+    TransactionLog.writeLog("message", params);
+
+    return newMessage(id, author, conversation, body, time);
   }
 
   @Override
   public User newUser(String name) {
-    return newUser(createId(), name, Time.now());
+    Uuid id = createId();
+    Time time = Time.now();
+
+    Object[] params = new Object[]{id, name, time.inMs()};
+    checkBuffer();
+    TransactionLog.writeLog("user", params);
+
+    return newUser(id, name, time);
   }
 
   @Override
   public ConversationHeader newConversation(String title, Uuid owner) {
-    return newConversation(createId(), title, owner, Time.now());
+    Uuid id = createId();
+    Time time = Time.now();
+
+    Object[] params = new Object[]{id, title, time.inMs(), owner};
+    checkBuffer();
+    TransactionLog.writeLog("conversation", params);
+
+    return newConversation(id, title, owner, time);
   }
 
   @Override
   public Message newMessage(Uuid id, Uuid author, Uuid conversation, String body, Time creationTime) {
 
+    System.out.println("add");
     final User foundUser = model.userById().first(author);
     final ConversationPayload foundConversation = model.conversationPayloadById().first(conversation);
 
@@ -87,9 +120,9 @@ public final class Controller implements RawController, BasicController {
       // not change.
 
       foundConversation.firstMessage =
-          Uuid.equals(foundConversation.firstMessage, Uuid.NULL) ?
-          message.id :
-          foundConversation.firstMessage;
+              Uuid.equals(foundConversation.firstMessage, Uuid.NULL) ?
+                      message.id :
+                      foundConversation.firstMessage;
 
       // Update the conversation to point to the new last message as it has changed.
 
@@ -110,18 +143,18 @@ public final class Controller implements RawController, BasicController {
       model.add(user);
 
       LOG.info(
-          "newUser success (user.id=%s user.name=%s user.time=%s)",
-          id,
-          name,
-          creationTime);
+              "newUser success (user.id=%s user.name=%s user.time=%s)",
+              id,
+              name,
+              creationTime);
 
     } else {
 
       LOG.info(
-          "newUser fail - id in use (user.id=%s user.name=%s user.time=%s)",
-          id,
-          name,
-          creationTime);
+              "newUser fail - id in use (user.id=%s user.name=%s user.time=%s)",
+              id,
+              name,
+              creationTime);
     }
 
     return user;
@@ -151,9 +184,9 @@ public final class Controller implements RawController, BasicController {
          isIdInUse(candidate);
          candidate = uuidGenerator.make()) {
 
-     // Assuming that "randomUuid" is actually well implemented, this
-     // loop should never be needed, but just incase make sure that the
-     // Uuid is not actually in use before returning it.
+      // Assuming that "randomUuid" is actually well implemented, this
+      // loop should never be needed, but just incase make sure that the
+      // Uuid is not actually in use before returning it.
 
     }
 
@@ -162,10 +195,33 @@ public final class Controller implements RawController, BasicController {
 
   private boolean isIdInUse(Uuid id) {
     return model.messageById().first(id) != null ||
-           model.conversationById().first(id) != null ||
-           model.userById().first(id) != null;
+            model.conversationById().first(id) != null ||
+            model.userById().first(id) != null;
   }
 
-  private boolean isIdFree(Uuid id) { return !isIdInUse(id); }
+  private boolean isIdFree(Uuid id) {
+    return !isIdInUse(id);
+  }
+
+  public void checkBuffer() {
+
+    File log = new File(persistentPath.getPath());
+    Queue<String> logBuffer = Server.getLogBuffer();
+
+    if (logBuffer.size() == 15) {
+      try {
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+        for (int i = 0; i < 15; i++) {
+          writer.write(logBuffer.remove());
+          writer.newLine();
+        }
+        writer.close();
+
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
 
 }

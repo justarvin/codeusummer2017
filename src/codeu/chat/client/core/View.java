@@ -25,7 +25,6 @@ import codeu.chat.common.NetworkCode;
 import codeu.chat.common.User;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Serializers;
-import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
