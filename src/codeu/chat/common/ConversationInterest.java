@@ -1,7 +1,6 @@
 package codeu.chat.common;
 
 import codeu.chat.util.Serializer;
-import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
@@ -12,14 +11,14 @@ import java.io.OutputStream;
 public class ConversationInterest extends Interest {
     public final Uuid id;
     public final Uuid convoId;
-    public final String name;
+    public final Uuid owner;
     public final Time creation;
 
-    public ConversationInterest(Uuid id, Uuid convoId, String name, Time creation) {
+    public ConversationInterest(Uuid id, Uuid convoId, Uuid owner, Time creation) {
 
         this.id = id;
         this.convoId = convoId;
-        this.name = name;
+        this.owner = owner;
         this.creation = creation;
     }
 
@@ -30,18 +29,17 @@ public class ConversationInterest extends Interest {
 
             Uuid.SERIALIZER.write(out, value.id);
             Uuid.SERIALIZER.write(out, value.convoId);
-            Serializers.STRING.write(out, value.name);
+            Uuid.SERIALIZER.write(out, value.owner);
             Time.SERIALIZER.write(out, value.creation);
 
         }
 
         @Override
         public ConversationInterest read(InputStream in) throws IOException {
-
             return new ConversationInterest(
                     Uuid.SERIALIZER.read(in),
                     Uuid.SERIALIZER.read(in),
-                    Serializers.STRING.read(in),
+                    Uuid.SERIALIZER.read(in),
                     Time.SERIALIZER.read(in)
             );
         }

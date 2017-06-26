@@ -17,13 +17,7 @@ package codeu.chat.client.core;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import codeu.chat.common.BasicView;
-import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.ConversationPayload;
-import codeu.chat.common.Message;
-import codeu.chat.common.NetworkCode;
-import codeu.chat.common.User;
-import codeu.chat.common.ServerInfo;
+import codeu.chat.common.*;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
@@ -153,6 +147,52 @@ final class View implements BasicView {
     }
 
     return messages;
+  }
+
+  @Override
+  public Collection<ConversationInterest> getConversationInterests(Collection<Uuid> ids) {
+
+    final Collection<ConversationInterest> interests = new ArrayList<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_CONVERSATIONS_INTEREST_REQUEST);
+      Serializers.collection(Uuid.SERIALIZER).write(connection.out(), ids);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_CONVERSATIONS_INTEREST_RESPONSE) {
+        interests.addAll(Serializers.collection(ConversationInterest.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return interests;
+  }
+
+  @Override
+  public Collection<UserInterest> getUserInterest(Collection<Uuid> ids) {
+
+    final Collection<UserInterest> interests = new ArrayList<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_USER_INTEREST_REQUEST);
+      Serializers.collection(Uuid.SERIALIZER).write(connection.out(), ids);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_USER_INTEREST_RESPONSE) {
+        interests.addAll(Serializers.collection(UserInterest.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return interests;
   }
 
   public ServerInfo getInfo() {

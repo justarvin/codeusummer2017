@@ -53,5 +53,15 @@ public interface BasicView {
   //   Return all messages whose id is found in the given collection.
   Collection<Message> getMessages(Collection<Uuid> ids);
 
+  // GET Conversation Interest
+  //
+  //   Return all Conversation Interests whose id is found in the given collection.
+  Collection<ConversationInterest> getConversationInterests(Collection<Uuid> ids);
+
+  // GET User Interest
+  //
+  //   Return all User Interest whose id is found in the given collection.
+  Collection<UserInterest> getUserInterest(Collection<Uuid> ids);
+
   ServerInfo getInfo();
 }

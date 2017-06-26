@@ -26,6 +26,8 @@ import codeu.chat.client.core.UserContext;
 import codeu.chat.util.Tokenizer;
 import codeu.chat.util.Time;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.common.UserInterest;
+import codeu.chat.common.ConversationInterest;
 
 public final class Chat {
 
