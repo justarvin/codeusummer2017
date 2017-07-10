@@ -314,11 +314,21 @@ public final class Server {
     this.commands.put(NetworkCode.DELETE_USER_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
-        final String name = Serializers.STRING.read(in);
-        User user = model.userByText().first(name);
+        final User user = User.SERIALIZER.read(in);
         model.remove(user);
 
         Serializers.INTEGER.write(out, NetworkCode.DELETE_USER_RESPONSE);
+      }
+    });
+
+    //Delete conversation -- an admin wants to delete the specified conversation
+    this.commands.put(NetworkCode.DELETE_CONVERSATION_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final ConversationHeader c = ConversationHeader.SERIALIZER.read(in);
+        model.remove(c);
+
+        Serializers.INTEGER.write(out, NetworkCode.DELETE_CONVERSATION_RESPONSE);
       }
     });
 

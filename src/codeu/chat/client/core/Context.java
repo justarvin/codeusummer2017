@@ -17,6 +17,7 @@ package codeu.chat.client.core;
 import java.util.ArrayList;
 import java.util.Collection;
 import codeu.chat.common.BasicView;
+import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.User;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.connections.ConnectionSource;
@@ -46,6 +47,12 @@ public final class Context {
     return users;
   }
 
+  public Iterable<ConversationHeader> allConversations() {
+    final Collection<ConversationHeader> conversations = new ArrayList<>();
+    conversations.addAll(view.getConversations());
+    return conversations;
+  }
+
   public void clean() {
     controller.clean();
   }
@@ -58,8 +65,12 @@ public final class Context {
     return view.getInfo();
   }
 
-  public void deleteUser(String name) {
-    controller.deleteUser(name);
+  public void deleteUser(User user) {
+    controller.deleteUser(user);
+  }
+
+  public void deleteConversation(ConversationHeader c) {
+    controller.deleteConversation(c);
   }
 
 }

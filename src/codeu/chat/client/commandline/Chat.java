@@ -18,6 +18,7 @@ import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
+import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Tokenizer;
 
@@ -220,6 +221,8 @@ public final class Chat {
             System.out.println("    Creates a new user with given name as a regular user by default. Type admin for admin account.");
             System.out.println("  u-delete <name>");
             System.out.println("    Deletes user with the given name");
+            System.out.println("  c-delete <name>");
+            System.out.println("    Deletes the conversation with the given name");
           }
 
           System.out.println("  c-list");
@@ -267,19 +270,34 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
             String name = args.get(0);
-            UserContext user = findUser(name);
             if (name.length() > 0) {
+              UserContext user = findUser(name);
               if (user != null) {
                   //todo: delete self?
-                context.deleteUser(name);
+                context.deleteUser(user.user);
               } else {
                 System.out.println("ERROR: User does not exist");
               }
             } else {
               System.out.println("ERROR: Missing <username>");
             }
+          }
+        });
 
-
+        panel.register("c-delete", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String title = args.get(0);
+            ConversationHeader conversation = findConversation(title);
+            if (title.length() > 0) {
+              if (conversation != null) {
+                context.deleteConversation(conversation);
+              } else {
+                System.out.println("ERROR: Conversation does not exist");
+              }
+            } else {
+              System.out.println("ERROR: Missing <title>");
+            }
           }
         });
 
@@ -583,6 +601,15 @@ public final class Chat {
     for (final UserContext user : context.allUsers()) {
       if (user.user.name.equals(name)) {
         return user;
+      }
+    }
+    return null;
+  }
+
+  private ConversationHeader findConversation(String title) {
+    for (final ConversationHeader c : context.allConversations()) {
+      if (c.title.equals(title)) {
+        return c;
       }
     }
     return null;

@@ -242,13 +242,32 @@ final class Controller implements BasicController {
     }
   }
 
-  void deleteUser(String name) {
+  void deleteUser(User user) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.DELETE_USER_REQUEST);
+      User.SERIALIZER.write(connection.out(), user);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.DELETE_USER_RESPONSE) {
-        LOG.info("Deleted user: " + name);
+        LOG.info("Deleted user: " + user.name);
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  void deleteConversation(ConversationHeader c) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.DELETE_CONVERSATION_REQUEST);
+      ConversationHeader.SERIALIZER.write(connection.out(), c);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.DELETE_CONVERSATION_RESPONSE) {
+        LOG.info("Deleted user: " + c.title);
       } else {
         LOG.error("Response from server failed.");
       }
