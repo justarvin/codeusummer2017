@@ -332,6 +332,28 @@ public final class Server {
       }
     });
 
+    //Add admin -- add the specified user as an admin
+    this.commands.put(NetworkCode.ADD_ADMIN_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+       final String name = Serializers.STRING.read(in);
+       model.addAdmin(model.userByText().first(name).id);
+
+       Serializers.INTEGER.write(out, NetworkCode.ADD_ADMIN_RESPONSE);
+      }
+    });
+
+    //All admins -- get all admins from the backend
+    this.commands.put(NetworkCode.ALL_ADMINS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+       Collection<Uuid> admins = view.allAdmins();
+       Serializers.collection(Uuid.SERIALIZER).write(out, admins);
+
+       Serializers.INTEGER.write(out, NetworkCode.ALL_ADMINS_RESPONSE);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {

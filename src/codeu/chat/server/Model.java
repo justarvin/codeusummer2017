@@ -59,6 +59,7 @@ public final class Model {
   private Store<Uuid, User> userById = new Store<>(UUID_COMPARE);
   private Store<Time, User> userByTime = new Store<>(TIME_COMPARE);
   private Store<String, User> userByText = new Store<>(STRING_COMPARE);
+  private Set<Uuid> admins = new HashSet<>();
 
   private Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
   private Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
@@ -69,6 +70,7 @@ public final class Model {
   private Store<Uuid, Message> messageById = new Store<>(UUID_COMPARE);
   private Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
   private Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
+
 
   private Map<Uuid, InterestStore> interestsByID = new HashMap<>();
 
@@ -85,6 +87,10 @@ public final class Model {
     userById.clear(user.id);
     userByTime.clear(user.creation);
     userByText.clear(user.name);
+  }
+
+  public void addAdmin(Uuid id) {
+    admins.add(id);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -170,6 +176,10 @@ public final class Model {
 
   public Map<Uuid, InterestStore> userInterests() {
     return interestsByID;
+  }
+
+  public Set<Uuid> admins() {
+    return admins;
   }
 
   public void clearStores() {

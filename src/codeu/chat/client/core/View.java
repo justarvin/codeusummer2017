@@ -204,4 +204,26 @@ final class View implements BasicView {
     return messages;
   }
 
+  @Override
+  public Collection<Uuid> allAdmins() {
+    final Collection<Uuid> admins = new ArrayList<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.ALL_ADMINS_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.ALL_ADMINS_RESPONSE) {
+        admins.addAll(Serializers.collection(Uuid.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+
+    return admins;
+  }
+
 }

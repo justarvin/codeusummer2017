@@ -20,8 +20,10 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.util.PasswordStorage;
 import codeu.chat.util.Tokenizer;
 
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -155,9 +157,8 @@ public final class Chat {
           final UserContext user = findUser(name);
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
-          } else {
-            panels.push(createUserPanel(user));
           }
+          authenticate(user);
         } else {
           System.out.println("ERROR: Missing <username>");
         }
@@ -202,7 +203,6 @@ public final class Chat {
   private Panel createUserPanel(final UserContext user) {
 
     final Panel panel = new Panel();
-    final ServerInfo serverInfo = context.getInfo();
 
       // HELP
       //
@@ -216,7 +216,7 @@ public final class Chat {
 
           //todo: add first admin.
 
-          if (serverInfo.isAdmin(user.user.id)) {
+          if (context.isAdmin(user.user.id)) {
             System.out.println("  u-add <name> (<type>)");
             System.out.println("    Creates a new user with given name as a regular user by default. Type admin for admin account.");
             System.out.println("  u-delete <name>");
@@ -243,7 +243,7 @@ public final class Chat {
       });
 
       // Only register these commands if current user is an admin
-      if (serverInfo.isAdmin(user.user.id)) {
+      if (context.isAdmin(user.user.id)) {
 
         // ADD USER
         //
@@ -254,7 +254,7 @@ public final class Chat {
           public void invoke(List<String> args) {
             String name = args.get(0);
             if (args.size() > 1) {
-              //todo add this user as an admin somewhere.
+              context.addAdmin(name);
             }
             if (name.length() > 0) {
               if (context.create(name) == null) {
@@ -300,9 +300,7 @@ public final class Chat {
             }
           }
         });
-
       }
-
 
       // C-LIST (list conversations)
       //
@@ -590,9 +588,22 @@ public final class Chat {
     return panel;
   }
 
-  private void authenticate(String name) {
-    System.out.println("Enter your password:");
-
+  private void authenticate(UserContext user) {
+    Console console = System.console();
+    char passwordArray[] = console.readPassword("Enter your password: ");
+    ServerInfo info = context.getInfo();
+    try {
+      boolean success = PasswordStorage.verifyPassword(passwordArray, info.getPassword(user.user.id));
+      if (success) {
+        panels.push(createUserPanel(user));
+      } else {
+        System.out.println("Login failed. Please try again");
+        console.readPassword("Enter your password: ");
+      }
+    } catch (Exception e) {
+      System.out.println("Login failed. Please try again");
+      console.readPassword("Enter your password: ");
+    }
   }
 
   // Find the first user with the given name and return a user context

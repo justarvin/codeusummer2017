@@ -2,6 +2,7 @@ package codeu.chat.common;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import codeu.chat.util.Uuid;
 import codeu.chat.util.Time;
@@ -10,7 +11,7 @@ public final class ServerInfo {
   private final Time startTime;
   private final Uuid version;
   private final static String SERVER_VERSION = "1.0.0";
-  private final ArrayList<Uuid> admins;
+  private final HashMap<Uuid, String> passwords;
 
   public ServerInfo() {
     this.startTime = Time.now();
@@ -21,13 +22,13 @@ public final class ServerInfo {
       // Do nothing.
     }
     this.version = serverVersion;
-    this.admins = new ArrayList<>();
+    this.passwords = new HashMap<>();
   }
   
   public ServerInfo(Uuid version, Time startTime) {
     this.version = version;
     this.startTime = startTime;
-    this.admins = new ArrayList<>();
+    this.passwords = new HashMap<>();
   }
   
   public Uuid getVersion() {
@@ -38,11 +39,5 @@ public final class ServerInfo {
     return startTime;
   }
 
-  public boolean isAdmin(Uuid id) {
-    return admins.contains(id);
-  }
 
-  public void addAdmin(Uuid id) {
-    admins.add(id);
-  }
 }

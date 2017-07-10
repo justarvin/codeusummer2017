@@ -20,6 +20,7 @@ import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.User;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
 
 public final class Context {
@@ -71,6 +72,20 @@ public final class Context {
 
   public void deleteConversation(ConversationHeader c) {
     controller.deleteConversation(c);
+  }
+
+  public Collection<Uuid> allAdmins() {
+    final Collection<Uuid> admins = new ArrayList<>();
+    admins.addAll(view.allAdmins());
+    return admins;
+  }
+
+  public void addAdmin(String name) {
+    controller.addAdmin(name);
+  }
+
+  public boolean isAdmin(Uuid id) {
+    return allAdmins().contains(id);
   }
 
 }
