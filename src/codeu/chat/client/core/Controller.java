@@ -25,6 +25,8 @@ import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
 
+import java.io.IOException;
+
 final class Controller implements BasicController {
 
   private final static Logger.Log LOG = Logger.newLog(Controller.class);
@@ -237,6 +239,23 @@ final class Controller implements BasicController {
     } catch (Exception ex) {
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(ex, "Exception during call on server.");
+    }
+  }
+
+  void deleteUser(String name) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.DELETE_USER_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.DELETE_USER_RESPONSE) {
+        LOG.info("Deleted user: " + name);
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
     }
   }
 }

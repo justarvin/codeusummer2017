@@ -310,6 +310,18 @@ public final class Server {
       }
     });
 
+    // Delete user -- an admin wants to delete the specified user
+    this.commands.put(NetworkCode.DELETE_USER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String name = Serializers.STRING.read(in);
+        User user = model.userByText().first(name);
+        model.remove(user);
+
+        Serializers.INTEGER.write(out, NetworkCode.DELETE_USER_RESPONSE);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {
