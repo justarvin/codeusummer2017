@@ -57,5 +57,5 @@ public interface BasicView {
 
   int getConversationUpdate(Uuid owner, String title);
 
-  Collection<Uuid> allAdmins();
+  Uuid getUuid(String name);
 }

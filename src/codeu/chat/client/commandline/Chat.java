@@ -14,6 +14,7 @@
 
 package codeu.chat.client.commandline;
 
+import codeu.chat.client.core.Auth;
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
@@ -40,9 +41,11 @@ public final class Chat {
   // panel all it needs to do is pop the top panel.
   private final Stack<Panel> panels = new Stack<>();
   private Context context;
+  private Auth auth;
 
   public Chat(Context context) {
     this.context = context;
+    this.auth = new Auth(context.getView());
     this.panels.push(createRootPanel(context));
   }
 
@@ -216,7 +219,7 @@ public final class Chat {
 
           //todo: add first admin.
 
-          if (context.isAdmin(user.user.id)) {
+          if (auth.isAdmin(user.user.id)) {
             System.out.println("  u-add <name> (<type>)");
             System.out.println("    Creates a new user with given name as a regular user by default. Type admin for admin account.");
             System.out.println("  u-delete <name>");
@@ -243,7 +246,7 @@ public final class Chat {
       });
 
       // Only register these commands if current user is an admin
-      if (context.isAdmin(user.user.id)) {
+      if (auth.isAdmin(user.user.id)) {
 
         // ADD USER
         //
@@ -254,7 +257,7 @@ public final class Chat {
           public void invoke(List<String> args) {
             String name = args.get(0);
             if (args.size() > 1) {
-              context.addAdmin(name);
+              auth.addAdmin(name);
             }
             if (name.length() > 0) {
               if (context.create(name) == null) {
@@ -591,9 +594,8 @@ public final class Chat {
   private void authenticate(UserContext user) {
     Console console = System.console();
     char passwordArray[] = console.readPassword("Enter your password: ");
-    ServerInfo info = context.getInfo();
     try {
-      boolean success = PasswordStorage.verifyPassword(passwordArray, info.getPassword(user.user.id));
+      boolean success = PasswordStorage.verifyPassword(passwordArray, auth.getPassword(user.user.id));
       if (success) {
         panels.push(createUserPanel(user));
       } else {
