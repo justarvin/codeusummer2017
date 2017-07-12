@@ -11,14 +11,15 @@ import java.io.IOException;
 /**
  * Utility class for writing and reading to/from the log
  */
-public class TransactionLog {
+public class PersistenceLog {
 
+  private static File path;
   private static final String USER = "ADD-USER";
   private static final String MESSAGE = "ADD-MESSAGE";
   private static final String CONVERSATION = "ADD-CONVERSATION";
   private static final String SPACE = " ";
 
-  public static void writeLog(String type, Object[] params) {
+  public static void writeTransaction(String type, Object[] params) {
     String log = "";
     switch(type) {
       case "user":
@@ -44,6 +45,10 @@ public class TransactionLog {
         break;
     }
     Server.getLogBuffer().add(log);
+  }
+
+  public static void writeAuthInfo(Uuid id, String password) {
+
   }
 
   public static void restore(File persistentPath, Controller controller) {
@@ -95,6 +100,10 @@ public class TransactionLog {
         controller.newMessage(uuid, senderUuid, conversationUuid, message, Time.fromMs(time));
         break;
     }
+  }
+
+  public static void setPersistentPath(File persistentPath) {
+    path = persistentPath;
   }
 
 }

@@ -1,6 +1,5 @@
 package codeu.chat.client.core;
 
-import codeu.chat.common.BasicView;
 import codeu.chat.util.PasswordStorage;
 import codeu.chat.util.Uuid;
 
@@ -13,11 +12,11 @@ import java.util.Set;
 
 public class Auth {
 
-  private BasicView view;
+  private View view;
   private Set<Uuid> admins, noPasswords;
   private Map<Uuid, String> passwords;
 
-  public Auth(BasicView view) {
+  public Auth(View view) {
     this.view = view;
     admins = new HashSet<>();
     noPasswords = new HashSet<>();
@@ -34,8 +33,8 @@ public class Auth {
     noPasswords.add(id);
   }
 
-  public boolean isNewUser(Uuid id) {
-    return noPasswords.contains(id);
+  public boolean isNewAdmin(Uuid id) {
+    return noPasswords.contains(id) && admins.contains(id);
   }
 
   public void authenticate(Uuid id) {
@@ -44,11 +43,10 @@ public class Auth {
     try {
       while (!PasswordStorage.verifyPassword(passwordArray, passwords.get(id))) {
         System.out.println("Login failed. Please try again");
-        console.readPassword("Enter your password: ");
+        passwordArray = console.readPassword("Enter your password: ");
       }
     } catch (Exception e) {
-      System.out.println("Login failed. Please try again");
-      console.readPassword("Enter your password: ");
+      e.printStackTrace();
     }
   }
 

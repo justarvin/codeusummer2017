@@ -56,6 +56,4 @@ public interface BasicView {
   Collection<ConversationHeader> getUserUpdate(Uuid owner, String name);
 
   int getConversationUpdate(Uuid owner, String title);
-
-  Uuid getUuid(String name);
 }

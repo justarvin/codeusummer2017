@@ -73,8 +73,8 @@ public final class Context {
     controller.deleteConversation(c);
   }
 
-  public BasicView getView() {
-    return view;
+  public View getView() {
+    return (View)view;
   }
 
 }

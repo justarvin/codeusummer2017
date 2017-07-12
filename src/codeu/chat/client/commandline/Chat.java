@@ -159,7 +159,7 @@ public final class Chat {
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
-            if (auth.isNewUser(user.user.id)) {
+            if (auth.isNewAdmin(user.user.id)) {
               auth.setPassword(user.user.id);
             } else {
               auth.authenticate(user.user.id);

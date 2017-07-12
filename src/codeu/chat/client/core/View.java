@@ -204,8 +204,7 @@ final class View implements BasicView {
     return messages;
   }
 
-  @Override
-  public Uuid getUuid(String name) {
+  Uuid getUuid(String name) {
     Uuid uuid = null;
     try (final Connection connection = source.connect()) {
 

@@ -23,8 +23,8 @@ import codeu.chat.common.RawController;
 import codeu.chat.common.User;
 import codeu.chat.util.InterestStore;
 import codeu.chat.util.Logger;
+import codeu.chat.util.PersistenceLog;
 import codeu.chat.util.Time;
-import codeu.chat.util.TransactionLog;
 import codeu.chat.util.Uuid;
 
 import java.io.BufferedWriter;
@@ -46,7 +46,8 @@ public final class Controller implements RawController, BasicController {
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
     this.persistentPath = persistentPath;
 
-    TransactionLog.restore(persistentPath, this);
+    PersistenceLog.setPersistentPath(persistentPath);
+    PersistenceLog.restore(persistentPath, this);
     LOG.info("restored called");
   }
 
@@ -57,7 +58,7 @@ public final class Controller implements RawController, BasicController {
 
     Object[] params = new Object[]{id, body, time.inMs(), conversation, author};
     checkBuffer();
-    TransactionLog.writeLog("message", params);
+    PersistenceLog.writeTransaction("message", params);
 
     return newMessage(id, author, conversation, body, time);
   }
@@ -69,7 +70,7 @@ public final class Controller implements RawController, BasicController {
 
     Object[] params = new Object[]{id, name, time.inMs()};
     checkBuffer();
-    TransactionLog.writeLog("user", params);
+    PersistenceLog.writeTransaction("user", params);
 
     return newUser(id, name, time);
   }
@@ -81,7 +82,7 @@ public final class Controller implements RawController, BasicController {
 
     Object[] params = new Object[]{id, title, time.inMs(), owner};
     checkBuffer();
-    TransactionLog.writeLog("conversation", params);
+    PersistenceLog.writeTransaction("conversation", params);
 
     return newConversation(id, title, owner, time);
   }
@@ -273,9 +274,11 @@ public final class Controller implements RawController, BasicController {
   }
 
   private void updateConversations(Uuid interest, Uuid owner) {
-    for (Uuid u : model.interestedByID().get(owner)) {
-      ConversationHeader conversation = model.conversationById().first(interest);
-      model.userInterests().get(u).addConversation(owner, conversation);
+    if (model.interestedByID().containsKey(owner)) {
+      for (Uuid u : model.interestedByID().get(owner)) {
+        ConversationHeader conversation = model.conversationById().first(interest);
+        model.userInterests().get(u).addConversation(owner, conversation);
+      }
     }
   }
 
