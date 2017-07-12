@@ -14,11 +14,7 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.Auth;
-import codeu.chat.client.core.Context;
-import codeu.chat.client.core.ConversationContext;
-import codeu.chat.client.core.MessageContext;
-import codeu.chat.client.core.UserContext;
+import codeu.chat.client.core.*;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Tokenizer;
@@ -43,8 +39,10 @@ public final class Chat {
 
   public Chat(Context context) {
     this.context = context;
-    this.auth = new Auth(context.getView());
+    this.auth = new Auth();
     this.panels.push(createRootPanel(context));
+
+    context.retrieveAdmins(auth);
   }
 
   // HANDLE COMMAND
@@ -159,9 +157,10 @@ public final class Chat {
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
+            context.retrieveAuthInfo(auth, user.user.id);
             if (auth.isNewAdmin(user.user.id)) {
               auth.setPassword(user.user.id);
-            } else {
+            } else if (auth.isAdmin(user.user.id)) {
               auth.authenticate(user.user.id);
             }
             panels.push(createUserPanel(user));
@@ -260,15 +259,16 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
             String name = args.get(0);
-            if (args.size() > 1) {
-              auth.addAdmin(name);
-            }
             if (name.length() > 0) {
               if (context.create(name) == null) {
                 System.out.println("ERROR: Failed to create new user");
               }
             } else {
               System.out.println("ERROR: Missing <username>");
+            }
+            System.out.println(args.size());
+            if (args.size() == 2) {
+              auth.addAdmin(name);
             }
           }
         });

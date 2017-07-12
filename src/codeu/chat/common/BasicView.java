@@ -15,6 +15,8 @@
 package codeu.chat.common;
 
 import java.util.Collection;
+
+import codeu.chat.client.core.Auth;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
@@ -56,4 +58,10 @@ public interface BasicView {
   Collection<ConversationHeader> getUserUpdate(Uuid owner, String name);
 
   int getConversationUpdate(Uuid owner, String title);
+
+  String retrieveAuthInfo(Uuid id);
+
+  Collection<Uuid> retrieveAdmins();
+
+  Collection<Uuid> retrieveNewAdmins();
 }

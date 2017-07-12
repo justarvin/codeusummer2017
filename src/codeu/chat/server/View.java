@@ -127,4 +127,19 @@ public final class View implements BasicView, SinglesView {
     return model.userInterests().get(owner).getConversationUpdate(conversation);
   }
 
+  @Override
+  public String retrieveAuthInfo(Uuid id) {
+    return null;
+  }
+
+  @Override
+  public Collection<Uuid> retrieveAdmins() {
+    return null;
+  }
+
+  @Override
+  public Collection<Uuid> retrieveNewAdmins() {
+    return null;
+  }
+
 }

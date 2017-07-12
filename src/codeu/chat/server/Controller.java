@@ -14,6 +14,7 @@
 
 package codeu.chat.server;
 
+import codeu.chat.client.core.Auth;
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -40,15 +41,17 @@ public final class Controller implements RawController, BasicController {
   private final Model model;
   private final Uuid.Generator uuidGenerator;
   private final File persistentPath;
+  private final Auth auth;
 
-  public Controller(Uuid serverId, Model model, File persistentPath) {
+  public Controller(Uuid serverId, Model model, Auth auth, File persistentPath) {
     this.model = model;
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
+    this.auth = auth;
     this.persistentPath = persistentPath;
 
     PersistenceLog.setPersistentPath(persistentPath);
-    PersistenceLog.restore(persistentPath, this);
-    LOG.info("restored called");
+    PersistenceLog.restoreTransactions(this);
+    PersistenceLog.restoreAuthInfo(this);
   }
 
   @Override
@@ -71,6 +74,9 @@ public final class Controller implements RawController, BasicController {
     Object[] params = new Object[]{id, name, time.inMs()};
     checkBuffer();
     PersistenceLog.writeTransaction("user", params);
+    if (!model.userById().all().iterator().hasNext()) {
+      auth.addFirstAdmin(id);
+    }
 
     return newUser(id, name, time);
   }
@@ -125,7 +131,6 @@ public final class Controller implements RawController, BasicController {
   @Override
   public Message newMessage(Uuid id, Uuid author, Uuid conversation, String body, Time creationTime) {
 
-    System.out.println("add");
     final User foundUser = model.userById().first(author);
     final ConversationPayload foundConversation = model.conversationPayloadById().first(conversation);
 
@@ -223,6 +228,10 @@ public final class Controller implements RawController, BasicController {
     }
 
     return conversation;
+  }
+
+  public void addAuthInfo(Uuid id, String password) {
+    auth.addPassword(id, password);
   }
 
   private Uuid createId() {

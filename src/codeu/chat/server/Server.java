@@ -14,6 +14,7 @@
 
 package codeu.chat.server;
 
+import codeu.chat.client.core.Auth;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
@@ -61,6 +62,7 @@ public final class Server {
   private final Model model = new Model();
   private final View view = new View(model);
   private final Controller controller;
+  private final Auth auth;
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
@@ -69,10 +71,16 @@ public final class Server {
 
   public Server(final Uuid id, final Secret secret, final Relay relay, File persistentPath) {
 
+    this.auth = new Auth();
     this.id = id;
     this.secret = secret;
-    this.controller = new Controller(id, model, persistentPath);
+    this.controller = new Controller(id, model, auth, persistentPath);
     this.relay = relay;
+
+    if (!model.userById().all().iterator().hasNext()) {
+      User user = controller.newUser("admin");
+      auth.addFirstAdmin(user.id);
+    }
 
     //Request info version - user asks server for current info version
     this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
@@ -192,7 +200,7 @@ public final class Server {
     this.commands.put(NetworkCode.CLEAN_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
-        File log = new File(persistentPath.getPath());
+        File log = new File(persistentPath, "log.txt");
         FileWriter writer = new FileWriter(log);
         writer.write("");
         writer.close();
@@ -210,7 +218,7 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         try {
 
-          File log = new File(persistentPath.getPath());
+          File log = new File(persistentPath, "log.txt");
           BufferedWriter writer = new BufferedWriter(new FileWriter(log));
           while (!logBuffer.isEmpty()) {
             writer.append(logBuffer.remove());
@@ -332,15 +340,46 @@ public final class Server {
       }
     });
 
-    //All admins -- get the uuid corresponding to a name from the backend
+    //Get uuid -- get the uuid corresponding to a name from the backend
     this.commands.put(NetworkCode.GET_UUID_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
        final String name = Serializers.STRING.read(in);
        Uuid id = model.userByText().first(name).id;
-       Uuid.SERIALIZER.write(out, id);
 
        Serializers.INTEGER.write(out, NetworkCode.GET_UUID_RESPONSE);
+       Uuid.SERIALIZER.write(out, id);
+      }
+    });
+
+    //Auth info -- get the password for the specified user id
+    this.commands.put(NetworkCode.AUTH_INFO_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        String password = auth.getPassword(id);
+        System.out.println(password);
+
+        Serializers.INTEGER.write(out, NetworkCode.AUTH_INFO_RESPONSE);
+        Serializers.nullable(Serializers.STRING).write(out, password);
+      }
+    });
+
+    //Get admins -- get the list of admins
+    this.commands.put(NetworkCode.GET_ADMINS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.GET_ADMINS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, auth.getAdmins());
+      }
+    });
+
+    //Get new admins -- get the list of admins who have not set their passwords yet
+    this.commands.put(NetworkCode.GET_NEW_ADMINS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.GET_NEW_ADMINS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, auth.getNewAdmins());
       }
     });
 

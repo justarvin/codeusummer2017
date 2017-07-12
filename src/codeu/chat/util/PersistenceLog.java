@@ -1,12 +1,10 @@
 package codeu.chat.util;
 
+import codeu.chat.client.core.Auth;
 import codeu.chat.server.Controller;
 import codeu.chat.server.Server;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Utility class for writing and reading to/from the log
@@ -18,6 +16,7 @@ public class PersistenceLog {
   private static final String MESSAGE = "ADD-MESSAGE";
   private static final String CONVERSATION = "ADD-CONVERSATION";
   private static final String SPACE = " ";
+  private static final Logger.Log LOG = Logger.newLog(Auth.class);
 
   public static void writeTransaction(String type, Object[] params) {
     String log = "";
@@ -49,22 +48,51 @@ public class PersistenceLog {
 
   public static void writeAuthInfo(Uuid id, String password) {
 
+    File passwords = new File(path, "passwords.txt");
+    try {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(passwords));
+      String text = id + SPACE + password;
+      writer.append(text);
+      writer.newLine();
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
-  public static void restore(File persistentPath, Controller controller) {
+  public static void restoreTransactions(Controller controller) {
 
-    File log = new File(persistentPath.getPath());
-
+    File log = new File(path, "log.txt");
     try {
 
       boolean created = log.createNewFile(); // true if file created, false otherwise
-      System.out.println(created);
       //read in and restore state if the file existed
       if (!created) {
         String line;
         BufferedReader reader = new BufferedReader(new FileReader(log));
         while ((line = reader.readLine()) != null) {
           process(controller, line);
+        }
+        reader.close();
+      }
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void restoreAuthInfo(Controller controller) {
+    File passwords = new File(path, "passwords.txt");
+    System.out.println("restoring");
+    try {
+      boolean created = passwords.createNewFile();
+      System.out.println(created);
+      if (!created) {
+        String line;
+        BufferedReader reader = new BufferedReader(new FileReader(passwords));
+        while ((line = reader.readLine()) != null) {
+          System.out.println(line);
+          processPassword(controller, line);
         }
         reader.close();
       }
@@ -100,6 +128,14 @@ public class PersistenceLog {
         controller.newMessage(uuid, senderUuid, conversationUuid, message, Time.fromMs(time));
         break;
     }
+  }
+
+  private static void processPassword(Controller controller, String line) throws IOException {
+    System.out.println("processing");
+    String[] splitLog = line.split(" ");
+    Uuid id = Uuid.parse(splitLog[0]);
+    String password = splitLog[1];
+    controller.addAuthInfo(id, password);
   }
 
   public static void setPersistentPath(File persistentPath) {

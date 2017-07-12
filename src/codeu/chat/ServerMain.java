@@ -96,8 +96,7 @@ final class ServerMain {
             new NoOpRelay() :
             new RemoteRelay(relaySource);
 
-    File log = new File(persistentPath, "log.txt");
-    final Server server = new Server(id, secret, relay, log);
+    final Server server = new Server(id, secret, relay, persistentPath);
 
     LOG.info("Created server.");
 

@@ -1,23 +1,19 @@
 package codeu.chat.client.core;
 
+import codeu.chat.client.core.View;
 import codeu.chat.util.PasswordStorage;
+import codeu.chat.util.PersistenceLog;
 import codeu.chat.util.Uuid;
 
 import java.io.Console;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Auth {
 
-  private View view;
   private Set<Uuid> admins, noPasswords;
   private Map<Uuid, String> passwords;
 
-  public Auth(View view) {
-    this.view = view;
+  public Auth() {
     admins = new HashSet<>();
     noPasswords = new HashSet<>();
     passwords = new HashMap<>();
@@ -28,7 +24,12 @@ public class Auth {
   }
 
   public void addAdmin(String name) {
-    Uuid id = view.getUuid(name);
+    Uuid id = new View().getUuid(name);
+    admins.add(id);
+    noPasswords.add(id);
+  }
+
+  public void addFirstAdmin(Uuid id) {
     admins.add(id);
     noPasswords.add(id);
   }
@@ -60,10 +61,35 @@ public class Auth {
       passwordConfirm = console.readPassword("Retype your password: ");
     }
     try {
-      passwords.put(id, PasswordStorage.createHash(password));
+      String pass = PasswordStorage.createHash(password);
+      passwords.put(id, pass);
       noPasswords.remove(id);
+      PersistenceLog.writeAuthInfo(id, pass);
     } catch (PasswordStorage.CannotPerformOperationException e) {
       e.printStackTrace();
     }
+  }
+
+  public void addPassword(Uuid id, String password) {
+    passwords.put(id, password);
+  }
+
+  public String getPassword(Uuid id) {
+    return passwords.get(id);
+  }
+
+  void setAdmins(HashSet<Uuid> admins) {
+    this.admins = admins;
+  }
+
+  void setNewAdmins(HashSet<Uuid> newAdmins) {
+    noPasswords = newAdmins;
+  }
+  public Set<Uuid> getAdmins() {
+    return admins;
+  }
+
+  public Set<Uuid> getNewAdmins() {
+    return noPasswords;
   }
 }
