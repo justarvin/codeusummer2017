@@ -21,10 +21,8 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.PasswordStorage;
 import codeu.chat.util.Tokenizer;
 
-import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,8 +158,14 @@ public final class Chat {
           final UserContext user = findUser(name);
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
+          } else {
+            if (auth.isNewUser(user.user.id)) {
+              auth.setPassword(user.user.id);
+            } else {
+              auth.authenticate(user.user.id);
+            }
+            panels.push(createUserPanel(user));
           }
-          authenticate(user);
         } else {
           System.out.println("ERROR: Missing <username>");
         }
@@ -589,23 +593,6 @@ public final class Chat {
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
     return panel;
-  }
-
-  private void authenticate(UserContext user) {
-    Console console = System.console();
-    char passwordArray[] = console.readPassword("Enter your password: ");
-    try {
-      boolean success = PasswordStorage.verifyPassword(passwordArray, auth.getPassword(user.user.id));
-      if (success) {
-        panels.push(createUserPanel(user));
-      } else {
-        System.out.println("Login failed. Please try again");
-        console.readPassword("Enter your password: ");
-      }
-    } catch (Exception e) {
-      System.out.println("Login failed. Please try again");
-      console.readPassword("Enter your password: ");
-    }
   }
 
   // Find the first user with the given name and return a user context
