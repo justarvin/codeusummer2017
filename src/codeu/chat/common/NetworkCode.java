@@ -65,5 +65,7 @@ public final class NetworkCode {
       GET_ADMINS_REQUEST = 57,
       GET_ADMINS_RESPONSE = 58,
       GET_NEW_ADMINS_REQUEST = 59,
-      GET_NEW_ADMINS_RESPONSE = 60;
+      GET_NEW_ADMINS_RESPONSE = 60,
+      WRITE_AUTH_REQUEST = 61,
+      WRITE_AUTH_RESPONSE = 62;
 }

@@ -383,6 +383,17 @@ public final class Server {
       }
     });
 
+    //Write auth info -- write the information to disk
+    this.commands.put(NetworkCode.WRITE_AUTH_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final String password = Serializers.STRING.read(in);
+        controller.writeAuthInfo(id, password);
+        Serializers.INTEGER.write(out, NetworkCode.WRITE_AUTH_RESPONSE);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {

@@ -95,4 +95,7 @@ public final class Context {
     auth.setNewAdmins(newAdmins);
   }
 
+  public void writeAuthInfo(Uuid id, String password) {
+    controller.writeAuthInfo(id, password);
+  }
 }

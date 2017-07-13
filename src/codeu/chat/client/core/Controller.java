@@ -80,6 +80,7 @@ final class Controller implements BasicController {
         LOG.error("Response from server failed.");
       }
     } catch (Exception ex) {
+      System.out.println(ex.getClass());
       System.out.println(ex.getMessage());
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(ex, "Exception during call on server.");
@@ -269,6 +270,25 @@ final class Controller implements BasicController {
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.DELETE_CONVERSATION_RESPONSE) {
         LOG.info("Deleted user: " + c.title);
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  void writeAuthInfo(Uuid id, String password) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.WRITE_AUTH_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), id);
+      Serializers.STRING.write(connection.out(), password);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.WRITE_AUTH_RESPONSE) {
+        LOG.info("Saved auth info");
       } else {
         LOG.error("Response from server failed.");
       }

@@ -49,9 +49,7 @@ public final class Controller implements RawController, BasicController {
     this.auth = auth;
     this.persistentPath = persistentPath;
 
-    PersistenceLog.setPersistentPath(persistentPath);
-    PersistenceLog.restoreTransactions(this);
-    PersistenceLog.restoreAuthInfo(this);
+    PersistenceLog.restore(this, persistentPath);
   }
 
   @Override
@@ -73,9 +71,13 @@ public final class Controller implements RawController, BasicController {
 
     Object[] params = new Object[]{id, name, time.inMs()};
     checkBuffer();
-    PersistenceLog.writeTransaction("user", params);
     if (!model.userById().all().iterator().hasNext()) {
       auth.addFirstAdmin(id);
+    }
+    if (auth.isAdmin(id)) {
+      PersistenceLog.writeTransaction("admin", params);
+    } else {
+      PersistenceLog.writeTransaction("user", params);
     }
 
     return newUser(id, name, time);
@@ -232,6 +234,11 @@ public final class Controller implements RawController, BasicController {
 
   public void addAuthInfo(Uuid id, String password) {
     auth.addPassword(id, password);
+    auth.passwordRetrieved(id);
+  }
+
+  public void addAdmin(Uuid id) {
+    auth.addAdmin(id);
   }
 
   private Uuid createId() {
@@ -263,7 +270,7 @@ public final class Controller implements RawController, BasicController {
 
   public void checkBuffer() {
 
-    File log = new File(persistentPath.getPath());
+    File log = new File(persistentPath, "log.txt");
     Queue<String> logBuffer = Server.getLogBuffer();
 
     if (logBuffer.size() == 15) {
@@ -292,9 +299,15 @@ public final class Controller implements RawController, BasicController {
   }
 
   public void updateMessageCounts(Uuid conversation) {
-    for (Uuid user : model.interestedByID().get(conversation)) {
-      InterestStore myInterests = model.userInterests().get(user);
-      myInterests.increaseMessageCount(conversation);
+    if (model.interestedByID().containsKey(conversation)) {
+      for (Uuid user : model.interestedByID().get(conversation)) {
+        InterestStore myInterests = model.userInterests().get(user);
+        myInterests.increaseMessageCount(conversation);
+      }
     }
+  }
+
+  public void writeAuthInfo(Uuid id, String password) {
+    PersistenceLog.writeAuthInfo(persistentPath, id, password);
   }
 }

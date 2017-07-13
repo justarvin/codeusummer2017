@@ -6,12 +6,21 @@ import codeu.chat.util.PersistenceLog;
 import codeu.chat.util.Uuid;
 
 import java.io.Console;
+import java.io.File;
 import java.util.*;
 
 public class Auth {
 
   private Set<Uuid> admins, noPasswords;
   private Map<Uuid, String> passwords;
+  private Context context;
+
+  public Auth(Context context) {
+    this.context = context;
+    admins = new HashSet<>();
+    noPasswords = new HashSet<>();
+    passwords = new HashMap<>();
+  }
 
   public Auth() {
     admins = new HashSet<>();
@@ -25,6 +34,11 @@ public class Auth {
 
   public void addAdmin(String name) {
     Uuid id = new View().getUuid(name);
+    admins.add(id);
+    noPasswords.add(id);
+  }
+
+  public void addAdmin(Uuid id) {
     admins.add(id);
     noPasswords.add(id);
   }
@@ -45,6 +59,7 @@ public class Auth {
       while (!PasswordStorage.verifyPassword(passwordArray, passwords.get(id))) {
         System.out.println("Login failed. Please try again");
         passwordArray = console.readPassword("Enter your password: ");
+        System.out.println("Verifying...");
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -59,12 +74,13 @@ public class Auth {
       System.out.println("Passwords didn't match. Please try again.");
       password = console.readPassword("Enter a new password: ");
       passwordConfirm = console.readPassword("Retype your password: ");
+      System.out.println("Verifying...");
     }
     try {
       String pass = PasswordStorage.createHash(password);
       passwords.put(id, pass);
       noPasswords.remove(id);
-      PersistenceLog.writeAuthInfo(id, pass);
+      context.writeAuthInfo(id, pass);
     } catch (PasswordStorage.CannotPerformOperationException e) {
       e.printStackTrace();
     }
@@ -91,5 +107,9 @@ public class Auth {
 
   public Set<Uuid> getNewAdmins() {
     return noPasswords;
+  }
+
+  public void passwordRetrieved(Uuid id) {
+    noPasswords.remove(id);
   }
 }

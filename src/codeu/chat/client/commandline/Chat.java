@@ -39,10 +39,11 @@ public final class Chat {
 
   public Chat(Context context) {
     this.context = context;
-    this.auth = new Auth();
+    this.auth = new Auth(context);
     this.panels.push(createRootPanel(context));
 
     context.retrieveAdmins(auth);
+    System.out.println(auth.getAdmins().size());
   }
 
   // HANDLE COMMAND
