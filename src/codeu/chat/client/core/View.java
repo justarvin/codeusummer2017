@@ -224,6 +224,7 @@ final class View implements BasicView {
       }
 
     } catch (Exception e) {
+      e.printStackTrace();
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(e, "Exception during call on server.");
     }
@@ -240,7 +241,6 @@ final class View implements BasicView {
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_INFO_RESPONSE) {
         password = Serializers.nullable(Serializers.STRING).read(connection.in());
-        LOG.info("Added auth info");
       } else {
         LOG.error("Response from server failed.");
       }

@@ -14,7 +14,11 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.*;
+import codeu.chat.client.core.Auth;
+import codeu.chat.client.core.Context;
+import codeu.chat.client.core.ConversationContext;
+import codeu.chat.client.core.MessageContext;
+import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Tokenizer;
@@ -43,7 +47,6 @@ public final class Chat {
     this.panels.push(createRootPanel(context));
 
     context.retrieveAdmins(auth);
-    System.out.println(auth.getAdmins().size());
   }
 
   // HANDLE COMMAND
@@ -207,7 +210,7 @@ public final class Chat {
     return panel;
   }
 
-  private Panel createUserPanel(final UserContext user) {
+  public Panel createUserPanel(final UserContext user) {
 
     final Panel panel = new Panel();
 
@@ -267,7 +270,6 @@ public final class Chat {
             } else {
               System.out.println("ERROR: Missing <username>");
             }
-            System.out.println(args.size());
             if (args.size() == 2) {
               auth.addAdmin(name);
             }
@@ -614,5 +616,10 @@ public final class Chat {
       }
     }
     return null;
+  }
+
+  // accessor method for testing purposes
+  public Stack<Panel> getPanels() {
+    return panels;
   }
 }

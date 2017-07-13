@@ -83,7 +83,6 @@ public final class Context {
   public void retrieveAuthInfo(Auth auth, Uuid id) {
     String password = view.retrieveAuthInfo(id);
     if (password != null) {
-      System.out.println(password);
       auth.addPassword(id, password);
     }
   }
@@ -95,7 +94,7 @@ public final class Context {
     auth.setNewAdmins(newAdmins);
   }
 
-  public void writeAuthInfo(Uuid id, String password) {
+  void writeAuthInfo(Uuid id, String password) {
     controller.writeAuthInfo(id, password);
   }
 }

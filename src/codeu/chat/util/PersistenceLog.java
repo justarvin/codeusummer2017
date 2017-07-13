@@ -1,6 +1,5 @@
 package codeu.chat.util;
 
-import codeu.chat.client.core.Auth;
 import codeu.chat.server.Controller;
 import codeu.chat.server.Server;
 
@@ -21,7 +20,6 @@ public class PersistenceLog {
   private static final String CONVERSATION = "ADD-CONVERSATION";
   private static final String ADMIN = "ADMIN";
   private static final String SPACE = " ";
-  private static final Logger.Log LOG = Logger.newLog(Auth.class);
 
   public static void writeTransaction(String type, Object[] params) {
     String log = "";
@@ -61,13 +59,11 @@ public class PersistenceLog {
   public static void writeAuthInfo(File path, Uuid id, String password) {
 
     File passwords = new File(path, "passwords.txt");
-    System.out.println(path);
     try {
       BufferedWriter writer = new BufferedWriter(new FileWriter(passwords));
       writer.append(id + " " + password);
       writer.newLine();
       writer.close();
-      System.out.println("written");
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -75,7 +71,6 @@ public class PersistenceLog {
 
   public static void restore(Controller controller, File path) {
     File log = new File(path, "log.txt");
-    System.out.println(path);
     try {
 
       boolean created = log.createNewFile(); // true if file created, false otherwise
@@ -94,8 +89,6 @@ public class PersistenceLog {
     }
 
     File passwords = new File(path, "passwords.txt");
-    System.out.println(path);
-    System.out.println("restoring");
     try {
       boolean created = passwords.createNewFile();
       System.out.println(created);
@@ -111,10 +104,6 @@ public class PersistenceLog {
     } catch (IOException e) {
       e.printStackTrace();
     }
-  }
-
-  public static void restoreAuthInfo(Controller controller) {
-
   }
 
   private static void process(Controller controller, String line) throws IOException {
@@ -151,7 +140,6 @@ public class PersistenceLog {
   }
 
   private static void processPassword(Controller controller, String line) throws IOException {
-    System.out.println("processing");
     String[] splitLog = line.split(" ");
     Uuid id = Uuid.parse(splitLog[0]);
     String password = splitLog[1];

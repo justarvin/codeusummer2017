@@ -79,7 +79,7 @@ public final class Server {
 
     if (!model.userById().all().iterator().hasNext()) {
       User user = controller.newUser("admin");
-      auth.addFirstAdmin(user.id);
+      auth.addAdmin(user.id);
     }
 
     //Request info version - user asks server for current info version
@@ -358,7 +358,6 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid id = Uuid.SERIALIZER.read(in);
         String password = auth.getPassword(id);
-        System.out.println(password);
 
         Serializers.INTEGER.write(out, NetworkCode.AUTH_INFO_RESPONSE);
         Serializers.nullable(Serializers.STRING).write(out, password);

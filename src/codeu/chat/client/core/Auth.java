@@ -1,14 +1,18 @@
 package codeu.chat.client.core;
 
-import codeu.chat.client.core.View;
 import codeu.chat.util.PasswordStorage;
-import codeu.chat.util.PersistenceLog;
 import codeu.chat.util.Uuid;
 
 import java.io.Console;
-import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Class for authentication-related tasks, such as managing admins and checking passwords
+ */
 public class Auth {
 
   private Set<Uuid> admins, noPasswords;
@@ -39,11 +43,6 @@ public class Auth {
   }
 
   public void addAdmin(Uuid id) {
-    admins.add(id);
-    noPasswords.add(id);
-  }
-
-  public void addFirstAdmin(Uuid id) {
     admins.add(id);
     noPasswords.add(id);
   }
@@ -101,6 +100,7 @@ public class Auth {
   void setNewAdmins(HashSet<Uuid> newAdmins) {
     noPasswords = newAdmins;
   }
+
   public Set<Uuid> getAdmins() {
     return admins;
   }

@@ -71,8 +71,10 @@ public final class Controller implements RawController, BasicController {
 
     Object[] params = new Object[]{id, name, time.inMs()};
     checkBuffer();
+
+    //if this is the first user, add them as an admin
     if (!model.userById().all().iterator().hasNext()) {
-      auth.addFirstAdmin(id);
+      auth.addAdmin(id);
     }
     if (auth.isAdmin(id)) {
       PersistenceLog.writeTransaction("admin", params);
@@ -298,7 +300,7 @@ public final class Controller implements RawController, BasicController {
     }
   }
 
-  public void updateMessageCounts(Uuid conversation) {
+  private void updateMessageCounts(Uuid conversation) {
     if (model.interestedByID().containsKey(conversation)) {
       for (Uuid user : model.interestedByID().get(conversation)) {
         InterestStore myInterests = model.userInterests().get(user);
@@ -307,7 +309,7 @@ public final class Controller implements RawController, BasicController {
     }
   }
 
-  public void writeAuthInfo(Uuid id, String password) {
+  void writeAuthInfo(Uuid id, String password) {
     PersistenceLog.writeAuthInfo(persistentPath, id, password);
   }
 }
