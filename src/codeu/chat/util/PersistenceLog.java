@@ -1,5 +1,7 @@
 package codeu.chat.util;
 
+import codeu.chat.common.ConversationHeader;
+import codeu.chat.common.User;
 import codeu.chat.server.Controller;
 import codeu.chat.server.Server;
 
@@ -19,6 +21,8 @@ public class PersistenceLog {
   private static final String MESSAGE = "ADD-MESSAGE";
   private static final String CONVERSATION = "ADD-CONVERSATION";
   private static final String ADMIN = "ADMIN";
+  private static final String DELETE_USER = "DELETE-USER";
+  private static final String DELETE_CONVERSATION = "DELETE-CONVERSATION";
   private static final String SPACE = " ";
 
   public static void writeTransaction(String type, Object[] params) {
@@ -51,6 +55,18 @@ public class PersistenceLog {
                 params[1] + SPACE +
                 params[2] + SPACE +
                 params[3];
+        break;
+      case "delete-user":
+        log = DELETE_USER + SPACE +
+                params[0] + SPACE +
+                params[1] + SPACE +
+                params[2];
+        break;
+      case "delete-conversation":
+        log = DELETE_USER + SPACE +
+                params[0] + SPACE +
+                params[1] + SPACE +
+                params[2];
         break;
     }
     Server.getLogBuffer().add(log);
@@ -112,12 +128,12 @@ public class PersistenceLog {
 
     //uuid and time occupy the same spot in each format so they have been extracted ahead of time
     Uuid uuid = Uuid.parse(splitLog[1]);
+    String text = splitLog[2];
     long time = Long.parseLong(splitLog[3]);
 
     switch (splitLog[0]) {
       case USER:
-        String name = splitLog[2];
-        controller.newUser(uuid, name, Time.fromMs(time));
+        controller.newUser(uuid, text, Time.fromMs(time));
         try {
           String admin = splitLog[4];
           controller.addAdmin(uuid);
@@ -126,16 +142,18 @@ public class PersistenceLog {
         }
         break;
       case CONVERSATION:
-        String title = splitLog[2];
         Uuid owner = Uuid.parse(splitLog[4]);
-        controller.newConversation(uuid, title, owner, Time.fromMs(time));
+        controller.newConversation(uuid, text, owner, Time.fromMs(time));
         break;
       case MESSAGE:
-        String message = splitLog[2];
         Uuid conversationUuid = Uuid.parse(splitLog[4]);
         Uuid senderUuid = Uuid.parse(splitLog[5]);
-        controller.newMessage(uuid, senderUuid, conversationUuid, message, Time.fromMs(time));
+        controller.newMessage(uuid, senderUuid, conversationUuid, text, Time.fromMs(time));
         break;
+      case DELETE_USER:
+        controller.removeUser(new User(uuid, text, Time.fromMs(time)));
+      case DELETE_CONVERSATION:
+        controller.removeConversation(new ConversationHeader(uuid, Uuid.NULL, Time.fromMs(time), text));
     }
   }
 

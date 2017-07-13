@@ -14,7 +14,7 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.Auth;
+import codeu.chat.client.core.Admin;
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
@@ -22,6 +22,7 @@ import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Tokenizer;
+import codeu.chat.util.Uuid;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,14 +40,14 @@ public final class Chat {
   // panel all it needs to do is pop the top panel.
   private final Stack<Panel> panels = new Stack<>();
   private Context context;
-  private Auth auth;
+  private Admin admin;
 
   public Chat(Context context) {
     this.context = context;
-    this.auth = new Auth(context);
+    this.admin = new Admin(context);
     this.panels.push(createRootPanel(context));
 
-    context.retrieveAdmins(auth);
+    admin.retrieveAdmins();
   }
 
   // HANDLE COMMAND
@@ -161,11 +162,11 @@ public final class Chat {
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
-            context.retrieveAuthInfo(auth, user.user.id);
-            if (auth.isNewAdmin(user.user.id)) {
-              auth.setPassword(user.user.id);
-            } else if (auth.isAdmin(user.user.id)) {
-              auth.authenticate(user.user.id);
+            admin.retrieveAuthInfo(admin, user.user.id);
+            if (admin.isNewAdmin(user.user.id)) {
+              admin.setPassword(user.user.id);
+            } else if (admin.isAdmin(user.user.id)) {
+              admin.authenticate(user.user.id);
             }
             panels.push(createUserPanel(user));
           }
@@ -224,11 +225,13 @@ public final class Chat {
         public void invoke(List<String> args) {
           System.out.println("USER MODE");
 
-          //todo: add first admin.
-
-          if (auth.isAdmin(user.user.id)) {
+          if (admin.isAdmin(user.user.id)) {
+            System.out.println("  a-add <name>");
+            System.out.println("    Adds user with given name as admin");
+            System.out.println("  a-remove <name>");
+            System.out.println("    Removes user with given name as admin");
             System.out.println("  u-add <name> (<type>)");
-            System.out.println("    Creates a new user with given name as a regular user by default. Type admin for admin account.");
+            System.out.println("    Creates a user with given name as a regular user by default. Else append admin.");
             System.out.println("  u-delete <name>");
             System.out.println("    Deletes user with the given name");
             System.out.println("  c-delete <name>");
@@ -253,7 +256,31 @@ public final class Chat {
       });
 
       // Only register these commands if current user is an admin
-      if (auth.isAdmin(user.user.id)) {
+      if (admin.isAdmin(user.user.id)) {
+
+        // ADD ADMIN
+        //
+        // Adds the specified user as an admin
+        panel.register("a-add", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String name = args.get(0);
+            Uuid id = findUser(name).user.id;
+            admin.addAdmin(id);
+          }
+        });
+
+        // REMOVE ADMIN
+        //
+        // Removes the specified user as an admin
+        panel.register("a-remove", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String name = args.get(0);
+            Uuid id = findUser(name).user.id;
+            admin.removeAdmin(id);
+          }
+        });
 
         // ADD USER
         //
@@ -271,7 +298,8 @@ public final class Chat {
               System.out.println("ERROR: Missing <username>");
             }
             if (args.size() == 2) {
-              auth.addAdmin(name);
+              Uuid id = findUser(name).user.id;
+              admin.addAdmin(id);
             }
           }
         });
@@ -283,7 +311,6 @@ public final class Chat {
             if (name.length() > 0) {
               UserContext user = findUser(name);
               if (user != null) {
-                  //todo: delete self?
                 context.deleteUser(user.user);
               } else {
                 System.out.println("ERROR: User does not exist");

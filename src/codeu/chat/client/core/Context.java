@@ -16,13 +16,11 @@ package codeu.chat.client.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.User;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
 
 public final class Context {
@@ -80,21 +78,7 @@ public final class Context {
     return (View)view;
   }
 
-  public void retrieveAuthInfo(Auth auth, Uuid id) {
-    String password = view.retrieveAuthInfo(id);
-    if (password != null) {
-      auth.addPassword(id, password);
-    }
-  }
-
-  public void retrieveAdmins(Auth auth) {
-    HashSet<Uuid> admins = (HashSet<Uuid>) view.retrieveAdmins();
-    HashSet<Uuid> newAdmins = (HashSet<Uuid>) view.retrieveNewAdmins();
-    auth.setAdmins(admins);
-    auth.setNewAdmins(newAdmins);
-  }
-
-  void writeAuthInfo(Uuid id, String password) {
-    controller.writeAuthInfo(id, password);
+  Controller getController() {
+    return controller;
   }
 }

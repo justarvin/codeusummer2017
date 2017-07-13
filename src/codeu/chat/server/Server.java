@@ -14,7 +14,7 @@
 
 package codeu.chat.server;
 
-import codeu.chat.client.core.Auth;
+import codeu.chat.client.core.Admin;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
@@ -62,7 +62,7 @@ public final class Server {
   private final Model model = new Model();
   private final View view = new View(model);
   private final Controller controller;
-  private final Auth auth;
+  private final Admin auth;
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
@@ -71,7 +71,7 @@ public final class Server {
 
   public Server(final Uuid id, final Secret secret, final Relay relay, File persistentPath) {
 
-    this.auth = new Auth();
+    this.auth = new Admin();
     this.id = id;
     this.secret = secret;
     this.controller = new Controller(id, model, auth, persistentPath);
@@ -323,7 +323,7 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final User user = User.SERIALIZER.read(in);
-        model.remove(user);
+        controller.removeUser(user);
 
         Serializers.INTEGER.write(out, NetworkCode.DELETE_USER_RESPONSE);
       }
@@ -334,25 +334,13 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final ConversationHeader c = ConversationHeader.SERIALIZER.read(in);
-        model.remove(c);
+        controller.removeConversation(c);
 
         Serializers.INTEGER.write(out, NetworkCode.DELETE_CONVERSATION_RESPONSE);
       }
     });
 
-    //Get uuid -- get the uuid corresponding to a name from the backend
-    this.commands.put(NetworkCode.GET_UUID_REQUEST, new Command() {
-      @Override
-      public void onMessage(InputStream in, OutputStream out) throws IOException {
-       final String name = Serializers.STRING.read(in);
-       Uuid id = model.userByText().first(name).id;
-
-       Serializers.INTEGER.write(out, NetworkCode.GET_UUID_RESPONSE);
-       Uuid.SERIALIZER.write(out, id);
-      }
-    });
-
-    //Auth info -- get the password for the specified user id
+    //Admin info -- get the password for the specified user id
     this.commands.put(NetworkCode.AUTH_INFO_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {

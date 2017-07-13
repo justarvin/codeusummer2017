@@ -14,7 +14,7 @@
 
 package codeu.chat.server;
 
-import codeu.chat.client.core.Auth;
+import codeu.chat.client.core.Admin;
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -41,12 +41,12 @@ public final class Controller implements RawController, BasicController {
   private final Model model;
   private final Uuid.Generator uuidGenerator;
   private final File persistentPath;
-  private final Auth auth;
+  private final Admin admin;
 
-  public Controller(Uuid serverId, Model model, Auth auth, File persistentPath) {
+  public Controller(Uuid serverId, Model model, Admin admin, File persistentPath) {
     this.model = model;
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
-    this.auth = auth;
+    this.admin = admin;
     this.persistentPath = persistentPath;
 
     PersistenceLog.restore(this, persistentPath);
@@ -74,15 +74,20 @@ public final class Controller implements RawController, BasicController {
 
     //if this is the first user, add them as an admin
     if (!model.userById().all().iterator().hasNext()) {
-      auth.addAdmin(id);
+      admin.addAdmin(id);
     }
-    if (auth.isAdmin(id)) {
+    if (admin.isAdmin(id)) {
       PersistenceLog.writeTransaction("admin", params);
     } else {
       PersistenceLog.writeTransaction("user", params);
     }
 
     return newUser(id, name, time);
+  }
+
+  public void removeUser(User user) {
+    model.remove(user);
+    PersistenceLog.writeTransaction("delete-user", new Object[]{user.id, user.name, user.creation});
   }
 
   @Override
@@ -95,6 +100,11 @@ public final class Controller implements RawController, BasicController {
     PersistenceLog.writeTransaction("conversation", params);
 
     return newConversation(id, title, owner, time);
+  }
+
+  public void removeConversation(ConversationHeader c) {
+    model.remove(c);
+    PersistenceLog.writeTransaction("delete-conversation", new Object[]{c.id, c.title, c.creation});
   }
 
   @Override
@@ -235,12 +245,12 @@ public final class Controller implements RawController, BasicController {
   }
 
   public void addAuthInfo(Uuid id, String password) {
-    auth.addPassword(id, password);
-    auth.passwordRetrieved(id);
+    admin.addPassword(id, password);
+    admin.passwordRetrieved(id);
   }
 
   public void addAdmin(Uuid id) {
-    auth.addAdmin(id);
+    admin.addAdmin(id);
   }
 
   private Uuid createId() {
@@ -270,7 +280,7 @@ public final class Controller implements RawController, BasicController {
     return !isIdInUse(id);
   }
 
-  public void checkBuffer() {
+  void checkBuffer() {
 
     File log = new File(persistentPath, "log.txt");
     Queue<String> logBuffer = Server.getLogBuffer();

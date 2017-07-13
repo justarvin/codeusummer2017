@@ -44,10 +44,6 @@ final class View implements BasicView {
 
   private final ConnectionSource source;
 
-  public View() {
-    this.source = null;
-  }
-
   public View(ConnectionSource source) {
     this.source = source;
   }
@@ -208,27 +204,6 @@ final class View implements BasicView {
     }
 
     return messages;
-  }
-
-  Uuid getUuid(String name) {
-    Uuid uuid = null;
-    try (final Connection connection = source.connect()) {
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_UUID_REQUEST);
-      Serializers.STRING.write(connection.out(), name);
-
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_UUID_RESPONSE) {
-        uuid = Uuid.SERIALIZER.read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(e, "Exception during call on server.");
-    }
-    return uuid;
   }
 
   @Override

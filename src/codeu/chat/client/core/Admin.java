@@ -11,22 +11,24 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Class for authentication-related tasks, such as managing admins and checking passwords
+ * Class for admin-related tasks, such as managing admins and checking passwords
  */
-public class Auth {
+public class Admin {
 
   private Set<Uuid> admins, noPasswords;
   private Map<Uuid, String> passwords;
   private Context context;
+  private Controller controller;
 
-  public Auth(Context context) {
+  public Admin(Context context) {
     this.context = context;
+    this.controller = context.getController();
     admins = new HashSet<>();
     noPasswords = new HashSet<>();
     passwords = new HashMap<>();
   }
 
-  public Auth() {
+  public Admin() {
     admins = new HashSet<>();
     noPasswords = new HashSet<>();
     passwords = new HashMap<>();
@@ -36,12 +38,6 @@ public class Auth {
     return admins.contains(id);
   }
 
-  public void addAdmin(String name) {
-    Uuid id = new View().getUuid(name);
-    admins.add(id);
-    noPasswords.add(id);
-  }
-
   public void addAdmin(Uuid id) {
     admins.add(id);
     noPasswords.add(id);
@@ -49,6 +45,27 @@ public class Auth {
 
   public boolean isNewAdmin(Uuid id) {
     return noPasswords.contains(id) && admins.contains(id);
+  }
+
+  //TODO: change log writing method
+  public void removeAdmin(Uuid id) {
+    admins.remove(id);
+    passwords.remove(id);
+    noPasswords.remove(id);
+  }
+
+  public void retrieveAuthInfo(Admin auth, Uuid id) {
+    String password = context.getView().retrieveAuthInfo(id);
+    if (password != null) {
+      auth.addPassword(id, password);
+    }
+  }
+
+  public void retrieveAdmins() {
+    HashSet<Uuid> admins = (HashSet<Uuid>) context.getView().retrieveAdmins();
+    HashSet<Uuid> newAdmins = (HashSet<Uuid>) context.getView().retrieveNewAdmins();
+    setAdmins(admins);
+    setNewAdmins(newAdmins);
   }
 
   public void authenticate(Uuid id) {
@@ -79,10 +96,14 @@ public class Auth {
       String pass = PasswordStorage.createHash(password);
       passwords.put(id, pass);
       noPasswords.remove(id);
-      context.writeAuthInfo(id, pass);
+      writeAuthInfo(id, pass);
     } catch (PasswordStorage.CannotPerformOperationException e) {
       e.printStackTrace();
     }
+  }
+
+  private void writeAuthInfo(Uuid id, String password) {
+    controller.writeAuthInfo(id, password);
   }
 
   public void addPassword(Uuid id, String password) {
@@ -93,11 +114,11 @@ public class Auth {
     return passwords.get(id);
   }
 
-  void setAdmins(HashSet<Uuid> admins) {
+  private void setAdmins(HashSet<Uuid> admins) {
     this.admins = admins;
   }
 
-  void setNewAdmins(HashSet<Uuid> newAdmins) {
+  private void setNewAdmins(HashSet<Uuid> newAdmins) {
     noPasswords = newAdmins;
   }
 
