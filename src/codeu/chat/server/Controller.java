@@ -57,9 +57,8 @@ public final class Controller implements RawController, BasicController {
     Uuid id = createId();
     Time time = Time.now();
 
-    Object[] params = new Object[]{id, body, time.inMs(), conversation, author};
     checkBuffer();
-    PersistenceLog.writeTransaction("message", params);
+    PersistenceLog.writeTransaction("message", id, body, time.inMs(), author, conversation);
 
     return newMessage(id, author, conversation, body, time);
   }
@@ -69,7 +68,6 @@ public final class Controller implements RawController, BasicController {
     Uuid id = createId();
     Time time = Time.now();
 
-    Object[] params = new Object[]{id, name, time.inMs()};
     checkBuffer();
 
     //if this is the first user, add them as an admin
@@ -77,9 +75,9 @@ public final class Controller implements RawController, BasicController {
       admin.addAdmin(id);
     }
     if (admin.isAdmin(id)) {
-      PersistenceLog.writeTransaction("admin", params);
+      PersistenceLog.writeTransaction("admin", id, name, time.inMs(), null, null);
     } else {
-      PersistenceLog.writeTransaction("user", params);
+      PersistenceLog.writeTransaction("user", id, name, time.inMs(), null, null);
     }
 
     return newUser(id, name, time);
@@ -87,7 +85,7 @@ public final class Controller implements RawController, BasicController {
 
   public void removeUser(User user) {
     model.remove(user);
-    PersistenceLog.writeTransaction("delete-user", new Object[]{user.id, user.name, user.creation.inMs()});
+    PersistenceLog.writeTransaction("delete-user", user.id, user.name, user.creation.inMs(), null, null);
   }
 
   @Override
@@ -95,16 +93,15 @@ public final class Controller implements RawController, BasicController {
     Uuid id = createId();
     Time time = Time.now();
 
-    Object[] params = new Object[]{id, title, time.inMs(), owner};
     checkBuffer();
-    PersistenceLog.writeTransaction("conversation", params);
+    PersistenceLog.writeTransaction("conversation", id, title, time.inMs(), owner, null);
 
     return newConversation(id, title, owner, time);
   }
 
   public void removeConversation(ConversationHeader c) {
     model.remove(c);
-    PersistenceLog.writeTransaction("delete-conversation", new Object[]{c.id, c.title, c.creation.inMs()});
+    PersistenceLog.writeTransaction("delete-conversation", c.id, c.title, c.creation.inMs(), null, null);
   }
 
   @Override

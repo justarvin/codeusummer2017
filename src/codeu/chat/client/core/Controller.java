@@ -80,8 +80,6 @@ final class Controller implements BasicController {
         LOG.error("Response from server failed.");
       }
     } catch (Exception ex) {
-      System.out.println(ex.getClass());
-      System.out.println(ex.getMessage());
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(ex, "Exception during call on server.");
     }

@@ -25,48 +25,48 @@ public class PersistenceLog {
   private static final String DELETE_CONVERSATION = "DELETE-CONVERSATION";
   private static final String SPACE = " ";
 
-  public static void writeTransaction(String type, Object[] params) {
+  public static void writeTransaction(String type, Uuid id, String text, long time, Uuid owner, Uuid convoId) {
     String log = "";
     switch(type) {
       case "user":
         log = USER + SPACE +
-                params[0] + SPACE +
-                params[1] + SPACE +
-                params[2];
+                id + SPACE +
+                text + SPACE +
+                time;
         break;
       case "admin":
         log = USER + SPACE +
-                params[0] + SPACE +
-                params[1] + SPACE +
-                params[2] + SPACE +
+                id + SPACE +
+                text + SPACE +
+                time + SPACE +
                 ADMIN;
         break;
       case "message":
         log = MESSAGE + SPACE +
-                params[0] + SPACE +
-                params[1] + SPACE +
-                params[2] + SPACE +
-                params[3] + SPACE +
-                params[4];
+                id + SPACE +
+                text + SPACE +
+                time + SPACE +
+                convoId + SPACE +
+                owner;
         break;
       case "conversation":
         log = CONVERSATION + SPACE +
-                params[0] + SPACE +
-                params[1] + SPACE +
-                params[2] + SPACE +
-                params[3];
+                id + SPACE +
+                text + SPACE +
+                time + SPACE +
+                owner;
         break;
       case "delete-user":
         log = DELETE_USER + SPACE +
-                params[0] + SPACE +
-                params[1] + SPACE +
-                params[2];
+                id + SPACE +
+                text + SPACE +
+                time;
         break;
       case "delete-conversation":
         log = DELETE_USER + SPACE +
-                params[0] + SPACE +
-                params[1] + SPACE +
-                params[2];
+                id + SPACE +
+                text + SPACE +
+                time;
         break;
     }
     Server.getLogBuffer().add(log);
