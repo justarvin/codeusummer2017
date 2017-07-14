@@ -47,7 +47,6 @@ public class Admin {
     return noPasswords.contains(id) && admins.contains(id);
   }
 
-  //TODO: change log writing method
   public void removeAdmin(Uuid id) {
     admins.remove(id);
     passwords.remove(id);
@@ -71,6 +70,7 @@ public class Admin {
   public void authenticate(Uuid id) {
     Console console = System.console();
     char passwordArray[] = console.readPassword("Enter your password: ");
+    System.out.println("Verifying...");
     try {
       while (!PasswordStorage.verifyPassword(passwordArray, passwords.get(id))) {
         System.out.println("Login failed. Please try again");
@@ -86,6 +86,7 @@ public class Admin {
     Console console = System.console();
     char password[] = console.readPassword("Enter a new password: ");
     char passwordConfirm[] = console.readPassword("Retype your password: ");
+    System.out.println("Verifying...");
     while (!Arrays.equals(password, passwordConfirm)) {
       System.out.println("Passwords didn't match. Please try again.");
       password = console.readPassword("Enter a new password: ");

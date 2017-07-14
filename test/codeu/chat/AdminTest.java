@@ -1,10 +1,9 @@
 package codeu.chat;
 
 import codeu.chat.client.commandline.Chat;
-import codeu.chat.client.core.Auth;
+import codeu.chat.client.core.Admin;
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.UserContext;
-import codeu.chat.common.LinearUuidGenerator;
 import codeu.chat.common.User;
 import codeu.chat.server.Controller;
 import codeu.chat.server.Model;
@@ -15,7 +14,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,7 +28,7 @@ public class AdminTest {
     User admin = new User(adminUuid, "admin", Time.now());
 
     Model model = new Model();
-    Controller controller = new Controller(Uuid.NULL, model, new Auth(), new File("test"));
+    Controller controller = new Controller(Uuid.NULL, model, new Admin(), new File("test"));
     controller.addAdmin(adminUuid);
 
     // admin adds user
@@ -52,7 +50,7 @@ public class AdminTest {
     User regular = new User(regularUuid, "regular", Time.now());
 
     Model model = new Model();
-    Controller controller = new Controller(Uuid.NULL, model, new Auth(), new File("test"));
+    Controller controller = new Controller(Uuid.NULL, model, new Admin(), new File("test"));
 
     // admin adds user
     Chat chat = new Chat(new Context(null));

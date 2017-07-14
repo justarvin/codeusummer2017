@@ -76,8 +76,8 @@ public class PersistenceLog {
 
     File passwords = new File(path, "passwords.txt");
     try {
-      BufferedWriter writer = new BufferedWriter(new FileWriter(passwords));
-      writer.append(id + " " + password);
+      BufferedWriter writer = new BufferedWriter(new FileWriter(passwords, true));
+      writer.write(id + " " + password);
       writer.newLine();
       writer.close();
     } catch (IOException e) {
@@ -138,7 +138,7 @@ public class PersistenceLog {
           String admin = splitLog[4];
           controller.addAdmin(uuid);
         } catch (ArrayIndexOutOfBoundsException ex) {
-          //do nothing
+          //do nothing, it's a regular user
         }
         break;
       case CONVERSATION:
@@ -152,8 +152,10 @@ public class PersistenceLog {
         break;
       case DELETE_USER:
         controller.removeUser(new User(uuid, text, Time.fromMs(time)));
+        break;
       case DELETE_CONVERSATION:
         controller.removeConversation(new ConversationHeader(uuid, Uuid.NULL, Time.fromMs(time), text));
+        break;
     }
   }
 

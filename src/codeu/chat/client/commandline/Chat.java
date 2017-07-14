@@ -226,14 +226,16 @@ public final class Chat {
           System.out.println("USER MODE");
 
           if (admin.isAdmin(user.user.id)) {
-            System.out.println("  a-add <name>");
-            System.out.println("    Adds user with given name as admin");
-            System.out.println("  a-remove <name>");
-            System.out.println("    Removes user with given name as admin");
+            System.out.println("  u-list");
+            System.out.println("    List all users.");
             System.out.println("  u-add <name> (<type>)");
             System.out.println("    Creates a user with given name as a regular user by default. Else append admin.");
             System.out.println("  u-delete <name>");
             System.out.println("    Deletes user with the given name");
+            System.out.println("  a-add <name>");
+            System.out.println("    Adds user with given name as admin");
+            System.out.println("  a-remove <name>");
+            System.out.println("    Removes user with given name as admin");
             System.out.println("  c-delete <name>");
             System.out.println("    Deletes the conversation with the given name");
           }
@@ -257,6 +259,23 @@ public final class Chat {
 
       // Only register these commands if current user is an admin
       if (admin.isAdmin(user.user.id)) {
+
+        // U-LIST (user list)
+        //
+        // Add a command to print all users registered on the server when the admin
+        // enters "u-list".
+        //
+        panel.register("u-list", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            for (final UserContext user : context.allUsers()) {
+              System.out.format(
+                      "USER %s (UUID:%s)\n",
+                      user.user.name,
+                      user.user.id);
+            }
+          }
+        });
 
         // ADD ADMIN
         //
@@ -308,7 +327,9 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
             String name = args.get(0);
-            if (name.length() > 0) {
+            if (name.equals(user.user.name)) {
+              System.out.println("ERROR: Can't delete yourself");
+            } else if (name.length() > 0) {
               UserContext user = findUser(name);
               if (user != null) {
                 context.deleteUser(user.user);

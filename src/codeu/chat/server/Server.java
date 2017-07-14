@@ -219,9 +219,9 @@ public final class Server {
         try {
 
           File log = new File(persistentPath, "log.txt");
-          BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+          BufferedWriter writer = new BufferedWriter(new FileWriter(log, true));
           while (!logBuffer.isEmpty()) {
-            writer.append(logBuffer.remove());
+            writer.write(logBuffer.remove());
             writer.newLine();
           }
           writer.close();

@@ -1,8 +1,7 @@
 package codeu.chat.server;
 
-import codeu.chat.client.core.Auth;
+import codeu.chat.client.core.Admin;
 import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.BasicController;
 import codeu.chat.common.Secret;
 import codeu.chat.common.User;
 import codeu.chat.util.Uuid;
@@ -34,7 +33,7 @@ public class StorageTest {
         Uuid id = new Uuid(4);
         File persistentPath = new File("logfiles");
         File log = new File(persistentPath.getPath());
-        controller = new Controller(id, model, new Auth(), persistentPath);
+        controller = new Controller(id, model, new Admin(), persistentPath);
         Server server = new Server(id, secret, null, persistentPath);
 
         User user = controller.newUser("user");

@@ -87,7 +87,7 @@ public final class Controller implements RawController, BasicController {
 
   public void removeUser(User user) {
     model.remove(user);
-    PersistenceLog.writeTransaction("delete-user", new Object[]{user.id, user.name, user.creation});
+    PersistenceLog.writeTransaction("delete-user", new Object[]{user.id, user.name, user.creation.inMs()});
   }
 
   @Override
@@ -104,7 +104,7 @@ public final class Controller implements RawController, BasicController {
 
   public void removeConversation(ConversationHeader c) {
     model.remove(c);
-    PersistenceLog.writeTransaction("delete-conversation", new Object[]{c.id, c.title, c.creation});
+    PersistenceLog.writeTransaction("delete-conversation", new Object[]{c.id, c.title, c.creation.inMs()});
   }
 
   @Override
@@ -288,7 +288,7 @@ public final class Controller implements RawController, BasicController {
     if (logBuffer.size() == 15) {
       try {
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(log, true));
         for (int i = 0; i < 15; i++) {
           writer.write(logBuffer.remove());
           writer.newLine();

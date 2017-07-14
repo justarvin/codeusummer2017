@@ -251,7 +251,7 @@ final class Controller implements BasicController {
       User.SERIALIZER.write(connection.out(), user);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.DELETE_USER_RESPONSE) {
-        LOG.info("Deleted user: " + user.name);
+        LOG.error("Deleted user: " + user.name);
       } else {
         LOG.error("Response from server failed.");
       }

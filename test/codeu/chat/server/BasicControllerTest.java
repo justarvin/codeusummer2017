@@ -16,7 +16,7 @@ package codeu.chat.server;
 
 import static org.junit.Assert.*;
 
-import codeu.chat.client.core.Auth;
+import codeu.chat.client.core.Admin;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -36,7 +36,7 @@ public final class BasicControllerTest {
   @Before
   public void doBefore() {
     model = new Model();
-    controller = new Controller(Uuid.NULL, model, new Auth(), new File("test"));
+    controller = new Controller(Uuid.NULL, model, new Admin(), new File("test"));
   }
 
   @Test
