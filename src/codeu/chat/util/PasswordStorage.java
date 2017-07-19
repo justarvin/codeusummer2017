@@ -1,10 +1,14 @@
 package codeu.chat.util;
+import codeu.chat.client.core.Context;
+
+import java.io.Console;
 import java.security.SecureRandom;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import javax.xml.bind.DatatypeConverter;
 
 /***
@@ -181,14 +185,10 @@ public class PasswordStorage
             return skf.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException ex) {
             throw new CannotPerformOperationException(
-                "Hash algorithm not supported.",
-                ex
-            );
+                "Hash algorithm not supported.", ex);
         } catch (InvalidKeySpecException ex) {
             throw new CannotPerformOperationException(
-                "Invalid key spec.",
-                ex
-            );
+                "Invalid key spec.", ex);
         }
     }
 
@@ -203,4 +203,39 @@ public class PasswordStorage
         return DatatypeConverter.printBase64Binary(array);
     }
 
+    /* My added methods */
+
+    public static String setPassword() {
+        Console console = System.console();
+        char password[] = console.readPassword("Enter a new password: ");
+        char passwordConfirm[] = console.readPassword("Retype your password: ");
+        System.out.println("Verifying...");
+        while (!Arrays.equals(password, passwordConfirm)) {
+            System.out.println("Passwords didn't match. Please try again.");
+            password = console.readPassword("Enter a new password: ");
+            passwordConfirm = console.readPassword("Retype your password: ");
+            System.out.println("Verifying...");
+        }
+        try {
+            return PasswordStorage.createHash(password);
+        } catch (PasswordStorage.CannotPerformOperationException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void authenticate(String password) {
+        Console console = System.console();
+        char passwordArray[] = console.readPassword("Enter your password: ");
+        System.out.println("Verifying...");
+        try {
+            while (!PasswordStorage.verifyPassword(passwordArray, password)) {
+                System.out.println("Login failed. Please try again");
+                passwordArray = console.readPassword("Enter your password: ");
+                System.out.println("Verifying...");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

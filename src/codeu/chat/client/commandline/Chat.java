@@ -158,10 +158,11 @@ public final class Chat {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
             if (context.getNewAdmins().contains(user.user.id)) {
-              setPassword(user.user.id);
+              String password = PasswordStorage.setPassword();
+              context.writeAuthInfo(user.user.id, password);
             } else if (context.getAdmins().contains(user.user.id)) {
               String password = context.getAuthInfo(user.user.id);
-              authenticate(password);
+              PasswordStorage.authenticate(password);
             }
             panels.push(createUserPanel(user));
           }
@@ -655,40 +656,6 @@ public final class Chat {
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
     return panel;
-  }
-
-  private void setPassword(Uuid id) {
-    Console console = System.console();
-    char password[] = console.readPassword("Enter a new password: ");
-    char passwordConfirm[] = console.readPassword("Retype your password: ");
-    System.out.println("Verifying...");
-    while (!Arrays.equals(password, passwordConfirm)) {
-      System.out.println("Passwords didn't match. Please try again.");
-      password = console.readPassword("Enter a new password: ");
-      passwordConfirm = console.readPassword("Retype your password: ");
-      System.out.println("Verifying...");
-    }
-    try {
-      String pass = PasswordStorage.createHash(password);
-      context.writeAuthInfo(id, pass);
-    } catch (PasswordStorage.CannotPerformOperationException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private void authenticate(String password) {
-    Console console = System.console();
-    char passwordArray[] = console.readPassword("Enter your password: ");
-    System.out.println("Verifying...");
-    try {
-      while (!PasswordStorage.verifyPassword(passwordArray, password)) {
-        System.out.println("Login failed. Please try again");
-        passwordArray = console.readPassword("Enter your password: ");
-        System.out.println("Verifying...");
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
   }
 
   // accessor method for testing purposes
