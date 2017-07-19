@@ -14,7 +14,12 @@
 
 package codeu.chat.server;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -222,5 +227,11 @@ public final class Model {
     messageById = new Store<>(UUID_COMPARE);
     messageByTime = new Store<>(TIME_COMPARE);
     messageByText = new Store<>(STRING_COMPARE);
+
+    watching.clear();
+    interestsByID.clear();
+    newAdmins.clear();
+    admins.clear();
+    passwords.clear();
   }
 }

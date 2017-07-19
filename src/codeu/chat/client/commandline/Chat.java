@@ -288,7 +288,7 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
             String name = args.get(0);
-            context.addAdmin(name);
+            context.addAdmin(name, true);
           }
         });
 
@@ -319,7 +319,7 @@ public final class Chat {
               System.out.println("ERROR: Missing <username>");
             }
             if (args.size() == 2) {
-              context.addAdmin(name);
+              context.addAdmin(name, false);
             }
           }
         });
@@ -670,7 +670,7 @@ public final class Chat {
     }
     try {
       String pass = PasswordStorage.createHash(password);
-      context.getController().writeAuthInfo(id, pass);
+      context.writeAuthInfo(id, pass);
     } catch (PasswordStorage.CannotPerformOperationException e) {
       e.printStackTrace();
     }

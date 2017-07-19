@@ -23,6 +23,8 @@ public class PersistenceLog {
   private static final String ADMIN = "ADMIN";
   private static final String DELETE_USER = "DELETE-USER";
   private static final String DELETE_CONVERSATION = "DELETE-CONVERSATION";
+  private static final String ADD_ADMIN = "ADD-ADMIN";
+  private static final String REMOVE_ADMIN = "REMOVE-ADMIN";
   private static final String SPACE = " ";
 
   public static void writeTransaction(String type, Uuid id, String text, long time, Uuid owner, Uuid convoId) {
@@ -67,6 +69,12 @@ public class PersistenceLog {
                 id + SPACE +
                 text + SPACE +
                 time;
+        break;
+      case "add-admin":
+        log = ADD_ADMIN + SPACE + id;
+        break;
+      case "remove-admin":
+        log = REMOVE_ADMIN + SPACE + id;
         break;
     }
     Server.getLogBuffer().add(log);
@@ -128,8 +136,12 @@ public class PersistenceLog {
 
     //uuid and time occupy the same spot in each format so they have been extracted ahead of time
     Uuid uuid = Uuid.parse(splitLog[1]);
-    String text = splitLog[2];
-    long time = Long.parseLong(splitLog[3]);
+    String text = null;
+    long time = 0;
+    if (splitLog.length > 2) {
+      text = splitLog[2];
+      time = Long.parseLong(splitLog[3]);
+    }
 
     switch (splitLog[0]) {
       case USER:
@@ -155,6 +167,12 @@ public class PersistenceLog {
         break;
       case DELETE_CONVERSATION:
         controller.removeConversation(new ConversationHeader(uuid, Uuid.NULL, Time.fromMs(time), text));
+        break;
+      case ADD_ADMIN:
+        controller.addAdmin(uuid);
+        break;
+      case REMOVE_ADMIN:
+        controller.removeAdmin(uuid);
         break;
     }
   }

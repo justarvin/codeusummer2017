@@ -247,6 +247,10 @@ public final class Controller implements RawController, BasicController {
     model.addAdmin(id);
   }
 
+  public void removeAdmin(Uuid id) {
+    model.removeAdmin(id);
+  }
+
   private Uuid createId() {
 
     Uuid candidate;
@@ -313,14 +317,18 @@ public final class Controller implements RawController, BasicController {
     }
   }
 
-  public void addAdmin(String name) {
+  public void addAdmin(String name, boolean log) {
     Uuid id = model.userByText().first(name).id;
     model.addAdmin(id);
+    if (log) {
+      PersistenceLog.writeTransaction("add-admin", id, null, 0, null, null);
+    }
   }
 
   public void removeAdmin(String name) {
     Uuid id = model.userByText().first(name).id;
     model.removeAdmin(id);
+    PersistenceLog.writeTransaction("remove-admin", id, null, 0, null, null);
   }
 
   void writeAuthInfo(Uuid id, String password) {

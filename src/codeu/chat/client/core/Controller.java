@@ -297,11 +297,12 @@ public final class Controller implements BasicController {
     }
   }
 
-  void addAdmin(String name) {
+  void addAdmin(String name, boolean log) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.ADD_ADMIN_REQUEST);
       Serializers.STRING.write(connection.out(), name);
+      Serializers.BOOLEAN.write(connection.out(), log);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.ADD_ADMIN_RESPONSE) {
         LOG.info("Added admin");

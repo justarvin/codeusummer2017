@@ -228,7 +228,7 @@ final class View implements BasicView {
   }
 
   @Override
-  public Collection<Uuid> retrieveAdmins() {
+  public Collection<Uuid> getAdmins() {
     final HashSet<Uuid> admins = new HashSet<>();
 
     try (final Connection connection = source.connect()) {
@@ -249,7 +249,7 @@ final class View implements BasicView {
   }
 
   @Override
-  public Collection<Uuid> retrieveNewAdmins() {
+  public Collection<Uuid> getNewAdmins() {
     final HashSet<Uuid> admins = new HashSet<>();
 
     try (final Connection connection = source.connect()) {

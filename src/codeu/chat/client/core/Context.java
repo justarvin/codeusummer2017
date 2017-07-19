@@ -92,15 +92,15 @@ public final class Context {
     return view.getAuthInfo(id);
   }
 
-  public void addAdmin(String name) {
-    controller.addAdmin(name);
+  public void writeAuthInfo(Uuid id, String password) {
+    controller.writeAuthInfo(id, password);
+  }
+
+  public void addAdmin(String name, boolean log) {
+    controller.addAdmin(name, log);
   }
 
   public void removeAdmin(String name) {
     controller.removeAdmin(name);
-  }
-
-  public Controller getController() {
-    return controller;
   }
 }

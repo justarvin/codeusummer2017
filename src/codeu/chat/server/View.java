@@ -44,6 +44,7 @@ public final class View implements BasicView, SinglesView {
 
   @Override
   public Collection<User> getUsers() {
+    System.out.println(all(model.userById()).size());
     return all(model.userById());
   }
 

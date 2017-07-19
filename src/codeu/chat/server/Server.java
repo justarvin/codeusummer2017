@@ -14,7 +14,6 @@
 
 package codeu.chat.server;
 
-import codeu.chat.client.core.Admin;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
@@ -62,7 +61,6 @@ public final class Server {
   private final Model model = new Model();
   private final View view = new View(model);
   private final Controller controller;
-  private final Admin auth;
 
   private final Relay relay;
   private Uuid lastSeen = Uuid.NULL;
@@ -71,10 +69,9 @@ public final class Server {
 
   public Server(final Uuid id, final Secret secret, final Relay relay, File persistentPath) {
 
-    this.auth = new Admin();
     this.id = id;
     this.secret = secret;
-    this.controller = new Controller(id, model, auth, persistentPath);
+    this.controller = new Controller(id, model, persistentPath);
     this.relay = relay;
 
     if (!model.userById().all().iterator().hasNext()) {
@@ -205,8 +202,14 @@ public final class Server {
         writer.write("");
         writer.close();
 
+        File passwords = new File(persistentPath, "passwords.txt");
+        FileWriter writer2 = new FileWriter(passwords);
+        writer2.write("");
+        writer2.close();
+
         //clear current data in model
         model.clearStores();
+        logBuffer.clear();
 
         Serializers.INTEGER.write(out, NetworkCode.CLEAN_RESPONSE);
       }
@@ -324,6 +327,9 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final User user = User.SERIALIZER.read(in);
         controller.removeUser(user);
+        for (User u : model.userById().all()) {
+          System.out.println(u.id);
+        }
 
         Serializers.INTEGER.write(out, NetworkCode.DELETE_USER_RESPONSE);
       }
@@ -385,7 +391,8 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final String name = Serializers.STRING.read(in);
-        controller.addAdmin(name);
+        final boolean log = Serializers.BOOLEAN.read(in);
+        controller.addAdmin(name, log);
         Serializers.INTEGER.write(out, NetworkCode.ADD_ADMIN_RESPONSE);
       }
     });

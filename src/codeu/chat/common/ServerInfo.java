@@ -11,7 +11,6 @@ public final class ServerInfo {
   private final Time startTime;
   private final Uuid version;
   private final static String SERVER_VERSION = "1.0.0";
-  private final HashMap<Uuid, String> passwords;
 
   public ServerInfo() {
     this.startTime = Time.now();
@@ -22,13 +21,11 @@ public final class ServerInfo {
       // Do nothing.
     }
     this.version = serverVersion;
-    this.passwords = new HashMap<>();
   }
   
   public ServerInfo(Uuid version, Time startTime) {
     this.version = version;
     this.startTime = startTime;
-    this.passwords = new HashMap<>();
   }
   
   public Uuid getVersion() {
