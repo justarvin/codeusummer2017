@@ -14,17 +14,17 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.*;
+import codeu.chat.client.core.Context;
+import codeu.chat.client.core.ConversationContext;
+import codeu.chat.client.core.MessageContext;
+import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.PasswordStorage;
 import codeu.chat.util.Tokenizer;
-import codeu.chat.util.Uuid;
 
-import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
