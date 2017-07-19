@@ -240,6 +240,7 @@ public final class Controller implements RawController, BasicController {
 
   public void addAuthInfo(Uuid id, String password) {
     model.addPassword(id, password);
+    //this user now has a password
     model.removeNewAdmin(id);
   }
 
