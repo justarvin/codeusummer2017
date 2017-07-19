@@ -128,18 +128,22 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
-  public String retrieveAuthInfo(Uuid id) {
+  public String getAuthInfo(Uuid id) {
     return null;
   }
 
   @Override
-  public Collection<Uuid> retrieveAdmins() {
-    return null;
+  public Collection<Uuid> getAdmins() {
+    return model.getAdmins();
   }
 
   @Override
-  public Collection<Uuid> retrieveNewAdmins() {
-    return null;
+  public Collection<Uuid> getNewAdmins() {
+    return model.getNewAdmins();
+  }
+
+  public String getPassword(Uuid id) {
+    return model.getPassword(id);
   }
 
 }

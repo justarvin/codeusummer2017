@@ -79,7 +79,7 @@ public final class Server {
 
     if (!model.userById().all().iterator().hasNext()) {
       User user = controller.newUser("admin");
-      auth.addAdmin(user.id);
+      model.addAdmin(user.id);
     }
 
     //Request info version - user asks server for current info version
@@ -345,7 +345,7 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid id = Uuid.SERIALIZER.read(in);
-        String password = auth.getPassword(id);
+        String password = view.getPassword(id);
 
         Serializers.INTEGER.write(out, NetworkCode.AUTH_INFO_RESPONSE);
         Serializers.nullable(Serializers.STRING).write(out, password);
@@ -357,7 +357,7 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         Serializers.INTEGER.write(out, NetworkCode.GET_ADMINS_RESPONSE);
-        Serializers.collection(Uuid.SERIALIZER).write(out, auth.getAdmins());
+        Serializers.collection(Uuid.SERIALIZER).write(out, view.getAdmins());
       }
     });
 
@@ -366,7 +366,7 @@ public final class Server {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         Serializers.INTEGER.write(out, NetworkCode.GET_NEW_ADMINS_RESPONSE);
-        Serializers.collection(Uuid.SERIALIZER).write(out, auth.getNewAdmins());
+        Serializers.collection(Uuid.SERIALIZER).write(out, view.getNewAdmins());
       }
     });
 
@@ -378,6 +378,24 @@ public final class Server {
         final String password = Serializers.STRING.read(in);
         controller.writeAuthInfo(id, password);
         Serializers.INTEGER.write(out, NetworkCode.WRITE_AUTH_RESPONSE);
+      }
+    });
+
+    this.commands.put(NetworkCode.ADD_ADMIN_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String name = Serializers.STRING.read(in);
+        controller.addAdmin(name);
+        Serializers.INTEGER.write(out, NetworkCode.ADD_ADMIN_RESPONSE);
+      }
+    });
+
+    this.commands.put(NetworkCode.REMOVE_ADMIN_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String name = Serializers.STRING.read(in);
+        controller.removeAdmin(name);
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_ADMIN_RESPONSE);
       }
     });
 

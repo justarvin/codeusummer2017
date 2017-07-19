@@ -54,9 +54,9 @@ public interface BasicView {
 
   int getConversationUpdate(Uuid owner, String title);
 
-  String retrieveAuthInfo(Uuid id);
+  String getAuthInfo(Uuid id);
 
-  Collection<Uuid> retrieveAdmins();
+  Collection<Uuid> getAdmins();
 
-  Collection<Uuid> retrieveNewAdmins();
+  Collection<Uuid> getNewAdmins();
 }

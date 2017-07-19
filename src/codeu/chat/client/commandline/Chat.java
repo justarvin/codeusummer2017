@@ -14,18 +14,17 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.Admin;
-import codeu.chat.client.core.Context;
-import codeu.chat.client.core.ConversationContext;
-import codeu.chat.client.core.MessageContext;
-import codeu.chat.client.core.UserContext;
+import codeu.chat.client.core.*;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.util.PasswordStorage;
 import codeu.chat.util.Tokenizer;
 import codeu.chat.util.Uuid;
 
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -40,14 +39,10 @@ public final class Chat {
   // panel all it needs to do is pop the top panel.
   private final Stack<Panel> panels = new Stack<>();
   private Context context;
-  private Admin admin;
 
   public Chat(Context context) {
     this.context = context;
-    this.admin = new Admin(context);
     this.panels.push(createRootPanel(context));
-
-    admin.retrieveAdmins();
   }
 
   // HANDLE COMMAND
@@ -162,11 +157,11 @@ public final class Chat {
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
-            admin.retrieveAuthInfo(admin, user.user.id);
-            if (admin.isNewAdmin(user.user.id)) {
-              admin.setPassword(user.user.id);
-            } else if (admin.isAdmin(user.user.id)) {
-              admin.authenticate(user.user.id);
+            if (context.getNewAdmins().contains(user.user.id)) {
+              setPassword(user.user.id);
+            } else if (context.getAdmins().contains(user.user.id)) {
+              String password = context.getAuthInfo(user.user.id);
+              authenticate(password);
             }
             panels.push(createUserPanel(user));
           }
@@ -211,6 +206,15 @@ public final class Chat {
     return panel;
   }
 
+  private UserContext findUser(String name) {
+    for (final UserContext user : context.allUsers()) {
+      if (user.user.name.equals(name)) {
+        return user;
+      }
+    }
+    return null;
+  }
+
   public Panel createUserPanel(final UserContext user) {
 
     final Panel panel = new Panel();
@@ -225,7 +229,7 @@ public final class Chat {
         public void invoke(List<String> args) {
           System.out.println("USER MODE");
 
-          if (admin.isAdmin(user.user.id)) {
+          if (context.getAdmins().contains(user.user.id)) {
             System.out.println("  u-list");
             System.out.println("    List all users.");
             System.out.println("  u-add <name> (<type>)");
@@ -258,7 +262,7 @@ public final class Chat {
       });
 
       // Only register these commands if current user is an admin
-      if (admin.isAdmin(user.user.id)) {
+      if (context.getAdmins().contains(user.user.id)) {
 
         // U-LIST (user list)
         //
@@ -284,8 +288,7 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
             String name = args.get(0);
-            Uuid id = findUser(name).user.id;
-            admin.addAdmin(id);
+            context.addAdmin(name);
           }
         });
 
@@ -296,8 +299,7 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
             String name = args.get(0);
-            Uuid id = findUser(name).user.id;
-            admin.removeAdmin(id);
+            context.removeAdmin(name);
           }
         });
 
@@ -317,8 +319,7 @@ public final class Chat {
               System.out.println("ERROR: Missing <username>");
             }
             if (args.size() == 2) {
-              Uuid id = findUser(name).user.id;
-              admin.addAdmin(id);
+              context.addAdmin(name);
             }
           }
         });
@@ -358,6 +359,7 @@ public final class Chat {
             }
           }
         });
+
       }
 
       // C-LIST (list conversations)
@@ -456,6 +458,15 @@ public final class Chat {
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
     return panel;
+  }
+
+  private ConversationHeader findConversation(String title) {
+    for (final ConversationHeader c : context.allConversations()) {
+      if (c.title.equals(title)) {
+        return c;
+      }
+    }
+    return null;
   }
 
   private Panel createInterestPanel(final UserContext user) {
@@ -646,24 +657,38 @@ public final class Chat {
     return panel;
   }
 
-  // Find the first user with the given name and return a user context
-  // for that user. If no user is found, the function will return null.
-  private UserContext findUser(String name) {
-    for (final UserContext user : context.allUsers()) {
-      if (user.user.name.equals(name)) {
-        return user;
-      }
+  private void setPassword(Uuid id) {
+    Console console = System.console();
+    char password[] = console.readPassword("Enter a new password: ");
+    char passwordConfirm[] = console.readPassword("Retype your password: ");
+    System.out.println("Verifying...");
+    while (!Arrays.equals(password, passwordConfirm)) {
+      System.out.println("Passwords didn't match. Please try again.");
+      password = console.readPassword("Enter a new password: ");
+      passwordConfirm = console.readPassword("Retype your password: ");
+      System.out.println("Verifying...");
     }
-    return null;
+    try {
+      String pass = PasswordStorage.createHash(password);
+      context.getController().writeAuthInfo(id, pass);
+    } catch (PasswordStorage.CannotPerformOperationException e) {
+      e.printStackTrace();
+    }
   }
 
-  private ConversationHeader findConversation(String title) {
-    for (final ConversationHeader c : context.allConversations()) {
-      if (c.title.equals(title)) {
-        return c;
+  private void authenticate(String password) {
+    Console console = System.console();
+    char passwordArray[] = console.readPassword("Enter your password: ");
+    System.out.println("Verifying...");
+    try {
+      while (!PasswordStorage.verifyPassword(passwordArray, password)) {
+        System.out.println("Login failed. Please try again");
+        passwordArray = console.readPassword("Enter your password: ");
+        System.out.println("Verifying...");
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    return null;
   }
 
   // accessor method for testing purposes

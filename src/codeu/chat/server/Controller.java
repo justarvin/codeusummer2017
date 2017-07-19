@@ -14,7 +14,6 @@
 
 package codeu.chat.server;
 
-import codeu.chat.client.core.Admin;
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -41,12 +40,10 @@ public final class Controller implements RawController, BasicController {
   private final Model model;
   private final Uuid.Generator uuidGenerator;
   private final File persistentPath;
-  private final Admin admin;
 
-  public Controller(Uuid serverId, Model model, Admin admin, File persistentPath) {
+  public Controller(Uuid serverId, Model model, File persistentPath) {
     this.model = model;
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
-    this.admin = admin;
     this.persistentPath = persistentPath;
 
     PersistenceLog.restore(this, persistentPath);
@@ -72,9 +69,9 @@ public final class Controller implements RawController, BasicController {
 
     //if this is the first user, add them as an admin
     if (!model.userById().all().iterator().hasNext()) {
-      admin.addAdmin(id);
+      model.addAdmin(id);
     }
-    if (admin.isAdmin(id)) {
+    if (model.isAdmin(id)) {
       PersistenceLog.writeTransaction("admin", id, name, time.inMs(), null, null);
     } else {
       PersistenceLog.writeTransaction("user", id, name, time.inMs(), null, null);
@@ -242,12 +239,12 @@ public final class Controller implements RawController, BasicController {
   }
 
   public void addAuthInfo(Uuid id, String password) {
-    admin.addPassword(id, password);
-    admin.passwordRetrieved(id);
+    model.addPassword(id, password);
+    model.removeNewAdmin(id);
   }
 
   public void addAdmin(Uuid id) {
-    admin.addAdmin(id);
+    model.addAdmin(id);
   }
 
   private Uuid createId() {
@@ -316,7 +313,18 @@ public final class Controller implements RawController, BasicController {
     }
   }
 
+  public void addAdmin(String name) {
+    Uuid id = model.userByText().first(name).id;
+    model.addAdmin(id);
+  }
+
+  public void removeAdmin(String name) {
+    Uuid id = model.userByText().first(name).id;
+    model.removeAdmin(id);
+  }
+
   void writeAuthInfo(Uuid id, String password) {
+    model.removeNewAdmin(id);
     PersistenceLog.writeAuthInfo(persistentPath, id, password);
   }
 }

@@ -27,7 +27,7 @@ import codeu.chat.util.connections.ConnectionSource;
 
 import java.io.IOException;
 
-final class Controller implements BasicController {
+public final class Controller implements BasicController {
 
   private final static Logger.Log LOG = Logger.newLog(Controller.class);
 
@@ -278,7 +278,7 @@ final class Controller implements BasicController {
     }
   }
 
-  void writeAuthInfo(Uuid id, String password) {
+  public void writeAuthInfo(Uuid id, String password) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.WRITE_AUTH_REQUEST);
@@ -287,6 +287,42 @@ final class Controller implements BasicController {
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.WRITE_AUTH_RESPONSE) {
         LOG.info("Saved auth info");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  void addAdmin(String name) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.ADD_ADMIN_REQUEST);
+      Serializers.STRING.write(connection.out(), name);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.ADD_ADMIN_RESPONSE) {
+        LOG.info("Added admin");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  void removeAdmin(String name) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_ADMIN_REQUEST);
+      Serializers.STRING.write(connection.out(), name);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_ADMIN_RESPONSE) {
+        LOG.info("Removed admin");
       } else {
         LOG.error("Response from server failed.");
       }

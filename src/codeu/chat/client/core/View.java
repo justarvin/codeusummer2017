@@ -207,7 +207,7 @@ final class View implements BasicView {
   }
 
   @Override
-  public String retrieveAuthInfo(Uuid id) {
+  public String getAuthInfo(Uuid id) {
     String password = "";
     try (final Connection connection = source.connect()) {
 
