@@ -239,4 +239,62 @@ final class Controller implements BasicController {
       LOG.error(ex, "Exception during call on server.");
     }
   }
+
+  // Make Owner
+  //
+  // Allows the creator of a conversation to promote a user into an owner
+  void makeOwner() {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.MAKE_OWNER_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.MAKE_OWNER_RESPONSE) {
+        LOG.info("User is now an Owner.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+  }
+
+  // Make Member
+  //
+  // Allows the creator of a conversation to promote/ demote a user into an owner
+  void makeMember() {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.MAKE_MEMBER_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.MAKE_MEMBER_RESPONSE) {
+        LOG.info("User is now a Member.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+  }
+
+  // Remove User
+  //
+  // Allows the creator or Owner to remove a user from the conversation
+  // Allows the creator to remove an owner or user from the conversation
+  void removeUser() {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_USER_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_USER_RESPONSE) {
+        LOG.info("User removed from conversation.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+  }
 }

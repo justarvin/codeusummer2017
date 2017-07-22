@@ -56,6 +56,10 @@ public final class Context {
   public void writeRestOfQueue() {
     controller.writeRestOfQueue();
   }
+
+  public void owners() { controller.makeOwner();}
+
+  public void members() { controller.makeMember();}
   
   public ServerInfo getInfo() {
     return view.getInfo();

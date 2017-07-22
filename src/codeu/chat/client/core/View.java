@@ -72,7 +72,6 @@ final class View implements BasicView {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.GET_USERS_REQUEST);
-
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_USERS_RESPONSE) {
         users.addAll(Serializers.collection(User.SERIALIZER).read(connection.in()));
       } else {

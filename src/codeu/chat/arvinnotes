@@ -1,0 +1,12 @@
+Since User class is declared final: Creators, owners and members cannot inherit from user class even though creator is a user etc.
+Every conversation has 1 creator. I assume that a conversation does not need to have owners or members or both. (can have 1 creator , # owners and 0 members ir 1 creator, 0 owners, # members)
+If a conversation has 0 creators it can be deleted (check if this has been implemented with the original persistent storage system)
+
+bugs:
+
+when creating a new conversation it prints out "failed to create new conversation despite conversations being created"
+m-add // doesn't actually add messages. either that or m-list does not list the messages properly
+    in interest panel, c-status shows that user never created any new messages or never created any conversations
+
+does the access control remove users from the conversation itself? what if its simply a conversation that the user is following?
+can users write in conversations they are following or are they only allowed to read?

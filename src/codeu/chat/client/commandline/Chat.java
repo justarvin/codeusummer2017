@@ -300,7 +300,7 @@ public final class Chat {
 
         // C-JOIN (join conversation)
         //
-        // Add a command that will joing a conversation when the user enters
+        // Add a command that will join a conversation when the user enters
         // "c-join" while on the user panel.
         //
         panel.register("c-join", new Panel.Command() {
@@ -471,7 +471,7 @@ public final class Chat {
         panel.register("help", new Panel.Command() {
             @Override
             public void invoke(List<String> args) {
-                System.out.println("USER MODE");
+                System.out.println("CONVERSATION MODE");
                 System.out.println("  m-list");
                 System.out.println("    List all messages in the current conversation.");
                 System.out.println("  m-add <message>");
@@ -542,6 +542,95 @@ public final class Chat {
 
         // Now that the panel has all its commands registered, return the panel
         // so that it can be used.
+        return panel;
+    }
+
+    private Panel createCreatorPanel(final ConversationContext conversation) {
+
+        final Panel panel = new Panel();
+
+        // HELP
+        //
+        // Add a command that will print all the commands and their descriptions
+        // when the user enters "help" while on the conversation panel.
+        //
+        panel.register("help", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+                System.out.println("CREATOR MODE");
+                System.out.println("  c-list");
+                System.out.println("    List all users in the current conversation.");
+                System.out.println("  make-owner <name>");
+                System.out.println("    Changes the status of a user to owner.");
+                System.out.println("  make-member <name>");
+                System.out.println("    Changes the status of a user to member.");
+                System.out.println("  add-user <name>");
+                System.out.println("    Adds the specified user with member status to the conversation.");
+                System.out.println("  remove-user <name>");
+                System.out.println("    Removes the specified user with member or owner status to the conversation.");
+                System.out.println("  back");
+                System.out.println("    Go back to CONVERSATION MODE.");
+                System.out.println("  exit");
+                System.out.println("    Exit the program.");
+            }
+        });
+
+        return panel;
+    }
+
+    private Panel createOwnerPanel(final ConversationContext conversation) {
+
+        final Panel panel = new Panel();
+
+        // HELP
+        //
+        // Add a command that will print all the commands and their descriptions
+        // when the user enters "help" while on the conversation panel.
+        //
+        panel.register("help", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+                System.out.println("OWNER MODE");
+                System.out.println("  c-list");
+                System.out.println("    List all users in the current conversation.");
+                System.out.println("  make member <name>");
+                System.out.println("    Changes the status of a user to member.");
+                System.out.println("  add user <name>");
+                System.out.println("    Adds the specified user with member status to the conversation.");
+                System.out.println("  remove user <name>");
+                System.out.println("    Removes the specified user with member status to the conversation.");
+                System.out.println("  back");
+                System.out.println("    Go back to CONVERSATION MODE.");
+                System.out.println("  exit");
+                System.out.println("    Exit the program.");
+            }
+        });
+
+        panel.register("c-list", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+                for (final ConversationContext conversation : user.conversations()) {
+                    System.out.format(
+                            "CONVERSATION %s (UUID:%s)\n",
+                            conversation.conversation.title,
+                            conversation.conversation.id);
+                }
+            }
+        });
+
+        panel.register("make-member", new Panel.Command() {
+            @Override
+            public void invoke(List<String> args) {
+                final String name = args.get(0);
+                if (name.length() > 0) {
+                    if (conversationcontext.create(name) == null) {
+                        System.out.println("ERROR: Failed to create new user");
+                    }
+                } else {
+                    System.out.println("ERROR: Missing <username>");
+                }
+            }
+        });
         return panel;
     }
 }
