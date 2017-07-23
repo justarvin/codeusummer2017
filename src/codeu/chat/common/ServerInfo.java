@@ -1,8 +1,6 @@
 package codeu.chat.common;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import codeu.chat.util.Uuid;
 import codeu.chat.util.Time;

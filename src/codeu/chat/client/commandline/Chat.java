@@ -20,7 +20,7 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.PasswordStorage;
+import codeu.chat.util.PasswordUtils;
 import codeu.chat.util.Tokenizer;
 
 import java.io.IOException;
@@ -157,14 +157,17 @@ public final class Chat {
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
+            String result = null;
             if (context.getNewAdmins().contains(user.user.id)) {
-              String password = PasswordStorage.setPassword();
-              context.writeAuthInfo(user.user.id, password);
+              result = PasswordUtils.setPassword();
+              context.writeAuthInfo(user.user.id, result);
             } else if (context.getAdmins().contains(user.user.id)) {
               String password = context.getAuthInfo(user.user.id);
-              PasswordStorage.authenticate(password);
+              result = PasswordUtils.authenticate(password);
             }
-            panels.push(createUserPanel(user));
+            if (!result.equals("")) {
+              panels.push(createUserPanel(user));
+            }
           }
         } else {
           System.out.println("ERROR: Missing <username>");

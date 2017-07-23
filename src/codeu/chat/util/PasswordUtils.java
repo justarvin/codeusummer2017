@@ -1,11 +1,9 @@
 package codeu.chat.util;
-import codeu.chat.client.core.Context;
 
 import java.io.Console;
 import java.security.SecureRandom;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
-import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
@@ -15,7 +13,7 @@ import javax.xml.bind.DatatypeConverter;
  * Password encryption class from https://github.com/defuse/password-hashing
  */
 
-public class PasswordStorage
+public class PasswordUtils
 {
 
     @SuppressWarnings("serial")
@@ -217,25 +215,27 @@ public class PasswordStorage
             System.out.println("Verifying...");
         }
         try {
-            return PasswordStorage.createHash(password);
-        } catch (PasswordStorage.CannotPerformOperationException e) {
-            e.printStackTrace();
+            return createHash(password);
+        } catch (CannotPerformOperationException e) {
+            System.out.println("Failed to set password for this account.");
         }
-        return null;
+        return "";
     }
 
-    public static void authenticate(String password) {
+    public static String authenticate(String password) {
         Console console = System.console();
         char passwordArray[] = console.readPassword("Enter your password: ");
         System.out.println("Verifying...");
         try {
-            while (!PasswordStorage.verifyPassword(passwordArray, password)) {
+            while (!verifyPassword(passwordArray, password)) {
                 System.out.println("Login failed. Please try again");
                 passwordArray = console.readPassword("Enter your password: ");
                 System.out.println("Verifying...");
             }
+            return "success";
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Login failed.");
+            return "";
         }
     }
 }

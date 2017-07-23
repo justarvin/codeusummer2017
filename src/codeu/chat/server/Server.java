@@ -197,19 +197,8 @@ public final class Server {
     this.commands.put(NetworkCode.CLEAN_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
-        File log = new File(persistentPath, "log.txt");
-        FileWriter writer = new FileWriter(log);
-        writer.write("");
-        writer.close();
 
-        File passwords = new File(persistentPath, "passwords.txt");
-        FileWriter writer2 = new FileWriter(passwords);
-        writer2.write("");
-        writer2.close();
-
-        //clear current data in model
-        model.clearStores();
-        logBuffer.clear();
+        controller.clean(persistentPath);
 
         Serializers.INTEGER.write(out, NetworkCode.CLEAN_RESPONSE);
       }

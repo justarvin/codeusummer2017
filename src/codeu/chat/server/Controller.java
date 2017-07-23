@@ -55,7 +55,7 @@ public final class Controller implements RawController, BasicController {
     Time time = Time.now();
 
     checkBuffer();
-    PersistenceLog.writeTransaction("message", id, body, time.inMs(), author, conversation);
+    PersistenceLog.writeTransaction(PersistenceLog.MESSAGE, id, body, time.inMs(), author, conversation);
 
     return newMessage(id, author, conversation, body, time);
   }
@@ -72,9 +72,9 @@ public final class Controller implements RawController, BasicController {
       model.addAdmin(id);
     }
     if (model.isAdmin(id)) {
-      PersistenceLog.writeTransaction("admin", id, name, time.inMs(), null, null);
+      PersistenceLog.writeTransaction(PersistenceLog.ADMIN, id, name, time.inMs(), null, null);
     } else {
-      PersistenceLog.writeTransaction("user", id, name, time.inMs(), null, null);
+      PersistenceLog.writeTransaction(PersistenceLog.USER, id, name, time.inMs(), null, null);
     }
 
     return newUser(id, name, time);
@@ -82,7 +82,7 @@ public final class Controller implements RawController, BasicController {
 
   public void removeUser(User user) {
     model.remove(user);
-    PersistenceLog.writeTransaction("delete-user", user.id, user.name, user.creation.inMs(), null, null);
+    PersistenceLog.writeTransaction(PersistenceLog.DELETE_USER, user.id, user.name, user.creation.inMs(), null, null);
   }
 
   @Override
@@ -91,14 +91,14 @@ public final class Controller implements RawController, BasicController {
     Time time = Time.now();
 
     checkBuffer();
-    PersistenceLog.writeTransaction("conversation", id, title, time.inMs(), owner, null);
+    PersistenceLog.writeTransaction(PersistenceLog.CONVERSATION, id, title, time.inMs(), owner, null);
 
     return newConversation(id, title, owner, time);
   }
 
   public void removeConversation(ConversationHeader c) {
     model.remove(c);
-    PersistenceLog.writeTransaction("delete-conversation", c.id, c.title, c.creation.inMs(), null, null);
+    PersistenceLog.writeTransaction(PersistenceLog.DELETE_CONVERSATION, c.id, c.title, c.creation.inMs(), null, null);
   }
 
   @Override
@@ -322,18 +322,39 @@ public final class Controller implements RawController, BasicController {
     Uuid id = model.userByText().first(name).id;
     model.addAdmin(id);
     if (log) {
-      PersistenceLog.writeTransaction("add-admin", id, null, 0, null, null);
+      PersistenceLog.writeTransaction(PersistenceLog.ADD_ADMIN, id, null, 0, null, null);
     }
   }
 
   public void removeAdmin(String name) {
     Uuid id = model.userByText().first(name).id;
     model.removeAdmin(id);
-    PersistenceLog.writeTransaction("remove-admin", id, null, 0, null, null);
+    PersistenceLog.writeTransaction(PersistenceLog.REMOVE_ADMIN, id, null, 0, null, null);
   }
 
   void writeAuthInfo(Uuid id, String password) {
     model.removeNewAdmin(id);
     PersistenceLog.writeAuthInfo(persistentPath, id, password);
+  }
+
+  void clean(File persistentPath) {
+    File log = new File(persistentPath, "log.txt");
+    File passwords = new File(persistentPath, "passwords.txt");
+
+    try {
+      FileWriter writer = new FileWriter(log);
+      writer.write("");
+      writer.close();
+
+      FileWriter writer2 = new FileWriter(passwords);
+      writer2.write("");
+      writer2.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    //clear current data in model
+    model.clearStores();
+    Server.getLogBuffer().clear();
   }
 }

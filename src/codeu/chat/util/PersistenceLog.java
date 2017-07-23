@@ -17,33 +17,33 @@ import java.io.IOException;
  */
 public class PersistenceLog {
 
-  private static final String USER = "ADD-USER";
-  private static final String MESSAGE = "ADD-MESSAGE";
-  private static final String CONVERSATION = "ADD-CONVERSATION";
-  private static final String ADMIN = "ADMIN";
-  private static final String DELETE_USER = "DELETE-USER";
-  private static final String DELETE_CONVERSATION = "DELETE-CONVERSATION";
-  private static final String ADD_ADMIN = "ADD-ADMIN";
-  private static final String REMOVE_ADMIN = "REMOVE-ADMIN";
-  private static final String SPACE = " ";
+  public static final String USER = "ADD-USER";
+  public static final String MESSAGE = "ADD-MESSAGE";
+  public static final String CONVERSATION = "ADD-CONVERSATION";
+  public static final String ADMIN = "ADMIN";
+  public static final String DELETE_USER = "DELETE-USER";
+  public static final String DELETE_CONVERSATION = "DELETE-CONVERSATION";
+  public static final String ADD_ADMIN = "ADD-ADMIN";
+  public static final String REMOVE_ADMIN = "REMOVE-ADMIN";
+  public static final String SPACE = " ";
 
   public static void writeTransaction(String type, Uuid id, String text, long time, Uuid owner, Uuid convoId) {
     String log = "";
     switch(type) {
-      case "user":
+      case USER:
         log = USER + SPACE +
                 id + SPACE +
                 text + SPACE +
                 time;
         break;
-      case "admin":
+      case ADMIN:
         log = USER + SPACE +
                 id + SPACE +
                 text + SPACE +
                 time + SPACE +
                 ADMIN;
         break;
-      case "message":
+      case MESSAGE:
         log = MESSAGE + SPACE +
                 id + SPACE +
                 text + SPACE +
@@ -51,29 +51,29 @@ public class PersistenceLog {
                 convoId + SPACE +
                 owner;
         break;
-      case "conversation":
+      case CONVERSATION:
         log = CONVERSATION + SPACE +
                 id + SPACE +
                 text + SPACE +
                 time + SPACE +
                 owner;
         break;
-      case "delete-user":
+      case DELETE_USER:
         log = DELETE_USER + SPACE +
                 id + SPACE +
                 text + SPACE +
                 time;
         break;
-      case "delete-conversation":
-        log = DELETE_USER + SPACE +
+      case DELETE_CONVERSATION:
+        log = DELETE_CONVERSATION + SPACE +
                 id + SPACE +
                 text + SPACE +
                 time;
         break;
-      case "add-admin":
+      case ADD_ADMIN:
         log = ADD_ADMIN + SPACE + id;
         break;
-      case "remove-admin":
+      case REMOVE_ADMIN:
         log = REMOVE_ADMIN + SPACE + id;
         break;
     }
