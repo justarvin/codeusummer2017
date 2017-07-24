@@ -22,11 +22,7 @@ import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
-import codeu.chat.util.Logger;
-import codeu.chat.util.Serializers;
-import codeu.chat.util.Time;
-import codeu.chat.util.Timeline;
-import codeu.chat.util.Uuid;
+import codeu.chat.util.*;
 import codeu.chat.util.connections.Connection;
 
 import java.io.BufferedWriter;
@@ -336,14 +332,21 @@ public final class Server {
     });
 
     //Admin info -- get the password for the specified user id
-    this.commands.put(NetworkCode.AUTH_INFO_REQUEST, new Command() {
+    this.commands.put(NetworkCode.AUTH_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid id = Uuid.SERIALIZER.read(in);
-        String password = view.getPassword(id);
+        final String password = Serializers.STRING.read(in);
+        String correct = view.getPassword(id);
+        boolean success;
+        try {
+          success = PasswordUtils.verifyPassword(password, correct);
+        } catch (PasswordUtils.CannotPerformOperationException | PasswordUtils.InvalidHashException e) {
+          success = false;
+        }
 
-        Serializers.INTEGER.write(out, NetworkCode.AUTH_INFO_RESPONSE);
-        Serializers.nullable(Serializers.STRING).write(out, password);
+        Serializers.INTEGER.write(out, NetworkCode.AUTH_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
       }
     });
 
@@ -366,13 +369,14 @@ public final class Server {
     });
 
     //Write auth info -- write the information to disk
-    this.commands.put(NetworkCode.WRITE_AUTH_REQUEST, new Command() {
+    this.commands.put(NetworkCode.SET_PASSWORD_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid id = Uuid.SERIALIZER.read(in);
         final String password = Serializers.STRING.read(in);
-        controller.writeAuthInfo(id, password);
-        Serializers.INTEGER.write(out, NetworkCode.WRITE_AUTH_RESPONSE);
+        boolean success = controller.setPassword(id, password);
+        Serializers.INTEGER.write(out, NetworkCode.SET_PASSWORD_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
       }
     });
 

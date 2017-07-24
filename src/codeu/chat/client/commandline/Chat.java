@@ -20,11 +20,12 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.PasswordUtils;
 import codeu.chat.util.Tokenizer;
 
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -157,15 +158,24 @@ public final class Chat {
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
-            String result = null;
+            boolean success = false;
+            Console console = System.console();
             if (context.getNewAdmins().contains(user.user.id)) {
-              result = PasswordUtils.setPassword();
-              context.writeAuthInfo(user.user.id, result);
+              String input = new String(console.readPassword("Set a new password: "));
+              String repeat = new String(console.readPassword("Reenter your password: "));
+              System.out.println("Verifying...");
+              if (!input.equals(repeat)) {
+                System.out.println("Error: passwords didn't match.");
+              } else {
+                success = context.setPassword(user.user.id, input);
+              }
             } else if (context.getAdmins().contains(user.user.id)) {
-              String password = context.getAuthInfo(user.user.id);
-              result = PasswordUtils.authenticate(password);
+              char passwordArray[] = console.readPassword("Enter your password: ");
+              success = context.authenticate(user.user.id, new String(passwordArray));
+              System.out.println("Authenticating...");
             }
-            if (!result.equals("")) {
+
+            if (success) {
               panels.push(createUserPanel(user));
             }
           }
@@ -241,9 +251,9 @@ public final class Chat {
             System.out.println("  u-delete <name>");
             System.out.println("    Deletes user with the given name");
             System.out.println("  a-add <name>");
-            System.out.println("    Adds user with given name as admin");
+            System.out.println("    Gives user with given name admin privileges.");
             System.out.println("  a-remove <name>");
-            System.out.println("    Removes user with given name as admin");
+            System.out.println("    Removes admin privileges for the given user.");
             System.out.println("  c-delete <name>");
             System.out.println("    Deletes the conversation with the given name");
           }
@@ -292,7 +302,12 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
             String name = args.get(0);
-            context.addAdmin(name, true);
+            boolean success = context.addAdmin(name, true);
+            if (success) {
+              System.out.println("Administrator privileges given to " + name);
+            } else {
+              System.out.println("Operation failed");
+            }
           }
         });
 
@@ -323,7 +338,10 @@ public final class Chat {
               System.out.println("ERROR: Missing <username>");
             }
             if (args.size() == 2) {
-              context.addAdmin(name, false);
+              boolean success = context.addAdmin(name, false);
+              if (!success) {
+                System.out.format("ERROR: Couldn't add %s as admin.", name);
+              }
             }
           }
         });

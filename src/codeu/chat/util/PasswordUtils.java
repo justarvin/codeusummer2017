@@ -200,42 +200,4 @@ public class PasswordUtils
     {
         return DatatypeConverter.printBase64Binary(array);
     }
-
-    /* My added methods */
-
-    public static String setPassword() {
-        Console console = System.console();
-        char password[] = console.readPassword("Enter a new password: ");
-        char passwordConfirm[] = console.readPassword("Retype your password: ");
-        System.out.println("Verifying...");
-        while (!Arrays.equals(password, passwordConfirm)) {
-            System.out.println("Passwords didn't match. Please try again.");
-            password = console.readPassword("Enter a new password: ");
-            passwordConfirm = console.readPassword("Retype your password: ");
-            System.out.println("Verifying...");
-        }
-        try {
-            return createHash(password);
-        } catch (CannotPerformOperationException e) {
-            System.out.println("Failed to set password for this account.");
-        }
-        return "";
-    }
-
-    public static String authenticate(String password) {
-        Console console = System.console();
-        char passwordArray[] = console.readPassword("Enter your password: ");
-        System.out.println("Verifying...");
-        try {
-            while (!verifyPassword(passwordArray, password)) {
-                System.out.println("Login failed. Please try again");
-                passwordArray = console.readPassword("Enter your password: ");
-                System.out.println("Verifying...");
-            }
-            return "success";
-        } catch (Exception e) {
-            System.out.println("Login failed.");
-            return "";
-        }
-    }
 }

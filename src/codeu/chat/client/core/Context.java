@@ -88,19 +88,19 @@ public final class Context {
     return (HashSet<Uuid>) view.getAdmins();
   }
 
-  public String getAuthInfo(Uuid id) {
-    return view.getAuthInfo(id);
-  }
-
-  public void writeAuthInfo(Uuid id, String password) {
-    controller.writeAuthInfo(id, password);
-  }
-
-  public void addAdmin(String name, boolean log) {
-    controller.addAdmin(name, log);
+  public boolean addAdmin(String name, boolean log) {
+    return controller.addAdmin(name, log);
   }
 
   public void removeAdmin(String name) {
     controller.removeAdmin(name);
+  }
+
+  public boolean authenticate(Uuid id, String input) {
+    return controller.authenticate(id, input);
+  }
+
+  public boolean setPassword(Uuid id, String input) {
+    return controller.setPassword(id, input);
   }
 }

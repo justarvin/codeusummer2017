@@ -211,10 +211,10 @@ final class View implements BasicView {
     String password = "";
     try (final Connection connection = source.connect()) {
 
-      Serializers.INTEGER.write(connection.out(), NetworkCode.AUTH_INFO_REQUEST);
+      Serializers.INTEGER.write(connection.out(), NetworkCode.AUTH_REQUEST);
       Uuid.SERIALIZER.write(connection.out(), id);
 
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_INFO_RESPONSE) {
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_RESPONSE) {
         password = Serializers.nullable(Serializers.STRING).read(connection.in());
       } else {
         LOG.error("Response from server failed.");

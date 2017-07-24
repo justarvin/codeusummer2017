@@ -278,15 +278,16 @@ public final class Controller implements BasicController {
     }
   }
 
-  public void writeAuthInfo(Uuid id, String password) {
+  public boolean setPassword(Uuid id, String password) {
     try (final Connection connection = source.connect()) {
 
-      Serializers.INTEGER.write(connection.out(), NetworkCode.WRITE_AUTH_REQUEST);
+      Serializers.INTEGER.write(connection.out(), NetworkCode.SET_PASSWORD_REQUEST);
       Uuid.SERIALIZER.write(connection.out(), id);
       Serializers.STRING.write(connection.out(), password);
 
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.WRITE_AUTH_RESPONSE) {
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SET_PASSWORD_RESPONSE) {
         LOG.info("Saved auth info");
+        return Serializers.BOOLEAN.read(connection.in());
       } else {
         LOG.error("Response from server failed.");
       }
@@ -295,9 +296,10 @@ public final class Controller implements BasicController {
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(e, "Exception during call on server.");
     }
+    return false;
   }
 
-  void addAdmin(String name, boolean log) {
+  boolean addAdmin(String name, boolean log) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.ADD_ADMIN_REQUEST);
@@ -306,6 +308,7 @@ public final class Controller implements BasicController {
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.ADD_ADMIN_RESPONSE) {
         LOG.info("Added admin");
+        return Serializers.BOOLEAN.read(connection.in());
       } else {
         LOG.error("Response from server failed.");
       }
@@ -314,6 +317,7 @@ public final class Controller implements BasicController {
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(e, "Exception during call on server.");
     }
+    return false;
   }
 
   void removeAdmin(String name) {
@@ -332,6 +336,27 @@ public final class Controller implements BasicController {
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(e, "Exception during call on server.");
     }
+  }
+
+  boolean authenticate(Uuid id, String input) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.AUTH_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), id);
+      Serializers.STRING.write(connection.out(), input);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_RESPONSE) {
+        LOG.info("Sent in authentication request.");
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
   }
 
 }

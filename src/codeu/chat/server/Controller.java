@@ -21,11 +21,7 @@ import codeu.chat.common.Message;
 import codeu.chat.common.RandomUuidGenerator;
 import codeu.chat.common.RawController;
 import codeu.chat.common.User;
-import codeu.chat.util.InterestStore;
-import codeu.chat.util.Logger;
-import codeu.chat.util.PersistenceLog;
-import codeu.chat.util.Time;
-import codeu.chat.util.Uuid;
+import codeu.chat.util.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -332,9 +328,16 @@ public final class Controller implements RawController, BasicController {
     PersistenceLog.writeTransaction(PersistenceLog.REMOVE_ADMIN, id, null, 0, null, null);
   }
 
-  void writeAuthInfo(Uuid id, String password) {
+  boolean setPassword(Uuid id, String password) {
     model.removeNewAdmin(id);
-    PersistenceLog.writeAuthInfo(persistentPath, id, password);
+    try {
+      String hash = PasswordUtils.createHash(password);
+      model.addPassword(id, hash);
+      PersistenceLog.writeAuthInfo(persistentPath, id, hash);
+      return true;
+    } catch (PasswordUtils.CannotPerformOperationException e) {
+      return false;
+    }
   }
 
   void clean(File persistentPath) {
