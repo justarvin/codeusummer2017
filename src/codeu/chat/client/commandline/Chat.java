@@ -592,9 +592,9 @@ public final class Chat {
             public void invoke(List<String> args) {
                 System.out.println("OWNER MODE");
                 System.out.println("  c-list");
-                System.out.println("    List all users in the current conversation.");
+                System.out.println("    List all users in the current conversation with their access levels.");
                 System.out.println("  make member <name>");
-                System.out.println("    Changes the status of a user to member.");
+                System.out.println("    Changes the access level of a user to member.");
                 System.out.println("  add user <name>");
                 System.out.println("    Adds the specified user with member status to the conversation.");
                 System.out.println("  remove user <name>");
