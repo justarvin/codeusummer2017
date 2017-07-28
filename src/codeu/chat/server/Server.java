@@ -22,11 +22,7 @@ import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
-import codeu.chat.util.Logger;
-import codeu.chat.util.Serializers;
-import codeu.chat.util.Time;
-import codeu.chat.util.Timeline;
-import codeu.chat.util.Uuid;
+import codeu.chat.util.*;
 import codeu.chat.util.connections.Connection;
 
 import java.io.BufferedWriter;
@@ -73,6 +69,11 @@ public final class Server {
     this.secret = secret;
     this.controller = new Controller(id, model, persistentPath);
     this.relay = relay;
+
+    if (!model.userById().all().iterator().hasNext()) {
+      User user = controller.newUser("admin");
+      model.addAdmin(user.id);
+    }
 
     //Request info version - user asks server for current info version
     this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
@@ -192,13 +193,8 @@ public final class Server {
     this.commands.put(NetworkCode.CLEAN_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
-        File log = new File(persistentPath.getPath());
-        FileWriter writer = new FileWriter(log);
-        writer.write("");
-        writer.close();
 
-        //clear current data in model
-        model.clearStores();
+        controller.clean(persistentPath);
 
         Serializers.INTEGER.write(out, NetworkCode.CLEAN_RESPONSE);
       }
@@ -210,10 +206,10 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         try {
 
-          File log = new File(persistentPath.getPath());
-          BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+          File log = new File(persistentPath, "log.txt");
+          BufferedWriter writer = new BufferedWriter(new FileWriter(log, true));
           while (!logBuffer.isEmpty()) {
-            writer.append(logBuffer.remove());
+            writer.write(logBuffer.remove());
             writer.newLine();
           }
           writer.close();
@@ -307,6 +303,99 @@ public final class Server {
         Serializers.INTEGER.write(out, NetworkCode.CONVERSATION_UPDATE_RESPONSE);
         Serializers.INTEGER.write(out, messages);
 
+      }
+    });
+
+    // Delete user -- an admin wants to delete the specified user
+    this.commands.put(NetworkCode.DELETE_USER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final User user = User.SERIALIZER.read(in);
+        controller.removeUser(user);
+        for (User u : model.userById().all()) {
+          System.out.println(u.id);
+        }
+
+        Serializers.INTEGER.write(out, NetworkCode.DELETE_USER_RESPONSE);
+      }
+    });
+
+    //Delete conversation -- an admin wants to delete the specified conversation
+    this.commands.put(NetworkCode.DELETE_CONVERSATION_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final ConversationHeader c = ConversationHeader.SERIALIZER.read(in);
+        controller.removeConversation(c);
+
+        Serializers.INTEGER.write(out, NetworkCode.DELETE_CONVERSATION_RESPONSE);
+      }
+    });
+
+    //Admin info -- get the password for the specified user id
+    this.commands.put(NetworkCode.AUTH_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final String password = Serializers.STRING.read(in);
+        String correct = view.getPassword(id);
+        boolean success;
+        try {
+          success = PasswordUtils.verifyPassword(password, correct);
+        } catch (PasswordUtils.CannotPerformOperationException | PasswordUtils.InvalidHashException e) {
+          success = false;
+        }
+
+        Serializers.INTEGER.write(out, NetworkCode.AUTH_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
+      }
+    });
+
+    //Get admins -- get the list of admins
+    this.commands.put(NetworkCode.GET_ADMINS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.GET_ADMINS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, view.getAdmins());
+      }
+    });
+
+    //Get new admins -- get the list of admins who have not set their passwords yet
+    this.commands.put(NetworkCode.GET_NEW_ADMINS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.GET_NEW_ADMINS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, view.getNewAdmins());
+      }
+    });
+
+    //Write auth info -- write the information to disk
+    this.commands.put(NetworkCode.SET_PASSWORD_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final String password = Serializers.STRING.read(in);
+        boolean success = controller.setPassword(id, password);
+        Serializers.INTEGER.write(out, NetworkCode.SET_PASSWORD_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
+      }
+    });
+
+    this.commands.put(NetworkCode.ADD_ADMIN_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String name = Serializers.STRING.read(in);
+        final boolean log = Serializers.BOOLEAN.read(in);
+        controller.addAdmin(name, log);
+        Serializers.INTEGER.write(out, NetworkCode.ADD_ADMIN_RESPONSE);
+      }
+    });
+
+    this.commands.put(NetworkCode.REMOVE_ADMIN_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String name = Serializers.STRING.read(in);
+        controller.removeAdmin(name);
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_ADMIN_RESPONSE);
       }
     });
 

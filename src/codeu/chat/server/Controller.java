@@ -21,11 +21,7 @@ import codeu.chat.common.Message;
 import codeu.chat.common.RandomUuidGenerator;
 import codeu.chat.common.RawController;
 import codeu.chat.common.User;
-import codeu.chat.util.InterestStore;
-import codeu.chat.util.Logger;
-import codeu.chat.util.Time;
-import codeu.chat.util.TransactionLog;
-import codeu.chat.util.Uuid;
+import codeu.chat.util.*;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -46,8 +42,7 @@ public final class Controller implements RawController, BasicController {
     this.uuidGenerator = new RandomUuidGenerator(serverId, System.currentTimeMillis());
     this.persistentPath = persistentPath;
 
-    TransactionLog.restore(persistentPath, this);
-    LOG.info("restored called");
+    PersistenceLog.restore(this, persistentPath);
   }
 
   @Override
@@ -55,9 +50,8 @@ public final class Controller implements RawController, BasicController {
     Uuid id = createId();
     Time time = Time.now();
 
-    Object[] params = new Object[]{id, body, time.inMs(), conversation, author};
     checkBuffer();
-    TransactionLog.writeLog("message", params);
+    PersistenceLog.writeTransaction(PersistenceLog.MESSAGE, id, body, time.inMs(), author, conversation);
 
     return newMessage(id, author, conversation, body, time);
   }
@@ -67,11 +61,24 @@ public final class Controller implements RawController, BasicController {
     Uuid id = createId();
     Time time = Time.now();
 
-    Object[] params = new Object[]{id, name, time.inMs()};
     checkBuffer();
-    TransactionLog.writeLog("user", params);
+
+    //if this is the first user, add them as an admin
+    if (!model.userById().all().iterator().hasNext()) {
+      model.addAdmin(id);
+    }
+    if (model.isAdmin(id)) {
+      PersistenceLog.writeTransaction(PersistenceLog.ADMIN, id, name, time.inMs(), null, null);
+    } else {
+      PersistenceLog.writeTransaction(PersistenceLog.USER, id, name, time.inMs(), null, null);
+    }
 
     return newUser(id, name, time);
+  }
+
+  public void removeUser(User user) {
+    model.remove(user);
+    PersistenceLog.writeTransaction(PersistenceLog.DELETE_USER, user.id, user.name, user.creation.inMs(), null, null);
   }
 
   @Override
@@ -79,11 +86,15 @@ public final class Controller implements RawController, BasicController {
     Uuid id = createId();
     Time time = Time.now();
 
-    Object[] params = new Object[]{id, title, time.inMs(), owner};
     checkBuffer();
-    TransactionLog.writeLog("conversation", params);
+    PersistenceLog.writeTransaction(PersistenceLog.CONVERSATION, id, title, time.inMs(), owner, null);
 
     return newConversation(id, title, owner, time);
+  }
+
+  public void removeConversation(ConversationHeader c) {
+    model.remove(c);
+    PersistenceLog.writeTransaction(PersistenceLog.DELETE_CONVERSATION, c.id, c.title, c.creation.inMs(), null, null);
   }
 
   @Override
@@ -124,7 +135,6 @@ public final class Controller implements RawController, BasicController {
   @Override
   public Message newMessage(Uuid id, Uuid author, Uuid conversation, String body, Time creationTime) {
 
-    System.out.println("add");
     final User foundUser = model.userById().first(author);
     final ConversationPayload foundConversation = model.conversationPayloadById().first(conversation);
 
@@ -224,6 +234,20 @@ public final class Controller implements RawController, BasicController {
     return conversation;
   }
 
+  public void addAuthInfo(Uuid id, String password) {
+    model.addPassword(id, password);
+    //this user now has a password
+    model.removeNewAdmin(id);
+  }
+
+  public void addAdmin(Uuid id) {
+    model.addAdmin(id);
+  }
+
+  public void removeAdmin(Uuid id) {
+    model.removeAdmin(id);
+  }
+
   private Uuid createId() {
 
     Uuid candidate;
@@ -251,15 +275,15 @@ public final class Controller implements RawController, BasicController {
     return !isIdInUse(id);
   }
 
-  public void checkBuffer() {
+  void checkBuffer() {
 
-    File log = new File(persistentPath.getPath());
+    File log = new File(persistentPath, "log.txt");
     Queue<String> logBuffer = Server.getLogBuffer();
 
     if (logBuffer.size() == 15) {
       try {
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(log));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(log, true));
         for (int i = 0; i < 15; i++) {
           writer.write(logBuffer.remove());
           writer.newLine();
@@ -273,16 +297,67 @@ public final class Controller implements RawController, BasicController {
   }
 
   private void updateConversations(Uuid interest, Uuid owner) {
-    for (Uuid u : model.interestedByID().get(owner)) {
-      ConversationHeader conversation = model.conversationById().first(interest);
-      model.userInterests().get(u).addConversation(owner, conversation);
+    if (model.interestedByID().containsKey(owner)) {
+      for (Uuid u : model.interestedByID().get(owner)) {
+        ConversationHeader conversation = model.conversationById().first(interest);
+        model.userInterests().get(u).addConversation(owner, conversation);
+      }
     }
   }
 
-  public void updateMessageCounts(Uuid conversation) {
-    for (Uuid user : model.interestedByID().get(conversation)) {
-      InterestStore myInterests = model.userInterests().get(user);
-      myInterests.increaseMessageCount(conversation);
+  private void updateMessageCounts(Uuid conversation) {
+    if (model.interestedByID().containsKey(conversation)) {
+      for (Uuid user : model.interestedByID().get(conversation)) {
+        InterestStore myInterests = model.userInterests().get(user);
+        myInterests.increaseMessageCount(conversation);
+      }
     }
+  }
+
+  public void addAdmin(String name, boolean log) {
+    Uuid id = model.userByText().first(name).id;
+    model.addAdmin(id);
+    if (log) {
+      PersistenceLog.writeTransaction(PersistenceLog.ADD_ADMIN, id, null, 0, null, null);
+    }
+  }
+
+  public void removeAdmin(String name) {
+    Uuid id = model.userByText().first(name).id;
+    model.removeAdmin(id);
+    PersistenceLog.writeTransaction(PersistenceLog.REMOVE_ADMIN, id, null, 0, null, null);
+  }
+
+  boolean setPassword(Uuid id, String password) {
+    model.removeNewAdmin(id);
+    try {
+      String hash = PasswordUtils.createHash(password);
+      model.addPassword(id, hash);
+      PersistenceLog.writeAuthInfo(persistentPath, id, hash);
+      return true;
+    } catch (PasswordUtils.CannotPerformOperationException e) {
+      return false;
+    }
+  }
+
+  void clean(File persistentPath) {
+    File log = new File(persistentPath, "log.txt");
+    File passwords = new File(persistentPath, "passwords.txt");
+
+    try {
+      FileWriter writer = new FileWriter(log);
+      writer.write("");
+      writer.close();
+
+      FileWriter writer2 = new FileWriter(passwords);
+      writer2.write("");
+      writer2.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    //clear current data in model
+    model.clearStores();
+    Server.getLogBuffer().clear();
   }
 }

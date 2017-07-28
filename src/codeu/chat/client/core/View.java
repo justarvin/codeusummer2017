@@ -14,8 +14,10 @@
 
 package codeu.chat.client.core;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
@@ -204,4 +206,66 @@ final class View implements BasicView {
     return messages;
   }
 
+  @Override
+  public String getAuthInfo(Uuid id) {
+    String password = "";
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.AUTH_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), id);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_RESPONSE) {
+        password = Serializers.nullable(Serializers.STRING).read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return password;
+  }
+
+  @Override
+  public Collection<Uuid> getAdmins() {
+    final HashSet<Uuid> admins = new HashSet<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_ADMINS_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_ADMINS_RESPONSE) {
+        admins.addAll(Serializers.collection(Uuid.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return admins;
+  }
+
+  @Override
+  public Collection<Uuid> getNewAdmins() {
+    final HashSet<Uuid> admins = new HashSet<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_NEW_ADMINS_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_NEW_ADMINS_RESPONSE) {
+        admins.addAll(Serializers.collection(Uuid.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return admins;
+  }
 }

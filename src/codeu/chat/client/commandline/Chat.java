@@ -14,17 +14,20 @@
 
 package codeu.chat.client.commandline;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
-import codeu.chat.common.ServerInfo;
 import codeu.chat.client.core.Context;
 import codeu.chat.client.core.ConversationContext;
 import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
+import codeu.chat.common.ConversationHeader;
+import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Tokenizer;
+
+import java.io.Console;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Stack;
 
 public final class Chat {
 
@@ -107,13 +110,12 @@ public final class Chat {
     // the user for "help" while on the root panel.
     //
     panel.register("help", new Panel.Command() {
+
       @Override
       public void invoke(List<String> args) {
         System.out.println("ROOT MODE");
         System.out.println("  u-list");
         System.out.println("    List all users.");
-        System.out.println("  u-add <name>");
-        System.out.println("    Add a new user with the given name.");
         System.out.println("  u-sign-in <name>");
         System.out.println("    Sign in as the user with the given name.");
         System.out.println("  clean");
@@ -142,25 +144,6 @@ public final class Chat {
       }
     });
 
-    // U-ADD (add user)
-    //
-    // Add a command to add and sign-in as a new user when the user enters
-    // "u-add" while on the root panel.
-    //
-    panel.register("u-add", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        final String name = args.get(0);
-        if (name.length() > 0) {
-          if (context.create(name) == null) {
-            System.out.println("ERROR: Failed to create new user");
-          }
-        } else {
-          System.out.println("ERROR: Missing <username>");
-        }
-      }
-    });
-
     // U-SIGN-IN (sign in user)
     //
     // Add a command to sign-in as a user when the user enters "u-sign-in"
@@ -175,22 +158,30 @@ public final class Chat {
           if (user == null) {
             System.out.format("ERROR: Failed to sign in as '%s'\n", name);
           } else {
-            panels.push(createUserPanel(user));
+            boolean success = false;
+            Console console = System.console();
+            if (context.getNewAdmins().contains(user.user.id)) {
+              String input = new String(console.readPassword("Set a new password: "));
+              String repeat = new String(console.readPassword("Reenter your password: "));
+              System.out.println("Verifying...");
+              if (!input.equals(repeat)) {
+                System.out.println("Error: passwords didn't match.");
+              } else {
+                success = context.setPassword(user.user.id, input);
+              }
+            } else if (context.getAdmins().contains(user.user.id)) {
+              char passwordArray[] = console.readPassword("Enter your password: ");
+              success = context.authenticate(user.user.id, new String(passwordArray));
+              System.out.println("Authenticating...");
+            }
+
+            if (success) {
+              panels.push(createUserPanel(user));
+            }
           }
         } else {
           System.out.println("ERROR: Missing <username>");
         }
-      }
-
-      // Find the first user with the given name and return a user context
-      // for that user. If no user is found, the function will return null.
-      private UserContext findUser(String name) {
-        for (final UserContext user : context.allUsers()) {
-          if (user.user.name.equals(name)) {
-            return user;
-          }
-        }
-        return null;
       }
     });
 
@@ -205,11 +196,11 @@ public final class Chat {
         context.clean();
       }
     });
-    
+
     // SERVER-INFO
-      //
-      // Command to show info about the server.  
-      panel.register("server-info", new Panel.Command() {
+    //
+    // Command to show info about the server.
+    panel.register("server-info", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
         final ServerInfo serverInfo = context.getInfo();
@@ -222,6 +213,268 @@ public final class Chat {
           System.out.println("The server has been running since " + serverInfo.getStartTime().inMs());
         }
       }
+    });
+
+    // Now that the panel has all its commands registered, return the panel
+    // so that it can be used.
+    return panel;
+  }
+
+  private UserContext findUser(String name) {
+    for (final UserContext user : context.allUsers()) {
+      if (user.user.name.equals(name)) {
+        return user;
+      }
+    }
+    return null;
+  }
+
+  public Panel createUserPanel(final UserContext user) {
+
+    final Panel panel = new Panel();
+
+      // HELP
+      //
+      // Add a command that will print a list of all commands and their
+      // descriptions when the user enters "help" while on the user panel.
+      //
+      panel.register("help", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          System.out.println("USER MODE");
+
+          if (context.getAdmins().contains(user.user.id)) {
+            System.out.println("  u-list");
+            System.out.println("    List all users.");
+            System.out.println("  u-add <name> (<type>)");
+            System.out.println("    Creates a user with given name as a regular user by default. Else append admin.");
+            System.out.println("  u-delete <name>");
+            System.out.println("    Deletes user with the given name");
+            System.out.println("  a-add <name>");
+            System.out.println("    Gives user with given name admin privileges.");
+            System.out.println("  a-remove <name>");
+            System.out.println("    Removes admin privileges for the given user.");
+            System.out.println("  c-delete <name>");
+            System.out.println("    Deletes the conversation with the given name");
+          }
+
+          System.out.println("  c-list");
+          System.out.println("    List all conversations that the current user can interact with.");
+          System.out.println("  c-add <title>");
+          System.out.println("    Add a new conversation with the given title and join it as the current user.");
+          System.out.println("  c-join <title>");
+          System.out.println("    Join the conversation as the current user.");
+          System.out.println("  info");
+          System.out.println("    Display all info for the current user");
+          System.out.println("  interest");
+          System.out.println("    Display the panel for managing interests and status updates.");
+          System.out.println("  back");
+          System.out.println("    Go back to ROOT MODE.");
+          System.out.println("  exit");
+          System.out.println("    Exit the program.");
+        }
+      });
+
+      // Only register these commands if current user is an admin
+      if (context.getAdmins().contains(user.user.id)) {
+
+        // U-LIST (user list)
+        //
+        // Add a command to print all users registered on the server when the admin
+        // enters "u-list".
+        //
+        panel.register("u-list", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            for (final UserContext user : context.allUsers()) {
+              System.out.format(
+                      "USER %s (UUID:%s)\n",
+                      user.user.name,
+                      user.user.id);
+            }
+          }
+        });
+
+        // ADD ADMIN
+        //
+        // Adds the specified user as an admin
+        panel.register("a-add", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String name = args.get(0);
+            boolean success = context.addAdmin(name, true);
+            if (success) {
+              System.out.println("Administrator privileges given to " + name);
+            } else {
+              System.out.println("Operation failed");
+            }
+          }
+        });
+
+        // REMOVE ADMIN
+        //
+        // Removes the specified user as an admin
+        panel.register("a-remove", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String name = args.get(0);
+            context.removeAdmin(name);
+          }
+        });
+
+        // ADD USER
+        //
+        // Adds a new user with the specified name as a regular user by default.
+        // If the client has specified "admin", this user will be given admin controls.
+        panel.register("u-add", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String name = args.get(0);
+            if (name.length() > 0) {
+              if (context.create(name) == null) {
+                System.out.println("ERROR: Failed to create new user");
+              }
+            } else {
+              System.out.println("ERROR: Missing <username>");
+            }
+            if (args.size() == 2) {
+              boolean success = context.addAdmin(name, false);
+              if (!success) {
+                System.out.format("ERROR: Couldn't add %s as admin.", name);
+              }
+            }
+          }
+        });
+
+        panel.register("u-delete", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String name = args.get(0);
+            if (name.equals(user.user.name)) {
+              System.out.println("ERROR: Can't delete yourself");
+            } else if (name.length() > 0) {
+              UserContext user = findUser(name);
+              if (user != null) {
+                context.deleteUser(user.user);
+              } else {
+                System.out.println("ERROR: User does not exist");
+              }
+            } else {
+              System.out.println("ERROR: Missing <username>");
+            }
+          }
+        });
+
+        panel.register("c-delete", new Panel.Command() {
+          @Override
+          public void invoke(List<String> args) {
+            String title = args.get(0);
+            ConversationHeader conversation = findConversation(title);
+            if (title.length() > 0) {
+              if (conversation != null) {
+                context.deleteConversation(conversation);
+              } else {
+                System.out.println("ERROR: Conversation does not exist");
+              }
+            } else {
+              System.out.println("ERROR: Missing <title>");
+            }
+          }
+        });
+
+      }
+
+      // C-LIST (list conversations)
+      //
+      // Add a command that will print all conversations when the user enters
+      // "c-list" while on the user panel.
+      //
+      panel.register("c-list", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          for (final ConversationContext conversation : user.conversations()) {
+            System.out.format(
+                    "CONVERSATION %s (UUID:%s)\n",
+                    conversation.conversation.title,
+                    conversation.conversation.id);
+          }
+        }
+      });
+
+      // C-ADD (add conversation)
+      //
+      // Add a command that will create and join a new conversation when the user
+      // enters "c-add" while on the user panel.
+      //
+      panel.register("c-add", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          final String name = args.get(0);
+          if (name.length() > 0) {
+            final ConversationContext conversation = user.start(name);
+            if (conversation == null) {
+              System.out.println("ERROR: Failed to create new conversation");
+            } else {
+              panels.push(createConversationPanel(conversation));
+            }
+          } else {
+            System.out.println("ERROR: Missing <title>");
+          }
+        }
+      });
+
+      // C-JOIN (join conversation)
+      //
+      // Add a command that will joing a conversation when the user enters
+      // "c-join" while on the user panel.
+      //
+      panel.register("c-join", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          final String name = args.get(0);
+          if (name.length() > 0) {
+            final ConversationContext conversation = find(name);
+            if (conversation == null) {
+              System.out.format("ERROR: No conversation with name '%s'\n", name);
+            } else {
+              panels.push(createConversationPanel(conversation));
+            }
+          } else {
+            System.out.println("ERROR: Missing <title>");
+          }
+        }
+
+        // Find the first conversation with the given name and return its context.
+        // If no conversation has the given name, this will return null.
+        private ConversationContext find(String title) {
+          for (final ConversationContext conversation : user.conversations()) {
+            if (title.equals(conversation.conversation.title)) {
+              return conversation;
+            }
+          }
+          return null;
+        }
+      });
+
+      // INFO
+      //
+      // Add a command that will print info about the current context when the
+      // user enters "info" while on the user panel.
+      //
+      panel.register("info", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          System.out.println("User Info:");
+          System.out.format("  Name : %s\n", user.user.name);
+          System.out.format("  Id   : UUID:%s\n", user.user.id);
+        }
+      });
+
+      panel.register("interest", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          panels.push(createInterestPanel(user));
+        }
       });
 
     // Now that the panel has all its commands registered, return the panel
@@ -229,319 +482,205 @@ public final class Chat {
     return panel;
   }
 
-    private Panel createUserPanel(final UserContext user) {
-
-        final Panel panel = new Panel();
-
-        // HELP
-        //
-        // Add a command that will print a list of all commands and their
-        // descriptions when the user enters "help" while on the user panel.
-        //
-        panel.register("help", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                System.out.println("USER MODE");
-                System.out.println("  c-list");
-                System.out.println("    List all conversations that the current user can interact with.");
-                System.out.println("  c-add <title>");
-                System.out.println("    Add a new conversation with the given title and join it as the current user.");
-                System.out.println("  c-join <title>");
-                System.out.println("    Join the conversation as the current user.");
-                System.out.println("  info");
-                System.out.println("    Display all info for the current user");
-                System.out.println("  interest");
-                System.out.println("    Display the panel for managing interests and status updates.");
-                System.out.println("  back");
-                System.out.println("    Go back to ROOT MODE.");
-                System.out.println("  exit");
-                System.out.println("    Exit the program.");
-            }
-        });
-
-        // C-LIST (list conversations)
-        //
-        // Add a command that will print all conversations when the user enters
-        // "c-list" while on the user panel.
-        //
-        panel.register("c-list", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                for (final ConversationContext conversation : user.conversations()) {
-                    System.out.format(
-                            "CONVERSATION %s (UUID:%s)\n",
-                            conversation.conversation.title,
-                            conversation.conversation.id);
-                }
-            }
-        });
-
-        // C-ADD (add conversation)
-        //
-        // Add a command that will create and join a new conversation when the user
-        // enters "c-add" while on the user panel.
-        //
-        panel.register("c-add", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                final String name = args.get(0);
-                if (name.length() > 0) {
-                    final ConversationContext conversation = user.start(name);
-                    if (conversation == null) {
-                        System.out.println("ERROR: Failed to create new conversation");
-                    } else {
-                        panels.push(createConversationPanel(conversation));
-                    }
-                } else {
-                    System.out.println("ERROR: Missing <title>");
-                }
-            }
-        });
-
-        // C-JOIN (join conversation)
-        //
-        // Add a command that will joing a conversation when the user enters
-        // "c-join" while on the user panel.
-        //
-        panel.register("c-join", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                final String name = args.get(0);
-                if (name.length() > 0) {
-                    final ConversationContext conversation = find(name);
-                    if (conversation == null) {
-                        System.out.format("ERROR: No conversation with name '%s'\n", name);
-                    } else {
-                        panels.push(createConversationPanel(conversation));
-                    }
-                } else {
-                    System.out.println("ERROR: Missing <title>");
-                }
-            }
-
-            // Find the first conversation with the given name and return its context.
-            // If no conversation has the given name, this will return null.
-            private ConversationContext find(String title) {
-                for (final ConversationContext conversation : user.conversations()) {
-                    if (title.equals(conversation.conversation.title)) {
-                        return conversation;
-                    }
-                }
-                return null;
-            }
-        });
-
-        // INFO
-        //
-        // Add a command that will print info about the current context when the
-        // user enters "info" while on the user panel.
-        //
-        panel.register("info", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                System.out.println("User Info:");
-                System.out.format("  Name : %s\n", user.user.name);
-                System.out.format("  Id   : UUID:%s\n", user.user.id);
-            }
-        });
-
-        panel.register("interest", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                panels.push(createInterestPanel(user));
-            }
-        });
-
-        // Now that the panel has all its commands registered, return the panel
-        // so that it can be used.
-        return panel;
+  private ConversationHeader findConversation(String title) {
+    for (final ConversationHeader c : context.allConversations()) {
+      if (c.title.equals(title)) {
+        return c;
+      }
     }
+    return null;
+  }
 
-    private Panel createInterestPanel(final UserContext user) {
+  private Panel createInterestPanel(final UserContext user) {
 
-        final Panel panel = new Panel();
+    final Panel panel = new Panel();
 
-        panel.register("help", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                System.out.println("  u-status <name>");
-                System.out.println("    Display status update for the user with the given name.");
-                System.out.println("  c-status <name>");
-                System.out.println("    Display status update for the conversation with the given name.");
-                System.out.println("  i-add-user <name>");
-                System.out.println("    Add the user with the given name as an interest.");
-                System.out.println("  i-add-conv <title>");
-                System.out.println("    Add the conversation with the given title as an interest.");
-                System.out.println("  i-remove-user <name>");
-                System.out.println("    Remove the user with the given name as an interest.");
-                System.out.println("  i-remove-conv <title>");
-                System.out.println("    Remove the conversation with the given title as an interest.");
-                System.out.println("  back");
-                System.out.println("    Go back to the user panel.");
-            }
-        });
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("  u-status <name>");
+        System.out.println("    Display status update for the user with the given name.");
+        System.out.println("  c-status <name>");
+        System.out.println("    Display status update for the conversation with the given name.");
+        System.out.println("  i-add-user <name>");
+        System.out.println("    Add the user with the given name as an interest.");
+        System.out.println("  i-add-conv <title>");
+        System.out.println("    Add the conversation with the given title as an interest.");
+        System.out.println("  i-remove-user <name>");
+        System.out.println("    Remove the user with the given name as an interest.");
+        System.out.println("  i-remove-conv <title>");
+        System.out.println("    Remove the conversation with the given title as an interest.");
+        System.out.println("  back");
+        System.out.println("    Go back to the user panel.");
+      }
+    });
 
-        // STATUS UPDATE
-        //
-        // Displays status update for a specified user.
-        //
-        panel.register("u-status", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                String name = args.get(0);
-                System.out.format("Conversations created or added to by %s since last update\n", name);
-                for (final ConversationContext conversation : user.getUserUpdate(user.user.id, name)) {
-                    System.out.format(
-                            "CONVERSATION %s (UUID:%s)\n",
-                            conversation.conversation.title,
-                            conversation.conversation.id);
-                }
-            }
-        });
+    // STATUS UPDATE
+    //
+    // Displays status update for a specified user.
+    //
+    panel.register("u-status", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        String name = args.get(0);
+        System.out.format("Conversations created or added to by %s since last update\n", name);
+        for (final ConversationContext conversation : user.getUserUpdate(user.user.id, name)) {
+          System.out.format(
+                  "CONVERSATION %s (UUID:%s)\n",
+                  conversation.conversation.title,
+                  conversation.conversation.id);
+        }
+      }
+    });
 
-        // STATUS UPDATE
-        //
-        // Displays status update for a specified conversation.
-        //
-        panel.register("c-status", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                String title = args.get(0);
-                int messages = user.getConversationUpdate(user.user.id, title);
-                System.out.println("Number of new messages since last update: " + messages);
-            }
-        });
+    // STATUS UPDATE
+    //
+    // Displays status update for a specified conversation.
+    //
+    panel.register("c-status", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        String title = args.get(0);
+        int messages = user.getConversationUpdate(user.user.id, title);
+        System.out.println("Number of new messages since last update: " + messages);
+      }
+    });
 
-        // ADD USER INTEREST
-        //
-        // Add a user interest for this user.
-        panel.register("i-add-user", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                final String name = args.get(0);
-                user.addUserInterest(name, user.user.id);
-            }
-        });
+    // ADD USER INTEREST
+    //
+    // Add a user interest for this user.
+    panel.register("i-add-user", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String name = args.get(0);
+        user.addUserInterest(name, user.user.id);
+      }
+    });
 
-        // ADD CONVERSATION INTEREST
-        //
-        // Add a conversation interest for this user.
-        panel.register("i-add-conv", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                final String title = args.get(0);
-                user.addConversationInterest(title, user.user.id);
-            }
-        });
+    // ADD CONVERSATION INTEREST
+    //
+    // Add a conversation interest for this user.
+    panel.register("i-add-conv", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String title = args.get(0);
+        user.addConversationInterest(title, user.user.id);
+      }
+    });
 
-        // REMOVE USER INTEREST
-        //
-        // Removes the given user as an interest for this user.
-        panel.register("i-remove-user", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                final String name = args.get(0);
-                user.removeUserInterest(name, user.user.id);
-            }
-        });
+    // REMOVE USER INTEREST
+    //
+    // Removes the given user as an interest for this user.
+    panel.register("i-remove-user", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String name = args.get(0);
+        user.removeUserInterest(name, user.user.id);
+      }
+    });
 
-        // REMOVE CONVERSATION INTEREST
-        //
-        // Removes the given conversation as an interest for this user.
-        panel.register("i-remove-conv", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                final String title = args.get(0);
-                user.removeConversationInterest(title, user.user.id);
-            }
-        });
+    // REMOVE CONVERSATION INTEREST
+    //
+    // Removes the given conversation as an interest for this user.
+    panel.register("i-remove-conv", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String title = args.get(0);
+        user.removeConversationInterest(title, user.user.id);
+      }
+    });
 
-        return panel;
-    }
+    return panel;
+  }
 
-    private Panel createConversationPanel(final ConversationContext conversation) {
+  private Panel createConversationPanel(final ConversationContext conversation) {
 
-        final Panel panel = new Panel();
+    final Panel panel = new Panel();
 
-        // HELP
-        //
-        // Add a command that will print all the commands and their descriptions
-        // when the user enters "help" while on the conversation panel.
-        //
-        panel.register("help", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                System.out.println("USER MODE");
-                System.out.println("  m-list");
-                System.out.println("    List all messages in the current conversation.");
-                System.out.println("  m-add <message>");
-                System.out.println("    Add a new message to the current conversation as the current user.");
-                System.out.println("  info");
-                System.out.println("    Display all info about the current conversation.");
-                System.out.println("  back");
-                System.out.println("    Go back to USER MODE.");
-                System.out.println("  exit");
-                System.out.println("    Exit the program.");
-            }
-        });
+    // HELP
+    //
+    // Add a command that will print all the commands and their descriptions
+    // when the user enters "help" while on the conversation panel.
+    //
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("USER MODE");
+        System.out.println("  m-list");
+        System.out.println("    List all messages in the current conversation.");
+        System.out.println("  m-add <message>");
+        System.out.println("    Add a new message to the current conversation as the current user.");
+        System.out.println("  info");
+        System.out.println("    Display all info about the current conversation.");
+        System.out.println("  back");
+        System.out.println("    Go back to USER MODE.");
+        System.out.println("  exit");
+        System.out.println("    Exit the program.");
+      }
+    });
 
-        // M-LIST (list messages)
-        //
-        // Add a command to print all messages in the current conversation when the
-        // user enters "m-list" while on the conversation panel.
-        //
-        panel.register("m-list", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                System.out.println("--- start of conversation ---");
-                for (MessageContext message = conversation.firstMessage();
-                     message != null;
-                     message = message.next()) {
-                    System.out.println();
-                    System.out.format("USER : %s\n", message.message.author);
-                    System.out.format("SENT : %s\n", message.message.creation);
-                    System.out.println();
-                    System.out.println(message.message.content);
-                    System.out.println();
-                }
-                System.out.println("---  end of conversation  ---");
-            }
-        });
+    // M-LIST (list messages)
+    //
+    // Add a command to print all messages in the current conversation when the
+    // user enters "m-list" while on the conversation panel.
+    //
+    panel.register("m-list", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("--- start of conversation ---");
+        for (MessageContext message = conversation.firstMessage();
+             message != null;
+             message = message.next()) {
+          System.out.println();
+          System.out.format("USER : %s\n", message.message.author);
+          System.out.format("SENT : %s\n", message.message.creation);
+          System.out.println();
+          System.out.println(message.message.content);
+          System.out.println();
+        }
+        System.out.println("---  end of conversation  ---");
+      }
+    });
 
-        // M-ADD (add message)
-        //
-        // Add a command to add a new message to the current conversation when the
-        // user enters "m-add" while on the conversation panel.
-        //
-        panel.register("m-add", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                final String message = args.get(0);
-                if (message.length() > 0) {
-                    conversation.add(message);
-                } else {
-                    System.out.println("ERROR: Messages must contain text");
-                }
-            }
-        });
+    // M-ADD (add message)
+    //
+    // Add a command to add a new message to the current conversation when the
+    // user enters "m-add" while on the conversation panel.
+    //
+    panel.register("m-add", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String message = args.get(0);
+        if (message.length() > 0) {
+          conversation.add(message);
+        } else {
+          System.out.println("ERROR: Messages must contain text");
+        }
+      }
+    });
 
-        // INFO
-        //
-        // Add a command to print info about the current conversation when the user
-        // enters "info" while on the conversation panel.
-        //
-        panel.register("info", new Panel.Command() {
-            @Override
-            public void invoke(List<String> args) {
-                System.out.println("Conversation Info:");
-                System.out.format("  Title : %s\n", conversation.conversation.title);
-                System.out.format("  Id    : UUID:%s\n", conversation.conversation.id);
-                System.out.format("  Owner : %s\n", conversation.conversation.owner);
-            }
-        });
+    // INFO
+    //
+    // Add a command to print info about the current conversation when the user
+    // enters "info" while on the conversation panel.
+    //
+    panel.register("info", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("Conversation Info:");
+        System.out.format("  Title : %s\n", conversation.conversation.title);
+        System.out.format("  Id    : UUID:%s\n", conversation.conversation.id);
+        System.out.format("  Owner : %s\n", conversation.conversation.owner);
+      }
+    });
 
-        // Now that the panel has all its commands registered, return the panel
-        // so that it can be used.
-        return panel;
-    }
+    // Now that the panel has all its commands registered, return the panel
+    // so that it can be used.
+    return panel;
+  }
+
+  // accessor method for testing purposes
+  public Stack<Panel> getPanels() {
+    return panels;
+  }
 }

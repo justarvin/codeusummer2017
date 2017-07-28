@@ -14,11 +14,13 @@
 
 package codeu.chat.server;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
@@ -70,15 +72,26 @@ public final class Model {
   private Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
   private Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
 
-  private Map<Uuid, InterestStore> interestsByID = new HashMap<>();
-
   //from user/conversation id to the uuid's of the users who care
   private Map<Uuid, Set<Uuid>> watching = new HashMap<>();
+  private Map<Uuid, InterestStore> interestsByID = new HashMap<>();
+
+  //set of admins who haven't set their passwords yet.
+  //new admins set their passwords after logging in for the first time
+  private Set<Uuid> newAdmins = new HashSet<>();
+  private Set<Uuid> admins = new HashSet<>();
+  private Map<Uuid, String> passwords = new HashMap<>();
 
   public void add(User user) {
     userById.insert(user.id, user);
     userByTime.insert(user.creation, user);
     userByText.insert(user.name, user);
+  }
+
+  public void remove(User user) {
+    userById.clear(user.id);
+    userByTime.clear(user.creation);
+    userByText.clear(user.name);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -98,6 +111,13 @@ public final class Model {
     conversationByTime.insert(conversation.creation, conversation);
     conversationByText.insert(conversation.title, conversation);
     conversationPayloadById.insert(conversation.id, new ConversationPayload(conversation.id));
+  }
+
+  public void remove(ConversationHeader c) {
+    conversationById.clear(c.id);
+    conversationByTime.clear(c.creation);
+    conversationByText.clear(c.title);
+    conversationPayloadById.clear(c.id);
   }
 
   public StoreAccessor<Uuid, ConversationHeader> conversationById() {
@@ -159,6 +179,40 @@ public final class Model {
     return interestsByID;
   }
 
+  public void removeNewAdmin(Uuid id) {
+    newAdmins.remove(id);
+  }
+
+  public boolean isAdmin(Uuid id) {
+    return admins.contains(id);
+  }
+
+  public void addAdmin(Uuid id) {
+    admins.add(id);
+    newAdmins.add(id);
+  }
+
+  public void removeAdmin(Uuid id) {
+    admins.remove(id);
+    newAdmins.remove(id);
+  }
+
+  public void addPassword(Uuid id, String password) {
+    passwords.put(id, password);
+  }
+
+  public String getPassword(Uuid id) {
+    return passwords.get(id);
+  }
+
+  public Collection<Uuid> getAdmins() {
+    return admins;
+  }
+
+  public Collection<Uuid> getNewAdmins() {
+    return newAdmins;
+  }
+
   public void clearStores() {
     userById = new Store<>(UUID_COMPARE);
     userByTime = new Store<>(TIME_COMPARE);
@@ -173,5 +227,11 @@ public final class Model {
     messageById = new Store<>(UUID_COMPARE);
     messageByTime = new Store<>(TIME_COMPARE);
     messageByText = new Store<>(STRING_COMPARE);
+
+    watching.clear();
+    interestsByID.clear();
+    newAdmins.clear();
+    admins.clear();
+    passwords.clear();
   }
 }

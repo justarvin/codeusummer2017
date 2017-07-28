@@ -16,12 +16,13 @@ package codeu.chat.client.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import codeu.chat.common.BasicView;
-import codeu.chat.common.User;
+import java.util.HashSet;
 
 import codeu.chat.common.BasicView;
+import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.User;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
 
 public final class Context {
@@ -49,6 +50,12 @@ public final class Context {
     return users;
   }
 
+  public Iterable<ConversationHeader> allConversations() {
+    final Collection<ConversationHeader> conversations = new ArrayList<>();
+    conversations.addAll(view.getConversations());
+    return conversations;
+  }
+
   public void clean() {
     controller.clean();
   }
@@ -61,4 +68,39 @@ public final class Context {
     return view.getInfo();
   }
 
+  public void deleteUser(User user) {
+    controller.deleteUser(user);
+  }
+
+  public void deleteConversation(ConversationHeader c) {
+    controller.deleteConversation(c);
+  }
+
+  public View getView() {
+    return (View)view;
+  }
+
+  public HashSet<Uuid> getNewAdmins() {
+    return (HashSet<Uuid>) view.getNewAdmins();
+  }
+
+  public HashSet<Uuid> getAdmins() {
+    return (HashSet<Uuid>) view.getAdmins();
+  }
+
+  public boolean addAdmin(String name, boolean log) {
+    return controller.addAdmin(name, log);
+  }
+
+  public void removeAdmin(String name) {
+    controller.removeAdmin(name);
+  }
+
+  public boolean authenticate(Uuid id, String input) {
+    return controller.authenticate(id, input);
+  }
+
+  public boolean setPassword(Uuid id, String input) {
+    return controller.setPassword(id, input);
+  }
 }

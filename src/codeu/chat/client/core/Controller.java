@@ -25,7 +25,9 @@ import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
 
-final class Controller implements BasicController {
+import java.io.IOException;
+
+public final class Controller implements BasicController {
 
   private final static Logger.Log LOG = Logger.newLog(Controller.class);
 
@@ -239,4 +241,122 @@ final class Controller implements BasicController {
       LOG.error(ex, "Exception during call on server.");
     }
   }
+
+  void deleteUser(User user) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.DELETE_USER_REQUEST);
+      User.SERIALIZER.write(connection.out(), user);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.DELETE_USER_RESPONSE) {
+        LOG.error("Deleted user: " + user.name);
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  void deleteConversation(ConversationHeader c) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.DELETE_CONVERSATION_REQUEST);
+      ConversationHeader.SERIALIZER.write(connection.out(), c);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.DELETE_CONVERSATION_RESPONSE) {
+        LOG.info("Deleted user: " + c.title);
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  public boolean setPassword(Uuid id, String password) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.SET_PASSWORD_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), id);
+      Serializers.STRING.write(connection.out(), password);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SET_PASSWORD_RESPONSE) {
+        LOG.info("Saved auth info");
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
+  }
+
+  boolean addAdmin(String name, boolean log) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.ADD_ADMIN_REQUEST);
+      Serializers.STRING.write(connection.out(), name);
+      Serializers.BOOLEAN.write(connection.out(), log);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.ADD_ADMIN_RESPONSE) {
+        LOG.info("Added admin");
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
+  }
+
+  void removeAdmin(String name) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_ADMIN_REQUEST);
+      Serializers.STRING.write(connection.out(), name);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_ADMIN_RESPONSE) {
+        LOG.info("Removed admin");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
+  boolean authenticate(Uuid id, String input) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.AUTH_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), id);
+      Serializers.STRING.write(connection.out(), input);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_RESPONSE) {
+        LOG.info("Sent in authentication request.");
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
+  }
+
 }

@@ -44,6 +44,7 @@ public final class View implements BasicView, SinglesView {
 
   @Override
   public Collection<User> getUsers() {
+    System.out.println(all(model.userById()).size());
     return all(model.userById());
   }
 
@@ -125,6 +126,25 @@ public final class View implements BasicView, SinglesView {
   public int getConversationUpdate(Uuid owner, String title) {
     Uuid conversation = model.conversationByText().first(title).id;
     return model.userInterests().get(owner).getConversationUpdate(conversation);
+  }
+
+  @Override
+  public String getAuthInfo(Uuid id) {
+    return null;
+  }
+
+  @Override
+  public Collection<Uuid> getAdmins() {
+    return model.getAdmins();
+  }
+
+  @Override
+  public Collection<Uuid> getNewAdmins() {
+    return model.getNewAdmins();
+  }
+
+  public String getPassword(Uuid id) {
+    return model.getPassword(id);
   }
 
 }
