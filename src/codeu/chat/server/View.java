@@ -147,4 +147,9 @@ public final class View implements BasicView, SinglesView {
     return model.getPassword(id);
   }
 
+  @Override
+  public Collection<String> getPlayTitles() {
+    return model.getPlayTitles();
+  }
+
 }

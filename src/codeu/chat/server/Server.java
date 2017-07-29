@@ -399,6 +399,31 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.PLAY_TITLE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.PLAY_TITLE_RESPONSE);
+        Serializers.collection(Serializers.STRING).write(out, view.getPlayTitles());
+      }
+    });
+
+    this.commands.put(NetworkCode.NEW_PLAY_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid member = Uuid.SERIALIZER.read(in);
+        final String title = Serializers.STRING.read(in);
+        controller.newPlay(member, title);
+      }
+    });
+
+    this.commands.put(NetworkCode.JOIN_PLAY_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid member = Uuid.SERIALIZER.read(in);
+        final String title = Serializers.STRING.read(in);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {

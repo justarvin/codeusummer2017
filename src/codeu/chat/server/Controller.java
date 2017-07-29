@@ -340,6 +340,10 @@ public final class Controller implements RawController, BasicController {
     }
   }
 
+  void newPlay(Uuid member, String title) {
+
+  }
+
   void clean(File persistentPath) {
     File log = new File(persistentPath, "log.txt");
     File passwords = new File(persistentPath, "passwords.txt");
