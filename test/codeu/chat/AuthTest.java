@@ -1,6 +1,6 @@
 package codeu.chat;
 
-import codeu.chat.util.PasswordStorage;
+import codeu.chat.util.PasswordUtils;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -15,9 +15,9 @@ public class AuthTest {
   public void testWrongPassword() {
     boolean pass = true;
     try {
-      String correctHashed = PasswordStorage.createHash("test");
+      String correctHashed = PasswordUtils.createHash("test");
       String testPassword = "incorrect";
-      pass = PasswordStorage.verifyPassword(testPassword, correctHashed);
+      pass = PasswordUtils.verifyPassword(testPassword, correctHashed);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -28,9 +28,9 @@ public class AuthTest {
   public void testCorrectPassword() {
     boolean pass = false;
     try {
-      String correctHashed = PasswordStorage.createHash("test");
+      String correctHashed = PasswordUtils.createHash("test");
       String testPassword = "test";
-      pass = PasswordStorage.verifyPassword(testPassword, correctHashed);
+      pass = PasswordUtils.verifyPassword(testPassword, correctHashed);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -42,8 +42,8 @@ public class AuthTest {
     String hashed = "";
     String pass = "rawPassword";
     try {
-      hashed = PasswordStorage.createHash(pass);
-    } catch (PasswordStorage.CannotPerformOperationException e) {
+      hashed = PasswordUtils.createHash(pass);
+    } catch (PasswordUtils.CannotPerformOperationException e) {
       e.printStackTrace();
     }
     assertNotEquals(pass, hashed);
