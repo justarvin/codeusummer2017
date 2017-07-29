@@ -20,6 +20,7 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.util.PlayInfo;
 import codeu.chat.util.Tokenizer;
 
 import java.io.Console;
@@ -508,7 +509,9 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         System.out.println("  titles");
-        System.out.println("    Display all plays available.");
+        System.out.println("    Display titles of all available plays.");
+        System.out.println("  all");
+        System.out.println("    Display all ongoing plays and their statuses.");
         System.out.println("  new <title>");
         System.out.println("    Create and join a new play enactment for the given title.");
         System.out.println("  join <title>");
@@ -523,6 +526,15 @@ public final class Chat {
       public void invoke(List<String> args) {
         for (final String title : context.allPlayTitles()) {
           System.out.println(title);
+        }
+      }
+    });
+
+    panel.register("all", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        for (final PlayInfo p : context.allPlays()) {
+          System.out.format("%s - %s", p.getTitle(), p.getStatus());
         }
       }
     });

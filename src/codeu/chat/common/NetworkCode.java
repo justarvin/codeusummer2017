@@ -75,5 +75,7 @@ public final class NetworkCode {
       NEW_PLAY_REQUEST = 67,
       NEW_PLAY_RESPONSE = 68,
       JOIN_PLAY_REQUEST = 69,
-      JOIN_PLAY_RESPONSE = 70;
+      JOIN_PLAY_RESPONSE = 70,
+      GET_PLAYS_REQUEST = 71,
+      GET_PLAYS_RESPONSE = 72;
 }
