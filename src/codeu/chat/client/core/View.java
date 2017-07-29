@@ -268,4 +268,25 @@ final class View implements BasicView {
     }
     return admins;
   }
+
+  public Collection<String> getPlayTitles() {
+    final HashSet<String> titles = new HashSet<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.PLAY_TITLE_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.PLAY_TITLE_RESPONSE) {
+        titles.addAll(Serializers.collection(Serializers.STRING).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+
+    return titles;
+  }
 }

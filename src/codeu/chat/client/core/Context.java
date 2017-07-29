@@ -56,6 +56,12 @@ public final class Context {
     return conversations;
   }
 
+  public Iterable<String> allPlayTitles() {
+    final Collection<String> titles = new ArrayList<>();
+    titles.addAll(view.getPlayTitles());
+    return titles;
+  }
+
   public void clean() {
     controller.clean();
   }
@@ -102,5 +108,13 @@ public final class Context {
 
   public boolean setPassword(Uuid id, String input) {
     return controller.setPassword(id, input);
+  }
+
+  public void newPlay(Uuid member, String title) {
+    controller.newPlay(member, title);
+  }
+
+  public void joinPlay(Uuid member, String title) {
+    controller.joinPlay(member, title);
   }
 }

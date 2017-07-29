@@ -59,4 +59,6 @@ public interface BasicView {
   Collection<Uuid> getAdmins();
 
   Collection<Uuid> getNewAdmins();
+
+  Collection<String> getPlayTitles();
 }

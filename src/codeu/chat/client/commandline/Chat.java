@@ -268,6 +268,8 @@ public final class Chat {
           System.out.println("    Display all info for the current user");
           System.out.println("  interest");
           System.out.println("    Display the panel for managing interests and status updates.");
+          System.out.println("  play");
+          System.out.println("    Display options for enacting a play with other users.");
           System.out.println("  back");
           System.out.println("    Go back to ROOT MODE.");
           System.out.println("  exit");
@@ -477,6 +479,13 @@ public final class Chat {
         }
       });
 
+      panel.register("play", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          panels.push(createPlayPanel(user));
+        }
+      });
+
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
     return panel;
@@ -489,6 +498,52 @@ public final class Chat {
       }
     }
     return null;
+  }
+
+  private Panel createPlayPanel(final UserContext user) {
+
+    final Panel panel = new Panel();
+
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("  titles");
+        System.out.println("    Display all plays available.");
+        System.out.println("  new <title>");
+        System.out.println("    Create and join a new play enactment for the given title.");
+        System.out.println("  join <title>");
+        System.out.println("    Join an ongoing play enactment for the given title.");
+        System.out.println("  back");
+        System.out.println("    Go back to the user panel.");
+      }
+    });
+
+    panel.register("titles", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        for (final String title : context.allPlayTitles()) {
+          System.out.println(title);
+        }
+      }
+    });
+
+    panel.register("new", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String title = args.get(0);
+        context.newPlay(user.user.id, title);
+      }
+    });
+
+    panel.register("join", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String title = args.get(0);
+        context.joinPlay(user.user.id, title);
+      }
+    });
+
+    return panel;
   }
 
   private Panel createInterestPanel(final UserContext user) {
