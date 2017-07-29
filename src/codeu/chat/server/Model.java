@@ -26,6 +26,7 @@ import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
 import codeu.chat.util.InterestStore;
+import codeu.chat.util.PlayInfo;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.Store;
@@ -81,6 +82,11 @@ public final class Model {
   private Set<Uuid> newAdmins = new HashSet<>();
   private Set<Uuid> admins = new HashSet<>();
   private Map<Uuid, String> passwords = new HashMap<>();
+
+  //map of plays lacking members so any user who decides to join a certain play
+  //will be added as a character in that play
+  private Map<String, PlayInfo> openPlays = new HashMap<>();
+  private Set<String> availablePlays = new HashSet<>();
 
   public void add(User user) {
     userById.insert(user.id, user);
