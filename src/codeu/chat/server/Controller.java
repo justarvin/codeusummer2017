@@ -341,7 +341,11 @@ public final class Controller implements RawController, BasicController {
   }
 
   void newPlay(Uuid member, String title) {
+    model.newPlay(member, title);
+  }
 
+  void joinPlay(Uuid member, String title) {
+    model.joinPlay(member, title);
   }
 
   void clean(File persistentPath) {
