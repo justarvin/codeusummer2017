@@ -359,7 +359,7 @@ public final class Controller implements BasicController {
     return false;
   }
 
-  void newPlay(Uuid member, String title) {
+  ConversationHeader newPlay(Uuid member, String title) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_PLAY_REQUEST);
@@ -368,6 +368,8 @@ public final class Controller implements BasicController {
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_PLAY_RESPONSE) {
         LOG.info("Added new play enactment.");
+        ConversationHeader play = ConversationHeader.SERIALIZER.read(connection.in());
+        return play;
       } else {
         LOG.error("Response from server failed.");
       }
@@ -376,9 +378,10 @@ public final class Controller implements BasicController {
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(e, "Exception during call on server.");
     }
+    return null;
   }
 
-  void joinPlay(Uuid member, String title) {
+  ConversationHeader joinPlay(Uuid member, String title) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.JOIN_PLAY_REQUEST);
@@ -386,7 +389,28 @@ public final class Controller implements BasicController {
       Serializers.STRING.write(connection.out(), title);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.JOIN_PLAY_RESPONSE) {
-        LOG.info("Added new play enactment.");
+        LOG.info("Joined play enactment.");
+        ConversationHeader play = ConversationHeader.SERIALIZER.read(connection.in());
+        return play;
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return null;
+  }
+
+  void speak() {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.SPEAK_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SPEAK_RESPONSE) {
+        LOG.info("Joined play enactment.");
+
       } else {
         LOG.error("Response from server failed.");
       }

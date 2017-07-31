@@ -93,6 +93,10 @@ public final class Context {
     return (View)view;
   }
 
+  public Controller getController() {
+    return controller;
+  }
+
   public HashSet<Uuid> getNewAdmins() {
     return (HashSet<Uuid>) view.getNewAdmins();
   }
@@ -117,11 +121,11 @@ public final class Context {
     return controller.setPassword(id, input);
   }
 
-  public void newPlay(Uuid member, String title) {
-    controller.newPlay(member, title);
+  public ConversationHeader newPlay(Uuid member, String title) {
+    return controller.newPlay(member, title);
   }
 
-  public void joinPlay(Uuid member, String title) {
-    controller.joinPlay(member, title);
+  public ConversationHeader joinPlay(Uuid member, String title) {
+    return controller.joinPlay(member, title);
   }
 }

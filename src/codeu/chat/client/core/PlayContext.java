@@ -9,14 +9,18 @@ public class PlayContext {
   public final ConversationHeader conversation;
 
   private final BasicView view;
-  private final BasicController controller;
+  private final Controller controller;
 
   public PlayContext(ConversationHeader conversation,
                              BasicView view,
-                             BasicController controller) {
+                             Controller controller) {
 
     this.conversation = conversation;
     this.view = view;
     this.controller = controller;
+  }
+
+  public void speak() {
+    controller.speak();
   }
 }
