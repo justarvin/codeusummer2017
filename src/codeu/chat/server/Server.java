@@ -412,7 +412,10 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid member = Uuid.SERIALIZER.read(in);
         final String title = Serializers.STRING.read(in);
-        controller.newPlay(member, title);
+        ConversationHeader c = controller.newPlay(member, title);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_PLAY_RESPONSE);
+        ConversationHeader.SERIALIZER.write(out, c);
       }
     });
 
@@ -421,7 +424,10 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid member = Uuid.SERIALIZER.read(in);
         final String title = Serializers.STRING.read(in);
-        controller.joinPlay(member, title);
+        ConversationHeader c = controller.joinPlay(member, title);
+
+        Serializers.INTEGER.write(out, NetworkCode.JOIN_PLAY_RESPONSE);
+        ConversationHeader.SERIALIZER.write(out, c);
       }
     });
 

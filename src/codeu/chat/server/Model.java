@@ -98,20 +98,23 @@ public final class Model {
     return openPlays.get(title);
   }
 
-  public void newPlay(Uuid member, String title) {
+  //return uuid of play conversation
+  public PlayInfo newPlay(Uuid member, String title) {
     ArrayList<String> roles = new ArrayList<>();
     PlayInfo play = new PlayInfo(title, roles);
     play.setRole(member);
     openPlays.put(title, play);
+    return play;
   }
 
-  public void joinPlay(Uuid member, String title) {
-    PlayInfo play = openPlays.get(title);
-    if (!play.filled()) {
+  //return uuid of play conversation
+  public PlayInfo joinPlay(Uuid member, String title) {
+    if (isOpen(title)) {
+      PlayInfo play = openPlays.get(title);
       play.setRole(member);
+      return play;
     } else {
-      //start(play);
-      newPlay(member, title);
+      return newPlay(member, title);
     }
   }
 

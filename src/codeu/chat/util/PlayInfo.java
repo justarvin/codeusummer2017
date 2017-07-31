@@ -1,5 +1,7 @@
 package codeu.chat.util;
 
+import codeu.chat.common.ConversationHeader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,6 +17,7 @@ public class PlayInfo {
   private Map<String, Uuid> roles;
   private List<String> openRoles;
   private Uuid next;
+  private ConversationHeader play;
   private String title;
   private String status;
 
@@ -42,6 +45,14 @@ public class PlayInfo {
   public PlayInfo(String title, String status) {
     this.title = title;
     this.status = status;
+  }
+
+  public void setConversation(ConversationHeader c) {
+    this.play = c;
+  }
+
+  public ConversationHeader getPlay() {
+    return play;
   }
 
   public void setRole(Uuid user) {

@@ -27,6 +27,7 @@ import codeu.chat.common.User;
 
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Logger;
+import codeu.chat.util.PlayInfo;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.StoreAccessor;
 
@@ -129,11 +130,6 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
-  public String getAuthInfo(Uuid id) {
-    return null;
-  }
-
-  @Override
   public Collection<Uuid> getAdmins() {
     return model.getAdmins();
   }
@@ -151,5 +147,4 @@ public final class View implements BasicView, SinglesView {
   public Collection<String> getPlayTitles() {
     return model.getPlayTitles();
   }
-
 }

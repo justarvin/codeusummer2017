@@ -92,6 +92,13 @@ public final class Controller implements RawController, BasicController {
     return newConversation(id, title, owner, time);
   }
 
+  public ConversationHeader newPlayConversation(String title) {
+    Uuid id = createId();
+    Time time = Time.now();
+
+    return newConversation(id, title, null, time);
+  }
+
   public void removeConversation(ConversationHeader c) {
     model.remove(c);
     PersistenceLog.writeTransaction(PersistenceLog.DELETE_CONVERSATION, c.id, c.title, c.creation.inMs(), null, null);
@@ -340,12 +347,18 @@ public final class Controller implements RawController, BasicController {
     }
   }
 
-  void newPlay(Uuid member, String title) {
-    model.newPlay(member, title);
+  // Returns Uuid
+  ConversationHeader newPlay(Uuid member, String title) {
+    PlayInfo play = model.newPlay(member, title);
+    ConversationHeader playConversation = newPlayConversation(title);
+    play.setConversation(playConversation);
+    return playConversation;
   }
 
-  void joinPlay(Uuid member, String title) {
-    model.joinPlay(member, title);
+  //return uuid, then on chat.java side push the panel. make command for checking if server is ready.
+  ConversationHeader joinPlay(Uuid member, String title) {
+    PlayInfo play = model.joinPlay(member, title);
+    return play.getPlay();
   }
 
   void clean(File persistentPath) {
