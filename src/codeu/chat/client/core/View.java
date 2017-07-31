@@ -205,27 +205,6 @@ final class View implements BasicView {
   }
 
   @Override
-  public String getAuthInfo(Uuid id) {
-    String password = "";
-    try (final Connection connection = source.connect()) {
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.AUTH_REQUEST);
-      Uuid.SERIALIZER.write(connection.out(), id);
-
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_RESPONSE) {
-        password = Serializers.nullable(Serializers.STRING).read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-
-    } catch (IOException e) {
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(e, "Exception during call on server.");
-    }
-    return password;
-  }
-
-  @Override
   public Collection<Uuid> getAdmins() {
     final HashSet<Uuid> admins = new HashSet<>();
 
@@ -307,5 +286,25 @@ final class View implements BasicView {
     }
 
     return plays;
+  }
+
+  String getRole(Uuid player) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_ROLE_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), player);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_ROLE_RESPONSE) {
+        final String role = Serializers.STRING.read(connection.in());
+        return role;
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return null;
   }
 }

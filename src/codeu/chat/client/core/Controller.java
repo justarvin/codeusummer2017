@@ -409,7 +409,7 @@ public final class Controller implements BasicController {
       Serializers.INTEGER.write(connection.out(), NetworkCode.SPEAK_REQUEST);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SPEAK_RESPONSE) {
-        LOG.info("Joined play enactment.");
+        LOG.info("This user's line has been spoken");
 
       } else {
         LOG.error("Response from server failed.");
