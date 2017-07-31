@@ -543,7 +543,8 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         final String title = args.get(0);
-        context.newPlay(user.user.id, title);
+        ConversationHeader play = context.newPlay(user.user.id, title);
+        panels.push(createPlayConversationPanel(new PlayContext(play)));
       }
     });
 
@@ -551,7 +552,24 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         final String title = args.get(0);
-        context.joinPlay(user.user.id, title);
+        ConversationHeader play = context.joinPlay(user.user.id, title);
+      }
+    });
+
+    return panel;
+  }
+
+  private Panel createPlayConversationPanel(final PlayContext play) {
+
+    final Panel panel = new Panel();
+
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("  speak");
+        System.out.println("    Say your character's next line.");
+        System.out.println("  back");
+        System.out.println("    Return to PLAYS mode.");
       }
     });
 
