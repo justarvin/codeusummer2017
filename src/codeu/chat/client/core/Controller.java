@@ -403,4 +403,22 @@ public final class Controller implements BasicController {
     return null;
   }
 
+  void speak() {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.SPEAK_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SPEAK_RESPONSE) {
+        LOG.info("Joined play enactment.");
+
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+  }
+
 }

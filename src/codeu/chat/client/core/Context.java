@@ -93,6 +93,10 @@ public final class Context {
     return (View)view;
   }
 
+  public Controller getController() {
+    return controller;
+  }
+
   public HashSet<Uuid> getNewAdmins() {
     return (HashSet<Uuid>) view.getNewAdmins();
   }

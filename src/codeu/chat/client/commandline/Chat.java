@@ -14,10 +14,7 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.Context;
-import codeu.chat.client.core.ConversationContext;
-import codeu.chat.client.core.MessageContext;
-import codeu.chat.client.core.UserContext;
+import codeu.chat.client.core.*;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.PlayInfo;
@@ -544,7 +541,7 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String title = args.get(0);
         ConversationHeader play = context.newPlay(user.user.id, title);
-        panels.push(createPlayConversationPanel(new PlayContext(play)));
+        panels.push(createPlayConversationPanel(new PlayContext(play, context.getView(), context.getController())));
       }
     });
 
@@ -553,6 +550,7 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String title = args.get(0);
         ConversationHeader play = context.joinPlay(user.user.id, title);
+        panels.push(createPlayConversationPanel(new PlayContext(play, context.getView(), context.getController())));
       }
     });
 
@@ -569,7 +567,14 @@ public final class Chat {
         System.out.println("  speak");
         System.out.println("    Say your character's next line.");
         System.out.println("  back");
-        System.out.println("    Return to PLAYS mode.");
+        System.out.println("    Return to all plays.");
+      }
+    });
+
+    panel.register("speak", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        play.speak();
       }
     });
 
