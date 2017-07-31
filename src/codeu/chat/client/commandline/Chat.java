@@ -541,7 +541,8 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String title = args.get(0);
         ConversationHeader play = context.newPlay(user.user.id, title);
-        panels.push(createPlayConversationPanel(new PlayContext(play, context.getView(), context.getController())));
+
+        panels.push(createPlayConversationPanel(new PlayContext(user.user.id, play, context.getView(), context.getController())));
       }
     });
 
@@ -550,7 +551,8 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String title = args.get(0);
         ConversationHeader play = context.joinPlay(user.user.id, title);
-        panels.push(createPlayConversationPanel(new PlayContext(play, context.getView(), context.getController())));
+
+        panels.push(createPlayConversationPanel(new PlayContext(user.user.id, play, context.getView(), context.getController())));
       }
     });
 
@@ -560,6 +562,8 @@ public final class Chat {
   private Panel createPlayConversationPanel(final PlayContext play) {
 
     final Panel panel = new Panel();
+    play.printHeading();
+    play.printLines();
 
     panel.register("help", new Panel.Command() {
       @Override
