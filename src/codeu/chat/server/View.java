@@ -147,4 +147,14 @@ public final class View implements BasicView, SinglesView {
   public Collection<String> getPlayTitles() {
     return model.getPlayTitles();
   }
+
+  @Override
+  public Collection<PlayInfo> getPlays() {
+    return all(model.plays());
+  }
+
+  public String getRole(String title, Uuid player) {
+    PlayInfo play = model.getPlay(title);
+    return play.getRole(player);
+  }
 }

@@ -131,6 +131,10 @@ public final class Model {
     userByText.clear(user.name);
   }
 
+  public StoreAccessor<String, PlayInfo> plays() {
+    return openPlays;
+  }
+
   public StoreAccessor<Uuid, User> userById() {
     return userById;
   }

@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class PlayInfo {
 
-  private Map<String, Uuid> roles;
+  private Map<Uuid, String> roles;
   private List<String> openRoles;
   private Uuid next;
   private ConversationHeader play;
@@ -57,7 +57,11 @@ public class PlayInfo {
 
   public void setRole(Uuid user) {
     String character = openRoles.remove(0);
-    roles.put(character, user);
+    roles.put(user, character);
+  }
+
+  public String getRole(Uuid user) {
+    return roles.get(user);
   }
 
   public void setNext(Uuid user) {

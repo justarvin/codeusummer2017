@@ -407,6 +407,14 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.GET_PLAYS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.GET_PLAYS_RESPONSE);
+        Serializers.collection(PlayInfo.SERIALIZER).write(out, view.getPlays());
+      }
+    });
+
     this.commands.put(NetworkCode.NEW_PLAY_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
@@ -436,6 +444,18 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
 
         Serializers.INTEGER.write(out, NetworkCode.SPEAK_RESPONSE);
+      }
+    });
+
+    this.commands.put(NetworkCode.GET_ROLE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String playTitle = Serializers.STRING.read(in);
+        final Uuid player = Uuid.SERIALIZER.read(in);
+
+        String role = view.getRole(playTitle, player);
+        Serializers.INTEGER.write(out, NetworkCode.GET_ROLE_RESPONSE);
+        Serializers.STRING.write(out, role);
       }
     });
 
