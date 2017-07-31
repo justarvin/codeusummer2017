@@ -84,18 +84,19 @@ public final class Model {
   private Set<Uuid> admins = new HashSet<>();
   private Map<Uuid, String> passwords = new HashMap<>();
 
-  //map of plays lacking members so any user who decides to join a certain play
-  //will be added as a character in that play
-  private Map<String, PlayInfo> openPlays = new HashMap<>();
+  //store of plays that still need characters. store was used because
+  //in the future, there could be multiple instances of the same play.
+  //(maybe users want to be join a certain play with their friends and not with random people)
+  private Store<String, PlayInfo> openPlays = new Store<>(STRING_COMPARE);
   private Set<String> availablePlays = new HashSet<>();
 
   // check if there is a play with this title that needs more characters
   public boolean isOpen(String title) {
-    return openPlays.containsKey(title);
+    return openPlays.first(title) != null;
   }
 
   public PlayInfo getPlay(String title) {
-    return openPlays.get(title);
+    return openPlays.first(title);
   }
 
   //return uuid of play conversation
@@ -103,14 +104,14 @@ public final class Model {
     ArrayList<String> roles = new ArrayList<>();
     PlayInfo play = new PlayInfo(title, roles);
     play.setRole(member);
-    openPlays.put(title, play);
+    openPlays.insert(title, play);
     return play;
   }
 
   //return uuid of play conversation
   public PlayInfo joinPlay(Uuid member, String title) {
     if (isOpen(title)) {
-      PlayInfo play = openPlays.get(title);
+      PlayInfo play = openPlays.first(title);
       play.setRole(member);
       return play;
     } else {

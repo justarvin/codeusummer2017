@@ -431,6 +431,14 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.SPEAK_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        Serializers.INTEGER.write(out, NetworkCode.SPEAK_RESPONSE);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {
