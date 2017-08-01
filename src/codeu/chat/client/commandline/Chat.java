@@ -531,7 +531,7 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         for (final PlayInfo p : context.allPlays()) {
-          System.out.format("%s - %s", p.getTitle(), p.getStatus());
+          System.out.format("%s - %s\n", p.getTitle(), p.getStatus());
         }
       }
     });
@@ -539,7 +539,13 @@ public final class Chat {
     panel.register("new", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        final String title = args.get(0);
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < args.size(); i++) {
+          builder.append(args.get(i));
+          builder.append(" ");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        String title = builder.toString();
         ConversationHeader play = context.newPlay(user.user.id, title);
         System.out.println("Successfully created new play. Waiting for more users to join...");
       }
@@ -548,7 +554,13 @@ public final class Chat {
     panel.register("join", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        final String title = args.get(0);
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < args.size(); i++) {
+          builder.append(args.get(i));
+          builder.append(" ");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        String title = builder.toString();
         ConversationHeader play = context.joinPlay(user.user.id, title);
 
         boolean filled = context.checkFilled(play.id, play.title);
