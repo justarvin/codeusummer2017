@@ -82,4 +82,10 @@ public final class UserContext {
     return view.getConversationUpdate(owner, title);
   }
 
+  public boolean isUserMember(ConversationContext conversationContext) {
+     Uuid conversationId = conversationContext.conversation.id;
+     Uuid userId = user.id;
+     return view.isUserMember(conversationId, userId);
+  }
+
 }

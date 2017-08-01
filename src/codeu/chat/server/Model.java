@@ -234,4 +234,36 @@ public final class Model {
     admins.clear();
     passwords.clear();
   }
+
+  // Helper functions to add/remove members from a conversation.
+
+  public boolean addMember(Uuid conversationId, String userName) {
+    User user = userByText.first(userName);
+    if (user == null) {
+      return false;
+    }
+    Uuid userId = user.id;
+    ConversationHeader conversation = conversationById().first(conversationId);
+    conversation.members.add(userId);
+    return true;
+  }
+
+  public boolean removeMember(Uuid conversationId, String userName) {
+    User user = userByText.first(userName);
+    if (user == null) {
+      return false;
+    }
+    Uuid userId = user.id;
+    ConversationHeader conversation = conversationById().first(conversationId);
+    if (!isUserMember(conversation, userId)) {
+      return false;
+    }
+    conversation.members.remove(userId);
+    return true;
+  }
+
+  public boolean isUserMember(ConversationHeader conversation, Uuid userId) {
+    return conversation.members.contains(userId);
+  }
+
 }

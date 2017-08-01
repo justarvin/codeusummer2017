@@ -14,14 +14,14 @@
 
 package codeu.chat.common;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import codeu.chat.util.Serializer;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 
 public final class ConversationHeader {
 
@@ -55,12 +55,16 @@ public final class ConversationHeader {
   public final Time creation;
   public final String title;
 
+  public ArrayList<Uuid> members;
+
   public ConversationHeader(Uuid id, Uuid owner, Time creation, String title) {
 
     this.id = id;
     this.owner = owner;
     this.creation = creation;
     this.title = title;
+    this.members = new ArrayList<>();
+    members.add(owner);
 
   }
 }

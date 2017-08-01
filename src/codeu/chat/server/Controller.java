@@ -360,4 +360,16 @@ public final class Controller implements RawController, BasicController {
     model.clearStores();
     Server.getLogBuffer().clear();
   }
+
+  // Helper functions to add/remove members from a conversation.
+
+  @Override
+  public boolean addMember(Uuid conversationId, String userName) {
+    return model.addMember(conversationId, userName);
+  }
+
+  @Override
+  public boolean removeMember(Uuid conversationId, String userName) {
+    return model.removeMember(conversationId, userName);
+  }
 }

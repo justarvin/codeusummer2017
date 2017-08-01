@@ -268,4 +268,23 @@ final class View implements BasicView {
     }
     return admins;
   }
+
+  @Override
+  public boolean isUserMember(Uuid conversationId, Uuid userId) {
+    boolean isUserMember = false;
+    try (final Connection connection = source.connect()) {
+      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_MEMBER_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), conversationId);
+      Uuid.SERIALIZER.write(connection.out(), userId);
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_MEMBER_RESPONSE) {
+        isUserMember = Serializers.BOOLEAN.read(connection.in());
+      } else {
+         LOG.error("Response from server failed.");
+      } 
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return isUserMember;
+  }
 }
