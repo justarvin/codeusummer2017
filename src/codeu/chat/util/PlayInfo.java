@@ -3,9 +3,7 @@ package codeu.chat.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Info to store information about an instance of a play
@@ -17,6 +15,7 @@ public class PlayInfo {
   private Uuid next;
   private String title;
   private String status;
+  private Queue<String> lines;
 
   public static final Serializer<PlayInfo> SERIALIZER = new Serializer<PlayInfo>() {
     @Override
@@ -37,6 +36,8 @@ public class PlayInfo {
     roles = new HashMap<>();
     this.title = title;
     this.openRoles = openRoles;
+    lines = new ArrayDeque<>();
+    load50Lines();
   }
 
   public PlayInfo(String title, String status) {
@@ -71,5 +72,9 @@ public class PlayInfo {
 
   public String getStatus() {
     return status;
+  }
+
+  public void load50Lines() {
+
   }
 }
