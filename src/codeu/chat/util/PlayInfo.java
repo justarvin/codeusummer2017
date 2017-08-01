@@ -14,6 +14,7 @@ public class PlayInfo {
   private Map<Uuid, String> roles;
   private List<String> openRoles;
   private Uuid next;
+  private Uuid id;
   private ConversationHeader play;
   private String title;
   private String status;
@@ -92,6 +93,10 @@ public class PlayInfo {
 
   public String getStatus() {
     return status;
+  }
+
+  public void setUuid(Uuid id) {
+    this.id = id;
   }
 
   public void setTotalParts(int parts) {

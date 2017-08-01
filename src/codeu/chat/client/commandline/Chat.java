@@ -541,7 +541,7 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String title = args.get(0);
         ConversationHeader play = context.newPlay(user.user.id, title);
-        System.out.println("Success. Waiting for more users to join...");
+        System.out.println("Successfully created new play. Waiting for more users to join...");
       }
     });
 
@@ -553,7 +553,7 @@ public final class Chat {
 
         boolean filled = context.checkFilled(play.id, play.title);
         if (!filled) {
-          System.out.println("Successfully joined. Waiting for more users...");
+          System.out.println("Successfully joined. Waiting for more users to join...");
         } else {
           panels.push(createPlayConversationPanel(new PlayContext(user.user.id, play, context.getView(), context.getController())));
         }

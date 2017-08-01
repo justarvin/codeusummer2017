@@ -352,6 +352,7 @@ public final class Controller implements RawController, BasicController {
     PlayInfo play = model.newPlay(member, title);
     ConversationHeader playConversation = newPlayConversation(title);
     play.setConversation(playConversation);
+    play.setUuid(playConversation.id);
     return playConversation;
   }
 
