@@ -33,7 +33,7 @@ public class PlayInfo {
     public PlayInfo read(InputStream in) throws IOException {
       String title = Serializers.STRING.read(in);
       String status = Serializers.STRING.read(in);
-      return new PlayInfo(title, status);
+      return new PlayInfo(title, status, false);
     }
   };
 
@@ -46,6 +46,11 @@ public class PlayInfo {
     load50Lines(playTitle, current_part);
     lines = new ArrayDeque<>();
     loadRoles(playTitle);
+  }
+
+  public PlayInfo(String title, String status, boolean b) {
+    this.title = title;
+    this.status = status;
   }
 
   public void setConversation(ConversationHeader c) {
@@ -97,6 +102,10 @@ public class PlayInfo {
 
   public void setUuid(Uuid id) {
     this.id = id;
+  }
+
+  public Uuid getID() {
+    return id;
   }
 
   public void setTotalParts(int parts) {

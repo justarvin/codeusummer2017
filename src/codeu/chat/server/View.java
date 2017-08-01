@@ -153,6 +153,16 @@ public final class View implements BasicView, SinglesView {
     return all(model.plays());
   }
 
+  @Override
+  public boolean checkFilled(Uuid id, String title) {
+    for (PlayInfo p : model.plays().at(title)) {
+      if (p.getID().equals(id)) {
+        return p.filled();
+      }
+    }
+    return false;
+  }
+
   public String getRole(String title, Uuid player) {
     PlayInfo play = model.getPlay(title);
     return play.getRole(player);

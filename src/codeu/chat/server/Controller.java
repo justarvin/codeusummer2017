@@ -92,11 +92,11 @@ public final class Controller implements RawController, BasicController {
     return newConversation(id, title, owner, time);
   }
 
-  public ConversationHeader newPlayConversation(String title) {
+  public ConversationHeader newPlayConversation(Uuid member, String title) {
     Uuid id = createId();
     Time time = Time.now();
 
-    return newConversation(id, title, null, time);
+    return newConversation(id, title, member, time);
   }
 
   public void removeConversation(ConversationHeader c) {
@@ -350,7 +350,7 @@ public final class Controller implements RawController, BasicController {
   // Returns Uuid
   ConversationHeader newPlay(Uuid member, String title) {
     PlayInfo play = model.newPlay(member, title);
-    ConversationHeader playConversation = newPlayConversation(title);
+    ConversationHeader playConversation = newPlayConversation(member, title);
     play.setConversation(playConversation);
     play.setUuid(playConversation.id);
     return playConversation;
