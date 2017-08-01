@@ -62,4 +62,6 @@ public interface BasicView {
   Collection<String> getPlayTitles();
 
   Collection<PlayInfo> getPlays();
+
+  boolean checkFilled(Uuid id, String title);
 }

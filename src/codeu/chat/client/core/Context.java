@@ -128,4 +128,8 @@ public final class Context {
   public ConversationHeader joinPlay(Uuid member, String title) {
     return controller.joinPlay(member, title);
   }
+
+  public boolean checkFilled(Uuid id, String title) {
+    return view.checkFilled(id, title);
+  }
 }

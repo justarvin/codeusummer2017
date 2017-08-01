@@ -81,5 +81,7 @@ public final class NetworkCode {
       SPEAK_REQUEST =73,
       SPEAK_RESPONSE = 74,
       GET_ROLE_REQUEST = 75,
-      GET_ROLE_RESPONSE = 76;
+      GET_ROLE_RESPONSE = 76,
+      CHECK_FILLED_REQUEST = 77,
+      CHECK_FILLED_RESPONSE = 78;
 }
