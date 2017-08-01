@@ -75,6 +75,9 @@ public final class Server {
       model.addAdmin(user.id);
     }
 
+    // Add available play titles
+    model.addPlayTitle("The Importance of Being Earnest");
+
     //Request info version - user asks server for current info version
     this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
       @Override

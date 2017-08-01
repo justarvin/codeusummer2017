@@ -99,11 +99,16 @@ public final class Model {
     return openPlays.first(title);
   }
 
+  public void addPlayTitle(String title) {
+    availablePlays.add(title);
+  }
+
   //return uuid of play conversation
   public PlayInfo newPlay(Uuid member, String title) {
-    ArrayList<String> roles = new ArrayList<>();
-    PlayInfo play = new PlayInfo(title, roles);
+    //TODO: change earnest
+    PlayInfo play = new PlayInfo(title, "earnest");
     play.setRole(member);
+    play.setStatus("recruiting");
     openPlays.insert(title, play);
     return play;
   }
@@ -112,7 +117,10 @@ public final class Model {
   public PlayInfo joinPlay(Uuid member, String title) {
     if (isOpen(title)) {
       PlayInfo play = openPlays.first(title);
-      play.setRole(member);
+      boolean success = play.setRole(member);
+      if (!success) {
+        play.setStatus("closed");
+      }
       return play;
     } else {
       return newPlay(member, title);
