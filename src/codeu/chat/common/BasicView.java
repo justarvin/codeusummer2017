@@ -59,4 +59,7 @@ public interface BasicView {
   Collection<Uuid> getAdmins();
 
   Collection<Uuid> getNewAdmins();
+
+  // Checks if a given user is a member of the given conversation.
+  boolean isUserMember(Uuid conversationId, Uuid userId);
 }

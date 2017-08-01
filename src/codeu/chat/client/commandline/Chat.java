@@ -173,8 +173,9 @@ public final class Chat {
               char passwordArray[] = console.readPassword("Enter your password: ");
               success = context.authenticate(user.user.id, new String(passwordArray));
               System.out.println("Authenticating...");
+            } else { // Regular user.
+              success = true;
             }
-
             if (success) {
               panels.push(createUserPanel(user));
             }
@@ -436,6 +437,8 @@ public final class Chat {
             final ConversationContext conversation = find(name);
             if (conversation == null) {
               System.out.format("ERROR: No conversation with name '%s'\n", name);
+            } else if (!user.isUserMember(conversation)){ // Check is user is a member of the conversation.
+              System.out.println("User is not authorised to join the conversation.");
             } else {
               panels.push(createConversationPanel(conversation));
             }
@@ -610,6 +613,10 @@ public final class Chat {
         System.out.println("    List all messages in the current conversation.");
         System.out.println("  m-add <message>");
         System.out.println("    Add a new message to the current conversation as the current user.");
+        System.out.println("  add-member <user>");
+        System.out.println("    Add the current user as a new member to the current conversation.");
+        System.out.println("  remove-member <user>");
+        System.out.println("    Remove the current user as a new member to the current conversation.");
         System.out.println("  info");
         System.out.println("    Display all info about the current conversation.");
         System.out.println("  back");
@@ -655,6 +662,34 @@ public final class Chat {
           conversation.add(message);
         } else {
           System.out.println("ERROR: Messages must contain text");
+        }
+      }
+    });
+
+    // ADD_MEMBER
+    // Adds the current user as a new member to the current conversation.
+    panel.register("add-member", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.addMember(userName)) {
+          System.out.println("Added member " + userName + " successfully.");
+        } else {
+          System.out.println("Command failed.");
+        }
+      }
+    });
+
+    // REMOVE_MEMBER
+    // Adds the current user as a new member to the current conversation.
+    panel.register("remove-member", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.removeMember(userName)) {
+          System.out.println("Removed member " + userName + " successfully.");
+        } else {
+          System.out.println("Command failed.");
         }
       }
     });

@@ -59,4 +59,10 @@ public interface BasicController {
 
   void removeConversationInterest(String title, Uuid owner);
 
+  // Adds the given user to members of the given conversation.
+  boolean addMember(Uuid conversationId, String userName);
+
+  // Removes the given user from members of the given conversation.
+  boolean removeMember(Uuid conversationId, String userName);
+
 }

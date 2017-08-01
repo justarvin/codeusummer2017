@@ -399,6 +399,39 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.ADD_MEMBER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final String userName = Serializers.STRING.read(in);
+        boolean success = controller.addMember(conversationId, userName);
+        Serializers.INTEGER.write(out, NetworkCode.ADD_MEMBER_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
+      }
+    });
+
+    this.commands.put(NetworkCode.REMOVE_MEMBER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final String userName = Serializers.STRING.read(in);
+        boolean success = controller.removeMember(conversationId, userName);
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_MEMBER_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
+      }
+    });
+
+    this.commands.put(NetworkCode.CHECK_MEMBER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final Uuid memberId = Uuid.SERIALIZER.read(in);
+        boolean isUserMember = view.isUserMember(conversationId, memberId);
+        Serializers.INTEGER.write(out, NetworkCode.CHECK_MEMBER_RESPONSE);
+        Serializers.BOOLEAN.write(out, isUserMember);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {
