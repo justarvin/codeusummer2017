@@ -288,15 +288,15 @@ final class View implements BasicView {
     return plays;
   }
 
-  String getRole(Uuid player) {
+  String getRole(String title, Uuid player) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.GET_ROLE_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
       Uuid.SERIALIZER.write(connection.out(), player);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_ROLE_RESPONSE) {
-        final String role = Serializers.STRING.read(connection.in());
-        return role;
+        return Serializers.STRING.read(connection.in());
       } else {
         LOG.error("Response from server failed.");
       }
