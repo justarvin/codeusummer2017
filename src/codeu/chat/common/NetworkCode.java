@@ -83,5 +83,7 @@ public final class NetworkCode {
       GET_ROLE_REQUEST = 75,
       GET_ROLE_RESPONSE = 76,
       CHECK_FILLED_REQUEST = 77,
-      CHECK_FILLED_RESPONSE = 78;
+      CHECK_FILLED_RESPONSE = 78,
+      PARSE_LINE_REQUEST = 79,
+      PARSE_LINE_RESPONSE = 80;
 }

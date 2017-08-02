@@ -64,4 +64,6 @@ public interface BasicView {
   Collection<PlayInfo> getPlays();
 
   boolean checkFilled(Uuid id, String title);
+
+  String parseLine();
 }

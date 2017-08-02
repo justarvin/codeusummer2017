@@ -34,6 +34,10 @@ public class PlayContext {
     System.out.format("Your role: %s", view.getRole(conversation.title, player));
   }
 
+  public String parseLine() {
+    return view.parseLine();
+  }
+
   public void printLines() {
 
   }

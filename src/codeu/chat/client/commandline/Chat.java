@@ -579,7 +579,8 @@ public final class Chat {
 
     final Panel panel = new Panel();
     play.printHeading();
-    play.printLines();
+    play.parseLine();
+    //play.printLines();
 
     panel.register("help", new Panel.Command() {
       @Override
