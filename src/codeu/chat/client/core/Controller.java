@@ -421,4 +421,23 @@ public final class Controller implements BasicController {
     }
   }
 
+  String parseLine(String title) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.PARSE_LINE_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.PARSE_LINE_RESPONSE) {
+        return Serializers.STRING.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return "";
+  }
+
 }
