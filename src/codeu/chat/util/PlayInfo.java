@@ -43,8 +43,9 @@ public class PlayInfo {
     roles = new HashMap<>();
     openRoles = new ArrayList<>();
     current_part = 1;
-    load50Lines(playTitle, current_part);
+    this.parts = 3;
     lines = new ArrayDeque<>();
+    load50Lines(playTitle, current_part);
     loadRoles(playTitle);
   }
 
@@ -127,10 +128,11 @@ public class PlayInfo {
   }
 
   private void load50Lines(String fileTitle, int part) {
-    if (current_part <= parts) {
+    if (part <= parts) {
       try {
         File part_x = new File(PLAYS, fileTitle + "-" + part + ".txt");
         File temp = new File(PLAYS, "temp.txt");
+        temp.createNewFile();
         BufferedReader reader = new BufferedReader(new FileReader(part_x));
         BufferedWriter writer = new BufferedWriter(new FileWriter(temp));
         String line;
@@ -143,18 +145,17 @@ public class PlayInfo {
         if (i < 49) {
           current_part++;
         } else {
-          //write the rest to a temp file and then rename as current file
+          //write the rest to a temp file and then rename the file
           while ((line = reader.readLine()) != null) {
             writer.write(line);
             writer.newLine();
           }
-          temp.renameTo(part_x);
         }
         writer.close();
         reader.close();
-
-      } catch (Exception e) {
-        System.out.println("Failed to load roles");
+        System.out.println("Renaming:" + temp.renameTo(part_x));
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     }
   }
