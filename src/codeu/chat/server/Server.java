@@ -462,6 +462,18 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.CHECK_FILLED_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final String title = Serializers.STRING.read(in);
+        boolean filled = view.checkFilled(id, title);
+
+        Serializers.INTEGER.write(out, NetworkCode.CHECK_FILLED_RESPONSE);
+        Serializers.BOOLEAN.write(out, filled);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {
