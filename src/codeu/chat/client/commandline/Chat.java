@@ -268,7 +268,7 @@ public final class Chat {
           System.out.println("    Display all info for the current user");
           System.out.println("  interest");
           System.out.println("    Display the panel for managing interests and status updates.");
-          System.out.println("  play");
+          System.out.println("  plays");
           System.out.println("    Display options for enacting a play with other users.");
           System.out.println("  back");
           System.out.println("    Go back to ROOT MODE.");
@@ -479,7 +479,7 @@ public final class Chat {
         }
       });
 
-      panel.register("play", new Panel.Command() {
+      panel.register("plays", new Panel.Command() {
         @Override
         public void invoke(List<String> args) {
           panels.push(createPlayPanel(user));
@@ -581,7 +581,8 @@ public final class Chat {
 
     final Panel panel = new Panel();
     play.printHeading();
-    play.parseLine();
+    String line = play.parseLine();
+
     //play.printLines();
 
     panel.register("help", new Panel.Command() {
