@@ -171,6 +171,8 @@ public final class Chat {
               char passwordArray[] = console.readPassword("Enter your password: ");
               success = context.authenticate(user.user.id, new String(passwordArray));
               System.out.println("Authenticating...");
+            } else {
+              success = true;
             }
 
             if (success) {

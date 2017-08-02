@@ -1,9 +1,20 @@
 package codeu.chat.util;
 
 import codeu.chat.common.ConversationHeader;
-
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Info to store information about an instance of a play
@@ -153,6 +164,7 @@ public class PlayInfo {
         }
         writer.close();
         reader.close();
+        part_x.delete();
         System.out.println("Renaming:" + temp.renameTo(part_x));
       } catch (IOException e) {
         e.printStackTrace();
