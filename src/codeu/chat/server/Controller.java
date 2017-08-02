@@ -362,6 +362,13 @@ public final class Controller implements RawController, BasicController {
     return play.getPlay();
   }
 
+  String parseLine(String title) {
+    PlayInfo info = model.getPlay(title);
+    String line = info.parseLine();
+    newMessage(Uuid.NULL, info.getPlay().id, line);
+    return line;
+  }
+
   void clean(File persistentPath) {
     File log = new File(persistentPath, "log.txt");
     File passwords = new File(persistentPath, "passwords.txt");

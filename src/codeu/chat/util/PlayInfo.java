@@ -176,17 +176,16 @@ public class PlayInfo {
     }
   }
 
-  public void parseLine() {
+  public String parseLine() {
     String line = lines.poll();
     String firstWord = line.substring(0, line.indexOf('.'));
     String character = textToCharacter.get(firstWord);
     //if it is a character's line
     if (roles.values().contains(character)) {
-      //let user know.
       Uuid user = roles.get(character);
+      return character + ":";
     } else {
-      //add to payload.
-
+      return line;
     }
   }
 }

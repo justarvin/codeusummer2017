@@ -24,6 +24,7 @@ import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
 import codeu.chat.util.*;
 import codeu.chat.util.connections.Connection;
+import sun.nio.ch.Net;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -471,6 +472,16 @@ public final class Server {
 
         Serializers.INTEGER.write(out, NetworkCode.CHECK_FILLED_RESPONSE);
         Serializers.BOOLEAN.write(out, filled);
+      }
+    });
+
+    this.commands.put(NetworkCode.PARSE_LINE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String title = Serializers.STRING.read(in);
+
+        Serializers.INTEGER.write(out, NetworkCode.PARSE_LINE_RESPONSE);
+        Serializers.STRING.write(out, controller.parseLine(title));
       }
     });
 
