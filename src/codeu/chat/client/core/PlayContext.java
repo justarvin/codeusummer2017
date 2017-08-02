@@ -47,6 +47,10 @@ public class PlayContext {
             new MessageContext(message, view);
   }
 
+  public String parseLine() {
+    return view.parseLine();
+  }
+
   public void printLines() {
 
   }
