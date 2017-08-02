@@ -31,7 +31,7 @@ public class PlayContext {
 
   public void printHeading() {
     System.out.println(conversation.title);
-    System.out.format("Your role: %s", view.getRole(player));
+    System.out.format("Your role: %s", view.getRole(conversation.title, player));
   }
 
   public void printLines() {
