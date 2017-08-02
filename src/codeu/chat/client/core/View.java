@@ -288,15 +288,15 @@ final class View implements BasicView {
     return plays;
   }
 
-  String getRole(Uuid player) {
+  String getRole(String title, Uuid player) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.GET_ROLE_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
       Uuid.SERIALIZER.write(connection.out(), player);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_ROLE_RESPONSE) {
-        final String role = Serializers.STRING.read(connection.in());
-        return role;
+        return Serializers.STRING.read(connection.in());
       } else {
         LOG.error("Response from server failed.");
       }
@@ -327,5 +327,24 @@ final class View implements BasicView {
       LOG.error(e, "Exception during call on server.");
     }
     return false;
+  }
+
+  @Override
+  public String parseLine() {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_FILLED_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_FILLED_RESPONSE) {
+        return Serializers.STRING.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return "";
   }
 }

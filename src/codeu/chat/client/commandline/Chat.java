@@ -579,6 +579,7 @@ public final class Chat {
 
     final Panel panel = new Panel();
     play.printHeading();
+    play.parseLine();
     //play.printLines();
 
     panel.register("help", new Panel.Command() {
