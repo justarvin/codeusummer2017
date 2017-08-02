@@ -117,10 +117,7 @@ public final class Model {
   public PlayInfo joinPlay(Uuid member, String title) {
     if (isOpen(title)) {
       PlayInfo play = openPlays.first(title);
-      boolean success = play.setRole(member);
-      if (!success) {
-        play.setStatus("closed");
-      }
+      play.setRole(member);
       return play;
     } else {
       return newPlay(member, title);

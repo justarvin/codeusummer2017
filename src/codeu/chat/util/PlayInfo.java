@@ -22,7 +22,8 @@ import java.util.Queue;
 public class PlayInfo {
 
   private static final File PLAYS = new File("plays");
-  private Map<Uuid, String> roles;
+  private Map<String, Uuid> roles;
+  private Map<String, String> textToCharacter;
   private List<String> openRoles;
   private Uuid next;
   private Uuid id;
@@ -52,6 +53,7 @@ public class PlayInfo {
     this.title = title;
 
     roles = new HashMap<>();
+    textToCharacter = new HashMap<>();
     openRoles = new ArrayList<>();
     current_part = 1;
     this.parts = 3;
@@ -73,19 +75,20 @@ public class PlayInfo {
     return play;
   }
 
-  //returns true if there was a role to fill.
-  public boolean setRole(Uuid user) {
-    if (openRoles.size() == 0) {
-      return false;
-    } else {
+  public void setRole(Uuid user) {
+    if (openRoles.size() != 0) {
       String character = openRoles.remove(0);
-      roles.put(user, character);
-      return true;
+      roles.put(character, user);
     }
   }
 
   public String getRole(Uuid user) {
-    return roles.get(user);
+    for (String key : roles.keySet()) {
+      if (roles.get(key).equals(user)) {
+        return key;
+      }
+    }
+    return null;
   }
 
   public void setNext(Uuid user) {
@@ -131,6 +134,7 @@ public class PlayInfo {
       String line;
       while ((line = reader.readLine()) != null) {
         openRoles.add(line);
+        textToCharacter.put(reader.readLine(), line);
       }
 
     } catch (Exception e) {
@@ -169,6 +173,20 @@ public class PlayInfo {
       } catch (IOException e) {
         e.printStackTrace();
       }
+    }
+  }
+
+  public void parseLine() {
+    String line = lines.poll();
+    String firstWord = line.substring(0, line.indexOf('.'));
+    String character = textToCharacter.get(firstWord);
+    //if it is a character's line
+    if (roles.values().contains(character)) {
+      //let user know.
+      Uuid user = roles.get(character);
+    } else {
+      //add to payload.
+
     }
   }
 }

@@ -157,7 +157,12 @@ public final class View implements BasicView, SinglesView {
   public boolean checkFilled(Uuid id, String title) {
     for (PlayInfo p : model.plays().at(title)) {
       if (p.getID().equals(id)) {
-        return p.filled();
+        boolean filled = p.filled();
+        if (filled) {
+          p.setStatus("closed");
+          p.parseLine();
+        }
+        return filled;
       }
     }
     return false;
