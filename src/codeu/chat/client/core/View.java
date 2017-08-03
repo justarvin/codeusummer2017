@@ -328,4 +328,24 @@ final class View implements BasicView {
     }
     return false;
   }
+
+  @Override
+  public String getStatus(String title) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_STATUS_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_STATUS_RESPONSE) {
+        return Serializers.STRING.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return "";
+  }
 }

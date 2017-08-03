@@ -14,6 +14,7 @@
 
 package codeu.chat.server;
 
+import codeu.chat.client.core.MessageContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
@@ -22,9 +23,14 @@ import codeu.chat.common.Relay;
 import codeu.chat.common.Secret;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
-import codeu.chat.util.*;
+import codeu.chat.util.Logger;
+import codeu.chat.util.PasswordUtils;
+import codeu.chat.util.PlayInfo;
+import codeu.chat.util.Serializers;
+import codeu.chat.util.Time;
+import codeu.chat.util.Timeline;
+import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
-import sun.nio.ch.Net;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -478,10 +484,38 @@ public final class Server {
     this.commands.put(NetworkCode.PARSE_LINE_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid player = Uuid.SERIALIZER.read(in);
         final String title = Serializers.STRING.read(in);
+        PlayInfo info = model.getPlay(title);
+
+        String line = info.parseLine();
+        Message message = controller.newMessage(player, info.getPlay().id, line);
 
         Serializers.INTEGER.write(out, NetworkCode.PARSE_LINE_RESPONSE);
-        Serializers.STRING.write(out, controller.parseLine(title));
+        Serializers.STRING.write(out, line);
+
+        timeline.scheduleNow(createSendToRelayEvent(
+                player,
+                info.getPlay().id,
+                message.id));
+      }
+    });
+
+    this.commands.put(NetworkCode.SET_STATUS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String title = Serializers.STRING.read(in);
+        final String status = Serializers.STRING.read(in);
+        controller.setStatus(title, status);
+      }
+    });
+
+    this.commands.put(NetworkCode.GET_STATUS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String title = Serializers.STRING.read(in);
+        Serializers.INTEGER.write(out, NetworkCode.GET_STATUS_RESPONSE);
+        Serializers.STRING.write(out, view.getStatus(title));
       }
     });
 

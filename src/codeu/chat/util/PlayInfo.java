@@ -76,7 +76,7 @@ public class PlayInfo {
   }
 
   public void setRole(Uuid user) {
-    if (openRoles.size() != 0) {
+    if (openRoles.size() != 0 && !roles.keySet().contains(user)) {
       String character = openRoles.remove(0);
       roles.put(character, user);
     }

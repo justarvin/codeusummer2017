@@ -168,6 +168,11 @@ public final class View implements BasicView, SinglesView {
     return false;
   }
 
+  @Override
+  public String getStatus(String title) {
+    return model.getPlay(title).getStatus();
+  }
+
   public String getRole(String title, Uuid player) {
     PlayInfo play = model.getPlay(title);
     return play.getRole(player);

@@ -14,6 +14,7 @@
 
 package codeu.chat.server;
 
+import codeu.chat.client.core.MessageContext;
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -21,7 +22,13 @@ import codeu.chat.common.Message;
 import codeu.chat.common.RandomUuidGenerator;
 import codeu.chat.common.RawController;
 import codeu.chat.common.User;
-import codeu.chat.util.*;
+import codeu.chat.util.InterestStore;
+import codeu.chat.util.Logger;
+import codeu.chat.util.PasswordUtils;
+import codeu.chat.util.PersistenceLog;
+import codeu.chat.util.PlayInfo;
+import codeu.chat.util.Time;
+import codeu.chat.util.Uuid;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -362,11 +369,9 @@ public final class Controller implements RawController, BasicController {
     return play.getPlay();
   }
 
-  String parseLine(String title) {
+  void setStatus(String title, String status) {
     PlayInfo info = model.getPlay(title);
-    String line = info.parseLine();
-    newMessage(Uuid.NULL, info.getPlay().id, line);
-    return line;
+    info.setStatus(status);
   }
 
   void clean(File persistentPath) {

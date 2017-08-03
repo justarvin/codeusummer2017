@@ -581,9 +581,11 @@ public final class Chat {
 
     final Panel panel = new Panel();
     play.printHeading();
-    String line = play.parseLine();
-
-    //play.printLines();
+    if (play.getStatus().equals("closed")) {
+      play.parseLine();
+    }
+    play.printLines();
+    play.setStatus("started");
 
     panel.register("help", new Panel.Command() {
       @Override
