@@ -271,7 +271,6 @@ public final class Model {
     }
     Uuid userId = user.id;
     ConversationHeader conversation = conversationById().first(conversationId);
-    conversation.members.add(userId);
     conversation.owners.add(userId);
     return true;
   }
@@ -283,10 +282,9 @@ public final class Model {
     }
     Uuid userId = user.id;
     ConversationHeader conversation = conversationById().first(conversationId);
-    if (!isUserMember(conversation, userId)) {
+    if (!isUserOwner(conversation, userId)) {
       return false;
     }
-    conversation.members.remove(userId);
     conversation.owners.remove(userId);
     return true;
   }
@@ -300,7 +298,7 @@ public final class Model {
   }
 
   public boolean isUserCreator(ConversationHeader conversation, Uuid userId) {
-    return conversation.creator == userId;
+    return conversation.creator.contains(userId);
   }
 
 }
