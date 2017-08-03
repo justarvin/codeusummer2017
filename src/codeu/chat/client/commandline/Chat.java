@@ -617,7 +617,11 @@ public final class Chat {
         System.out.println("  add-member <user>");
         System.out.println("    Add the current user as a new member to the current conversation.");
         System.out.println("  remove-member <user>");
-        System.out.println("    Remove the current user as a new member to the current conversation.");
+        System.out.println("    Remove the current user from the current conversation.");
+        System.out.println("  add-owner <user>");
+        System.out.println("    Appoints user as an owner of the current conversation.");
+        System.out.println("  remove-owner <user>");
+        System.out.println("    Revoke user's owner privileges.");
         System.out.println("  info");
         System.out.println("    Display all info about the current conversation.");
         System.out.println("  back");
@@ -699,6 +703,42 @@ public final class Chat {
           }
         } else {
           System.out.println("User is not authorised to add a member to the conversation.");
+        }
+      }
+    });
+
+    // ADD_OWNER
+    // Adds the current user as a new member to the current conversation.
+    panel.register("add-owner", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.isUserCreator(conversation)) { // Check if user is a creator of the conversation.
+          if (conversation.addOwner(userName)) {
+            System.out.println(userName + " now has owner status.");
+          } else {
+            System.out.println("Command failed.");
+          }
+        } else {
+          System.out.println("User is not authorised to do this.");
+        }
+      }
+    });
+
+    // REMOVE_OWNER
+    // Adds the current user as a new member to the current conversation.
+    panel.register("remove-owner", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.isUserCreator(conversation)) { // Check if user is a creator of the conversation.
+          if (conversation.removeOwner(userName)) {
+            System.out.println(userName + "'s owner privileges have been revoked.");
+          } else {
+            System.out.println("Command failed.");
+          }
+        } else {
+          System.out.println("User is not authorised to do this.");
         }
       }
     });

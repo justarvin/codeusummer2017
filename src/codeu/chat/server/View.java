@@ -159,4 +159,10 @@ public final class View implements BasicView, SinglesView {
     return model.isUserOwner(conversation, userId);
   }
 
+  @Override
+  public boolean isUserCreator(Uuid conversationId, Uuid userId) {
+    ConversationHeader conversation = model.conversationById().first(conversationId);
+    return model.isUserCreator(conversation, userId);
+  }
+
 }

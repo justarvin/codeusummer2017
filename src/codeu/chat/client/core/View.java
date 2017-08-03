@@ -306,4 +306,23 @@ final class View implements BasicView {
     }
     return isUserOwner;
   }
+
+  @Override
+  public boolean isUserCreator(Uuid conversationId, Uuid userId) {
+    boolean isUserCreator = false;
+    try (final Connection connection = source.connect()) {
+      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_CREATOR_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), conversationId);
+      Uuid.SERIALIZER.write(connection.out(), userId);
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_CREATOR_RESPONSE) {
+        isUserCreator = Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return isUserCreator;
+  }
 }

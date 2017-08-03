@@ -65,4 +65,7 @@ public interface BasicView {
 
   // Checks if a given user is an owner of the given conversation.
   boolean isUserOwner(Uuid conversationId, Uuid userId);
+
+  // Checks if a given user is an owner of the given conversation.
+  boolean isUserCreator(Uuid conversationId, Uuid userId);
 }

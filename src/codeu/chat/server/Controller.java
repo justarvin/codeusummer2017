@@ -372,4 +372,14 @@ public final class Controller implements RawController, BasicController {
   public boolean removeMember(Uuid conversationId, String userName) {
     return model.removeMember(conversationId, userName);
   }
+
+  @Override
+  public boolean addOwner(Uuid conversationId, String userName) {
+    return model.addOwner(conversationId, userName);
+  }
+
+  @Override
+  public boolean removeOwner(Uuid conversationId, String userName) {
+    return model.removeOwner(conversationId, userName);
+  }
 }
