@@ -432,6 +432,17 @@ public final class Server {
       }
     });
 
+    this.commands.put(NetworkCode.CHECK_OWNER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final Uuid memberId = Uuid.SERIALIZER.read(in);
+        boolean isUserOwner = view.isUserOwner(conversationId, memberId);
+        Serializers.INTEGER.write(out, NetworkCode.CHECK_OWNER_RESPONSE);
+        Serializers.BOOLEAN.write(out, isUserOwner);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {

@@ -266,4 +266,8 @@ public final class Model {
     return conversation.members.contains(userId);
   }
 
+  public boolean isUserOwner(ConversationHeader conversation, Uuid userId) {
+    return conversation.owners.contains(userId);
+  }
+
 }

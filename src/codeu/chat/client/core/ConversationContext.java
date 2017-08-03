@@ -98,4 +98,10 @@ public final class ConversationContext {
     Uuid conversationId = conversation.id;
     return controller.removeMember(conversationId, userName);
   }
+
+  public boolean isUserOwner(ConversationContext conversationContext) {
+    Uuid conversationId = conversationContext.conversation.id;
+    Uuid userId = user.id;
+    return view.isUserOwner(conversationId, userId);
+  }
 }
