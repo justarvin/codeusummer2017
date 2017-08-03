@@ -330,7 +330,7 @@ final class View implements BasicView {
   }
 
   @Override
-  public boolean checkMyTurn(Uuid id, String title) {
+  public boolean myTurn(Uuid id, String title) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_TURN_REQUEST);

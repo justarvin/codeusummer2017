@@ -484,7 +484,7 @@ public final class Server {
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid id = Uuid.SERIALIZER.read(in);
         final String title = Serializers.STRING.read(in);
-        boolean myTurn = view.checkMyTurn(id, title);
+        boolean myTurn = view.myTurn(id, title);
 
         Serializers.INTEGER.write(out, NetworkCode.CHECK_TURN_RESPONSE);
         Serializers.BOOLEAN.write(out, myTurn);
@@ -500,12 +500,13 @@ public final class Server {
 
         String line = info.parseLine();
         //narrator line, so add it to the conversation
-        if (!line.equals("")) {
+        while (!line.equals("")) {
           Message message = controller.newMessage(player, info.getPlay().id, line);
           timeline.scheduleNow(createSendToRelayEvent(
                   player,
                   info.getPlay().id,
                   message.id));
+          line = info.parseLine();
         }
 
         Serializers.INTEGER.write(out, NetworkCode.PARSE_LINE_RESPONSE);

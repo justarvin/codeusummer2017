@@ -76,13 +76,12 @@ public class PlayInfo {
   }
 
   public void setRole(Uuid user) {
+    if (openRoles.size() != 0 && !roles.keySet().contains(user)) {
+      String character = openRoles.remove(0);
+      roles.put(character, user);
+    }
     if (openRoles.size() == 0) {
       setStatus("closed");
-    } else {
-      if (!roles.keySet().contains(user)) {
-        String character = openRoles.remove(0);
-        roles.put(character, user);
-      }
     }
   }
 
@@ -172,6 +171,7 @@ public class PlayInfo {
         writer.close();
         reader.close();
         part_x.delete();
+        temp.renameTo(part_x);
       } catch (IOException e) {
         e.printStackTrace();
       }

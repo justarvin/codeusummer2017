@@ -582,7 +582,7 @@ public final class Chat {
   private Panel createPlayConversationPanel(final PlayContext play) {
 
     final Panel panel = new Panel();
-    play.printInfo();
+    play.printHeading();
 
     //automatically check the first line
     //todo: check if first line is legit
@@ -591,12 +591,14 @@ public final class Chat {
       play.setStatus("started");
     }
 
-    boolean myTurn = play.checkMyTurn();
-    if (myTurn) {
+    if (play.myTurn()) {
+      play.printLines();
       Console console = System.console();
       if (console.readLine("You: ").equals("speak")) {
         play.speak();
       }
+    } else {
+      play.printLines();
     }
 
     panel.register("help", new Panel.Command() {

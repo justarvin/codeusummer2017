@@ -65,5 +65,5 @@ public interface BasicView {
 
   String getStatus(String title);
 
-  boolean checkMyTurn(Uuid id, String title);
+  boolean myTurn(Uuid id, String title);
 }

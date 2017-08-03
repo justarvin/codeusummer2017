@@ -159,7 +159,7 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
-  public boolean checkMyTurn(Uuid id, String title) {
+  public boolean myTurn(Uuid id, String title) {
     return id.equals(model.getPlay(title).getNext());
   }
 

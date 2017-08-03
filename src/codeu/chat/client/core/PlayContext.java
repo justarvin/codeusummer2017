@@ -38,11 +38,6 @@ public final class PlayContext {
     return view.getStatus(conversation.title);
   }
 
-  public void printInfo() {
-    printHeading();
-    printLines();
-  }
-
   public void printHeading() {
     System.out.println(conversation.title);
     System.out.format("Your role: %s\n", view.getRole(conversation.title, player));
@@ -52,8 +47,8 @@ public final class PlayContext {
     controller.parseLine(player, conversation.title);
   }
 
-  public boolean checkMyTurn() {
-    return view.checkMyTurn(player, conversation.title);
+  public boolean myTurn() {
+    return view.myTurn(player, conversation.title);
   }
 
   public void printLines() {
