@@ -571,7 +571,8 @@ public final class Chat {
         if (context.getStatus(play.title).equals("recruiting")) {
           System.out.println("Successfully joined. Waiting for more users to join...");
         } else {
-          panels.push(createPlayConversationPanel(new PlayContext(user.user.id, play, context.getView(), context.getController())));
+          PlayContext playContext = new PlayContext(user.user.id, play, context.getView(), context.getController());
+          panels.push(createPlayConversationPanel(playContext));
         }
       }
     });
@@ -585,7 +586,6 @@ public final class Chat {
     play.printHeading();
 
     //automatically check the first line
-    //todo: check if first line is legit
     if (play.getStatus().equals("closed")) {
       play.parseLine();
       play.setStatus("started");

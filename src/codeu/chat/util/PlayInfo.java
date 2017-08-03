@@ -56,7 +56,6 @@ public class PlayInfo {
     textToCharacter = new HashMap<>();
     openRoles = new ArrayList<>();
     current_part = 1;
-    this.parts = 3;
     lines = new ArrayDeque<>();
     load50Lines(playTitle, current_part);
     loadRoles(playTitle);
@@ -158,7 +157,7 @@ public class PlayInfo {
           lines.add(line);
           i++;
         }
-        // file did not have at least 50 lines left
+        // file did not have at least 50 lines left, so move to next file
         if (i < 49) {
           current_part++;
         } else {
@@ -186,13 +185,14 @@ public class PlayInfo {
     }
   }
 
+  // return the next line to be said and then find next speaker
   public String speak() {
     String line = lines.poll();
     setNextCharacter();
     return line;
   }
 
-  //returns true if the next line is a user's line
+  // returns true if the next line is a user's line
   private boolean setNextCharacter() {
     String nextLine = lines.peek();
     String firstWord = nextLine.substring(0, nextLine.indexOf('.'));

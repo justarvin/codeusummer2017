@@ -14,7 +14,6 @@
 
 package codeu.chat.server;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -87,35 +86,43 @@ public final class Model {
   //store of plays that still need characters. store was used because
   //in the future, there could be multiple instances of the same play.
   //(maybe users want to be join a certain play with their friends and not with random people)
-  private Store<String, PlayInfo> openPlays = new Store<>(STRING_COMPARE);
-  private Set<String> availablePlays = new HashSet<>();
-
-  // check if there is a play with this title that needs more characters
-  public boolean isOpen(String title) {
-    return openPlays.first(title) != null;
-  }
+  private Store<String, PlayInfo> plays = new Store<>(STRING_COMPARE);
+  private Set<String> availableTitles = new HashSet<>();
 
   public PlayInfo getPlay(String title) {
-    return openPlays.first(title);
+    return plays.first(title);
   }
 
   public void addPlayTitle(String title) {
-    availablePlays.add(title);
+    availableTitles.add(title);
   }
 
   //return uuid of play conversation
   public PlayInfo newPlay(Uuid member, String title) {
-    //TODO: change earnest
-    PlayInfo play = new PlayInfo(title, "earnest");
+    String shortTitle = "";
+    int totalParts = 0;
+    if (title.equals("The Importance of Being Earnest")) {
+      shortTitle = "earnest";
+      totalParts = 3;
+    }
+    PlayInfo play = new PlayInfo(title, shortTitle);
     play.setRole(member);
     play.setStatus("recruiting");
-    openPlays.insert(title, play);
+    play.setTotalParts(totalParts);
+    plays.insert(title, play);
+    plays.insert(title, play);
     return play;
   }
 
   public PlayInfo joinPlay(Uuid member, String title) {
-    if (isOpen(title)) {
-      PlayInfo play = openPlays.first(title);
+    PlayInfo play = null;
+    for (PlayInfo p : plays.at(title)) {
+      if (p.getStatus().equals("recruiting")) {
+        play = p;
+      }
+    }
+
+    if (play != null) {
       play.setRole(member);
       return play;
     } else {
@@ -136,7 +143,7 @@ public final class Model {
   }
 
   public StoreAccessor<String, PlayInfo> plays() {
-    return openPlays;
+    return plays;
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -259,7 +266,7 @@ public final class Model {
   }
 
   public Collection<String> getPlayTitles() {
-    return availablePlays;
+    return availableTitles;
   }
 
   public void clearStores() {
