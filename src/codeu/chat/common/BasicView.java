@@ -63,7 +63,7 @@ public interface BasicView {
 
   Collection<PlayInfo> getPlays();
 
-  boolean checkFilled(Uuid id, String title);
-
   String getStatus(String title);
+
+  boolean checkMyTurn(Uuid id, String title);
 }

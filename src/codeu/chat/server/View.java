@@ -154,23 +154,13 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
-  public boolean checkFilled(Uuid id, String title) {
-    for (PlayInfo p : model.plays().at(title)) {
-      if (p.getID().equals(id)) {
-        boolean filled = p.filled();
-        if (filled) {
-          p.setStatus("closed");
-          p.parseLine();
-        }
-        return filled;
-      }
-    }
-    return false;
+  public String getStatus(String title) {
+    return model.getPlay(title).getStatus();
   }
 
   @Override
-  public String getStatus(String title) {
-    return model.getPlay(title).getStatus();
+  public boolean checkMyTurn(Uuid id, String title) {
+    return id.equals(model.getPlay(title).getNext());
   }
 
   public String getRole(String title, Uuid player) {

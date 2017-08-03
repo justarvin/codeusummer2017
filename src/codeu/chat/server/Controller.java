@@ -374,6 +374,10 @@ public final class Controller implements RawController, BasicController {
     info.setStatus(status);
   }
 
+  String speak(PlayInfo info) {
+    return info.speak();
+  }
+
   void clean(File persistentPath) {
     File log = new File(persistentPath, "log.txt");
     File passwords = new File(persistentPath, "passwords.txt");

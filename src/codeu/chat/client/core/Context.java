@@ -129,7 +129,7 @@ public final class Context {
     return controller.joinPlay(member, title);
   }
 
-  public boolean checkFilled(Uuid id, String title) {
-    return view.checkFilled(id, title);
+  public String getStatus(String title) {
+    return view.getStatus(title);
   }
 }

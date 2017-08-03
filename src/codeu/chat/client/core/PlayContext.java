@@ -27,7 +27,7 @@ public final class PlayContext {
   }
 
   public void speak() {
-    controller.speak();
+    controller.speak(player, conversation.title);
   }
 
   public void setStatus(String status) {
@@ -38,13 +38,22 @@ public final class PlayContext {
     return view.getStatus(conversation.title);
   }
 
+  public void printInfo() {
+    printHeading();
+    printLines();
+  }
+
   public void printHeading() {
     System.out.println(conversation.title);
     System.out.format("Your role: %s\n", view.getRole(conversation.title, player));
   }
 
-  public String parseLine() {
-    return controller.parseLine(player, conversation.title);
+  public void parseLine() {
+    controller.parseLine(player, conversation.title);
+  }
+
+  public boolean checkMyTurn() {
+    return view.checkMyTurn(player, conversation.title);
   }
 
   public void printLines() {

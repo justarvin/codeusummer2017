@@ -14,7 +14,11 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.*;
+import codeu.chat.client.core.Context;
+import codeu.chat.client.core.ConversationContext;
+import codeu.chat.client.core.MessageContext;
+import codeu.chat.client.core.PlayContext;
+import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
 import codeu.chat.util.PlayInfo;
@@ -23,7 +27,6 @@ import codeu.chat.util.Tokenizer;
 import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -565,8 +568,7 @@ public final class Chat {
         String title = builder.toString();
         ConversationHeader play = context.joinPlay(user.user.id, title);
 
-        boolean filled = context.checkFilled(play.id, play.title);
-        if (!filled) {
+        if (context.getStatus(play.title).equals("recruiting")) {
           System.out.println("Successfully joined. Waiting for more users to join...");
         } else {
           panels.push(createPlayConversationPanel(new PlayContext(user.user.id, play, context.getView(), context.getController())));
@@ -580,27 +582,30 @@ public final class Chat {
   private Panel createPlayConversationPanel(final PlayContext play) {
 
     final Panel panel = new Panel();
-    play.printHeading();
+    play.printInfo();
+
+    //automatically check the first line
+    //todo: check if first line is legit
     if (play.getStatus().equals("closed")) {
       play.parseLine();
+      play.setStatus("started");
     }
-    play.printLines();
-    play.setStatus("started");
+
+    boolean myTurn = play.checkMyTurn();
+    if (myTurn) {
+      Console console = System.console();
+      if (console.readLine("You: ").equals("speak")) {
+        play.speak();
+      }
+    }
 
     panel.register("help", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
         System.out.println("  speak");
-        System.out.println("    Say your character's next line.");
+        System.out.println("    Word to type when it's your turn.");
         System.out.println("  back");
         System.out.println("    Return to all plays.");
-      }
-    });
-
-    panel.register("speak", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        play.speak();
       }
     });
 

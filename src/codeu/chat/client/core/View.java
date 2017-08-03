@@ -309,27 +309,6 @@ final class View implements BasicView {
   }
 
   @Override
-  public boolean checkFilled(Uuid id, String title) {
-    try (final Connection connection = source.connect()) {
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_FILLED_REQUEST);
-      Uuid.SERIALIZER.write(connection.out(), id);
-      Serializers.STRING.write(connection.out(), title);
-
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_FILLED_RESPONSE) {
-        return Serializers.BOOLEAN.read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-
-    } catch (Exception e) {
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(e, "Exception during call on server.");
-    }
-    return false;
-  }
-
-  @Override
   public String getStatus(String title) {
     try (final Connection connection = source.connect()) {
 
@@ -337,6 +316,7 @@ final class View implements BasicView {
       Serializers.STRING.write(connection.out(), title);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_STATUS_RESPONSE) {
+        LOG.info("Successfully got status");
         return Serializers.STRING.read(connection.in());
       } else {
         LOG.error("Response from server failed.");
@@ -347,5 +327,26 @@ final class View implements BasicView {
       LOG.error(e, "Exception during call on server.");
     }
     return "";
+  }
+
+  @Override
+  public boolean checkMyTurn(Uuid id, String title) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_TURN_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), id);
+      Serializers.STRING.write(connection.out(), title);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_TURN_RESPONSE) {
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
   }
 }

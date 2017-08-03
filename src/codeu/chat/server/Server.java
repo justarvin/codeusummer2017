@@ -452,6 +452,16 @@ public final class Server {
     this.commands.put(NetworkCode.SPEAK_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid player = Uuid.SERIALIZER.read(in);
+        final String title = Serializers.STRING.read(in);
+        PlayInfo info = model.getPlay(title);
+        String line = controller.speak(info);
+
+        Message message = controller.newMessage(player, info.getPlay().id, line);
+        timeline.scheduleNow(createSendToRelayEvent(
+                player,
+                info.getPlay().id,
+                message.id));
 
         Serializers.INTEGER.write(out, NetworkCode.SPEAK_RESPONSE);
       }
@@ -469,15 +479,15 @@ public final class Server {
       }
     });
 
-    this.commands.put(NetworkCode.CHECK_FILLED_REQUEST, new Command() {
+    this.commands.put(NetworkCode.CHECK_TURN_REQUEST, new Command() {
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid id = Uuid.SERIALIZER.read(in);
         final String title = Serializers.STRING.read(in);
-        boolean filled = view.checkFilled(id, title);
+        boolean myTurn = view.checkMyTurn(id, title);
 
-        Serializers.INTEGER.write(out, NetworkCode.CHECK_FILLED_RESPONSE);
-        Serializers.BOOLEAN.write(out, filled);
+        Serializers.INTEGER.write(out, NetworkCode.CHECK_TURN_RESPONSE);
+        Serializers.BOOLEAN.write(out, myTurn);
       }
     });
 
@@ -489,15 +499,16 @@ public final class Server {
         PlayInfo info = model.getPlay(title);
 
         String line = info.parseLine();
-        Message message = controller.newMessage(player, info.getPlay().id, line);
+        //narrator line, so add it to the conversation
+        if (!line.equals("")) {
+          Message message = controller.newMessage(player, info.getPlay().id, line);
+          timeline.scheduleNow(createSendToRelayEvent(
+                  player,
+                  info.getPlay().id,
+                  message.id));
+        }
 
         Serializers.INTEGER.write(out, NetworkCode.PARSE_LINE_RESPONSE);
-        Serializers.STRING.write(out, line);
-
-        timeline.scheduleNow(createSendToRelayEvent(
-                player,
-                info.getPlay().id,
-                message.id));
       }
     });
 

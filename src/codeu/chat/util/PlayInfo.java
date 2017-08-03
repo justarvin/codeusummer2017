@@ -76,9 +76,13 @@ public class PlayInfo {
   }
 
   public void setRole(Uuid user) {
-    if (openRoles.size() != 0 && !roles.keySet().contains(user)) {
-      String character = openRoles.remove(0);
-      roles.put(character, user);
+    if (openRoles.size() == 0) {
+      setStatus("closed");
+    } else {
+      if (!roles.keySet().contains(user)) {
+        String character = openRoles.remove(0);
+        roles.put(character, user);
+      }
     }
   }
 
@@ -97,10 +101,6 @@ public class PlayInfo {
 
   public Uuid getNext() {
     return next;
-  }
-
-  public boolean filled() {
-    return openRoles.isEmpty();
   }
 
   public String getTitle() {
@@ -133,8 +133,11 @@ public class PlayInfo {
       BufferedReader reader = new BufferedReader(new FileReader(characters));
       String line;
       while ((line = reader.readLine()) != null) {
+        System.out.println("line:"+line);
         openRoles.add(line);
-        textToCharacter.put(reader.readLine(), line);
+        String shortened = reader.readLine();
+        System.out.println(shortened);
+        textToCharacter.put(shortened, line);
       }
 
     } catch (Exception e) {
@@ -169,7 +172,6 @@ public class PlayInfo {
         writer.close();
         reader.close();
         part_x.delete();
-        System.out.println("Renaming:" + temp.renameTo(part_x));
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -177,15 +179,28 @@ public class PlayInfo {
   }
 
   public String parseLine() {
-    String line = lines.poll();
-    String firstWord = line.substring(0, line.indexOf('.'));
-    String character = textToCharacter.get(firstWord);
-    //if it is a character's line
-    if (roles.values().contains(character)) {
-      Uuid user = roles.get(character);
-      return character + ":";
+    if (setNextCharacter()) {
+      return "";
     } else {
-      return line;
+      return lines.poll();
     }
+  }
+
+  public String speak() {
+    String line = lines.poll();
+    setNextCharacter();
+    return line;
+  }
+
+  //returns true if the next line is a user's line
+  private boolean setNextCharacter() {
+    String nextLine = lines.peek();
+    String firstWord = nextLine.substring(0, nextLine.indexOf('.'));
+    if (textToCharacter.keySet().contains(firstWord)) {
+      String character = textToCharacter.get(firstWord);
+      next = roles.get(character);
+      return true;
+    }
+    return false;
   }
 }

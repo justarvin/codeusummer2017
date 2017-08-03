@@ -113,7 +113,6 @@ public final class Model {
     return play;
   }
 
-  //return uuid of play conversation
   public PlayInfo joinPlay(Uuid member, String title) {
     if (isOpen(title)) {
       PlayInfo play = openPlays.first(title);
