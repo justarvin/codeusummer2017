@@ -464,6 +464,7 @@ public final class Server {
                 message.id));
 
         Serializers.INTEGER.write(out, NetworkCode.SPEAK_RESPONSE);
+        Serializers.STRING.write(out, line);
       }
     });
 

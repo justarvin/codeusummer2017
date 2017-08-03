@@ -595,7 +595,7 @@ public final class Chat {
       play.printLines();
       Console console = System.console();
       if (console.readLine("You: ").equals("speak")) {
-        play.speak();
+        System.out.println(play.speak());
       }
     } else {
       play.printLines();

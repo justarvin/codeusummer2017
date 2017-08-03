@@ -403,7 +403,7 @@ public final class Controller implements BasicController {
     return null;
   }
 
-  void speak(Uuid player, String title) {
+  String speak(Uuid player, String title) {
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.SPEAK_REQUEST);
@@ -412,7 +412,7 @@ public final class Controller implements BasicController {
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.SPEAK_RESPONSE) {
         LOG.info("This user's line has been spoken");
-
+        return Serializers.STRING.read(connection.in());
       } else {
         LOG.error("Response from server failed.");
       }
@@ -421,6 +421,7 @@ public final class Controller implements BasicController {
       System.out.println("ERROR: Exception during call on server. Check log for details.");
       LOG.error(e, "Exception during call on server.");
     }
+    return "";
   }
 
   void parseLine(Uuid id, String title) {

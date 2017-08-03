@@ -26,8 +26,8 @@ public final class PlayContext {
     this.player = player;
   }
 
-  public void speak() {
-    controller.speak(player, conversation.title);
+  public String speak() {
+    return controller.speak(player, conversation.title);
   }
 
   public void setStatus(String status) {
@@ -39,8 +39,12 @@ public final class PlayContext {
   }
 
   public void printHeading() {
+    System.out.println();
+    System.out.println("------------------------");
     System.out.println(conversation.title);
     System.out.format("Your role: %s\n", view.getRole(conversation.title, player));
+    System.out.println("------------------------");
+    System.out.println();
   }
 
   public void parseLine() {
