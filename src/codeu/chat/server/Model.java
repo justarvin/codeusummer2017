@@ -83,9 +83,8 @@ public final class Model {
   private Set<Uuid> admins = new HashSet<>();
   private Map<Uuid, String> passwords = new HashMap<>();
 
-  //store of plays that still need characters. store was used because
-  //in the future, there could be multiple instances of the same play.
-  //(maybe users want to be join a certain play with their friends and not with random people)
+  // store from play title to playinfo object, since there could be multiple instances of
+  // the same play in the future
   private Store<String, PlayInfo> plays = new Store<>(STRING_COMPARE);
   private Set<String> availableTitles = new HashSet<>();
 
@@ -109,7 +108,6 @@ public final class Model {
     play.setRole(member);
     play.setStatus("recruiting");
     play.setTotalParts(totalParts);
-    plays.insert(title, play);
     plays.insert(title, play);
     return play;
   }
