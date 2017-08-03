@@ -564,6 +564,7 @@ public final class Chat {
           builder.append(args.get(i));
           builder.append(" ");
         }
+        // delete extra space
         builder.deleteCharAt(builder.length() - 1);
         String title = builder.toString();
         ConversationHeader play = context.joinPlay(user.user.id, title);
@@ -594,7 +595,8 @@ public final class Chat {
     if (play.myTurn()) {
       play.printLines();
       Console console = System.console();
-      if (console.readLine("You: ").equals("speak")) {
+      if (console.readLine("You: ").equals("")) {
+        // prints it out because calling printLines will reprint everything
         System.out.println(play.speak());
       }
     } else {
@@ -604,8 +606,7 @@ public final class Chat {
     panel.register("help", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        System.out.println("  speak");
-        System.out.println("    Word to type when it's your turn.");
+        System.out.println("  Press enter when it's your turn to say your line.");
         System.out.println("  back");
         System.out.println("    Return to all plays.");
       }

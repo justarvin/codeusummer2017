@@ -23,12 +23,14 @@ public class PlayInfo {
 
   private static final File PLAYS = new File("plays");
   private Map<String, Uuid> roles;
+  // map from name in play to full name in character list
   private Map<String, String> textToCharacter;
   private List<String> openRoles;
   private Uuid next;
   private Uuid id;
   private ConversationHeader play;
   private String title;
+  private String shortTitle;
   private String status;
   private Queue<String> lines;
   private int parts;
@@ -49,16 +51,17 @@ public class PlayInfo {
     }
   };
 
-  public PlayInfo(String title, String playTitle) {
+  public PlayInfo(String title, String shortTitle) {
     this.title = title;
+    this.shortTitle = shortTitle;
 
     roles = new HashMap<>();
     textToCharacter = new HashMap<>();
     openRoles = new ArrayList<>();
     current_part = 1;
     lines = new ArrayDeque<>();
-    load50Lines(playTitle, current_part);
-    loadRoles(playTitle);
+    load50Lines(current_part);
+    loadRoles();
   }
 
   public PlayInfo(String title, String status, boolean b) {
@@ -82,6 +85,10 @@ public class PlayInfo {
     if (openRoles.size() == 0) {
       setStatus("closed");
     }
+  }
+
+  public boolean hasRole(Uuid user) {
+    return roles.values().contains(user);
   }
 
   public String getRole(Uuid user) {
@@ -125,16 +132,14 @@ public class PlayInfo {
     this.parts = parts;
   }
 
-  private void loadRoles(String fileTitle) {
-    File characters = new File(PLAYS, fileTitle+"-chars.txt");
+  private void loadRoles() {
+    File characters = new File(PLAYS, shortTitle+"-chars.txt");
     try {
       BufferedReader reader = new BufferedReader(new FileReader(characters));
       String line;
       while ((line = reader.readLine()) != null) {
-        System.out.println("line:"+line);
         openRoles.add(line);
         String shortened = reader.readLine();
-        System.out.println(shortened);
         textToCharacter.put(shortened, line);
       }
 
@@ -143,10 +148,10 @@ public class PlayInfo {
     }
   }
 
-  private void load50Lines(String fileTitle, int part) {
+  private void load50Lines(int part) {
     if (part <= parts) {
       try {
-        File part_x = new File(PLAYS, fileTitle + "-" + part + ".txt");
+        File part_x = new File(PLAYS, shortTitle + "-" + part + ".txt");
         File temp = new File(PLAYS, "temp.txt");
         temp.createNewFile();
         BufferedReader reader = new BufferedReader(new FileReader(part_x));
@@ -194,6 +199,9 @@ public class PlayInfo {
 
   // returns true if the next line is a user's line
   private boolean setNextCharacter() {
+    if (lines.isEmpty()) {
+      load50Lines(current_part);
+    }
     String nextLine = lines.peek();
     String firstWord = nextLine.substring(0, nextLine.indexOf('.'));
     if (textToCharacter.keySet().contains(firstWord)) {

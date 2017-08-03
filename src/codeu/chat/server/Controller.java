@@ -363,7 +363,6 @@ public final class Controller implements RawController, BasicController {
     return playConversation;
   }
 
-  //return uuid, then on chat.java side push the panel. make command for checking if server is ready.
   ConversationHeader joinPlay(Uuid member, String title) {
     PlayInfo play = model.joinPlay(member, title);
     return play.getPlay();

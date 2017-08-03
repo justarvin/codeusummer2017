@@ -14,22 +14,25 @@
 
 package codeu.chat.client.core;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.NetworkCode;
-import codeu.chat.common.User;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.*;
+import codeu.chat.common.User;
+import codeu.chat.util.Logger;
+import codeu.chat.util.PlayInfo;
+import codeu.chat.util.Serializers;
+import codeu.chat.util.Time;
+import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 // VIEW
 //
@@ -246,7 +249,7 @@ final class View implements BasicView {
     return admins;
   }
 
-  public Collection<String> getPlayTitles() {
+public Collection<String> getPlayTitles() {
     final HashSet<String> titles = new HashSet<>();
 
     try (final Connection connection = source.connect()) {
