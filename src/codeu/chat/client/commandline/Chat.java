@@ -438,7 +438,9 @@ public final class Chat {
             final ConversationContext conversation = find(name);
             if (conversation == null) {
               System.out.format("ERROR: No conversation with name '%s'\n", name);
-            } else if (!user.isUserMember(conversation)){ // Check if user is a member of the conversation.
+              // Check if user is a member of the conversation.
+            } else if (!user.isUserMember(conversation) && !user.isUserOwner(conversation)
+                    && !user.isUserCreator(conversation)){
               System.out.println("User is not authorised to join the conversation.");
             } else {
               panels.push(createConversationPanel(conversation));
@@ -677,7 +679,8 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         final String userName = args.get(0);
-        if (conversation.isUserOwner(conversation)) { // Check if user is an owner of the conversation.
+        // Check if user is an owner or creator of the conversation.
+        if (conversation.isUserOwner(conversation) || conversation.isUserCreator(conversation)) {
           if (conversation.addMember(userName)) {
             System.out.println("Added member " + userName + " successfully.");
           } else {
@@ -695,14 +698,15 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         final String userName = args.get(0);
-        if (conversation.isUserOwner(conversation)) { // Check if user is an owner of the conversation.
+        // Check if user is an owner or creator of the conversation.
+        if (conversation.isUserOwner(conversation) || conversation.isUserCreator(conversation)) {
           if (conversation.removeMember(userName)) {
             System.out.println("Removed member " + userName + " successfully.");
           } else {
             System.out.println("Command failed.");
           }
         } else {
-          System.out.println("User is not authorised to add a member to the conversation.");
+          System.out.println("User is not authorised to remove a member from the conversation.");
         }
       }
     });

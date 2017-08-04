@@ -54,7 +54,6 @@ public final class ConversationHeader {
   public final Uuid owner;
   public final Time creation;
   public final String title;
-  //public final Uuid creator;
 
   public ArrayList<Uuid> members;
   public ArrayList<Uuid> owners;
@@ -69,8 +68,7 @@ public final class ConversationHeader {
     this.members = new ArrayList<>();
     this.owners = new ArrayList<>();
     this.creator = new ArrayList<>();
-    members.add(owner);
-    owners.add(owner);
+
     creator.add(owner);
 
 
