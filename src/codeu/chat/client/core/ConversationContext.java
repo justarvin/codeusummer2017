@@ -98,4 +98,26 @@ public final class ConversationContext {
     Uuid conversationId = conversation.id;
     return controller.removeMember(conversationId, userName);
   }
+
+  public boolean isUserOwner(ConversationContext conversationContext) {
+    Uuid conversationId = conversationContext.conversation.id;
+    Uuid userId = user.id;
+    return view.isUserOwner(conversationId, userId);
+  }
+
+  public boolean addOwner(String userName) {
+    Uuid conversationId = conversation.id;
+    return controller.addOwner(conversationId, userName);
+  }
+
+  public boolean removeOwner(String userName) {
+    Uuid conversationId = conversation.id;
+    return controller.removeOwner(conversationId, userName);
+  }
+
+  public boolean isUserCreator(ConversationContext conversationContext) {
+    Uuid conversationId = conversationContext.conversation.id;
+    Uuid userId = user.id;
+    return view.isUserCreator(conversationId, userId);
+  }
 }

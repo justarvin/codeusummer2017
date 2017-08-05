@@ -20,6 +20,7 @@ import codeu.chat.client.core.MessageContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.common.User;
 import codeu.chat.util.Tokenizer;
 
 import java.io.Console;
@@ -414,7 +415,7 @@ public final class Chat {
           if (name.length() > 0) {
             final ConversationContext conversation = user.start(name);
             if (conversation == null) {
-              System.out.println("ERROR: Failed to create new conversation");
+              System.out.println("Successfully created a new conversation.");
             } else {
               panels.push(createConversationPanel(conversation));
             }
@@ -426,7 +427,7 @@ public final class Chat {
 
       // C-JOIN (join conversation)
       //
-      // Add a command that will joing a conversation when the user enters
+      // Add a command that will join a conversation when the user enters
       // "c-join" while on the user panel.
       //
       panel.register("c-join", new Panel.Command() {
@@ -437,7 +438,9 @@ public final class Chat {
             final ConversationContext conversation = find(name);
             if (conversation == null) {
               System.out.format("ERROR: No conversation with name '%s'\n", name);
-            } else if (!user.isUserMember(conversation)){ // Check is user is a member of the conversation.
+              // Check if user is a member of the conversation.
+            } else if (!user.isUserMember(conversation) && !user.isUserOwner(conversation)
+                    && !user.isUserCreator(conversation)){
               System.out.println("User is not authorised to join the conversation.");
             } else {
               panels.push(createConversationPanel(conversation));
@@ -608,7 +611,7 @@ public final class Chat {
     panel.register("help", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        System.out.println("USER MODE");
+        System.out.println("CONVERSATION MODE");
         System.out.println("  m-list");
         System.out.println("    List all messages in the current conversation.");
         System.out.println("  m-add <message>");
@@ -616,7 +619,11 @@ public final class Chat {
         System.out.println("  add-member <user>");
         System.out.println("    Add the current user as a new member to the current conversation.");
         System.out.println("  remove-member <user>");
-        System.out.println("    Remove the current user as a new member to the current conversation.");
+        System.out.println("    Remove the current user from the current conversation.");
+        System.out.println("  add-owner <user>");
+        System.out.println("    Appoints user as an owner of the current conversation.");
+        System.out.println("  remove-owner <user>");
+        System.out.println("    Revoke user's owner privileges.");
         System.out.println("  info");
         System.out.println("    Display all info about the current conversation.");
         System.out.println("  back");
@@ -672,10 +679,15 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         final String userName = args.get(0);
-        if (conversation.addMember(userName)) {
-          System.out.println("Added member " + userName + " successfully.");
+        // Check if user is an owner or creator of the conversation.
+        if (conversation.isUserOwner(conversation) || conversation.isUserCreator(conversation)) {
+          if (conversation.addMember(userName)) {
+            System.out.println("Added member " + userName + " successfully.");
+          } else {
+            System.out.println("Command failed.");
+          }
         } else {
-          System.out.println("Command failed.");
+          System.out.println("User is not authorised to add a member to the conversation.");
         }
       }
     });
@@ -686,10 +698,51 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         final String userName = args.get(0);
-        if (conversation.removeMember(userName)) {
-          System.out.println("Removed member " + userName + " successfully.");
+        // Check if user is an owner or creator of the conversation.
+        if (conversation.isUserOwner(conversation) || conversation.isUserCreator(conversation)) {
+          if (conversation.removeMember(userName)) {
+            System.out.println("Removed member " + userName + " successfully.");
+          } else {
+            System.out.println("Command failed.");
+          }
         } else {
-          System.out.println("Command failed.");
+          System.out.println("User is not authorised to remove a member from the conversation.");
+        }
+      }
+    });
+
+    // ADD_OWNER
+    // Adds the current user as a new member to the current conversation.
+    panel.register("add-owner", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.isUserCreator(conversation)) { // Check if user is a creator of the conversation.
+          if (conversation.addOwner(userName)) {
+            System.out.println(userName + " now has owner status.");
+          } else {
+            System.out.println("Command failed.");
+          }
+        } else {
+          System.out.println("User is not authorised to do this.");
+        }
+      }
+    });
+
+    // REMOVE_OWNER
+    // Adds the current user as a new member to the current conversation.
+    panel.register("remove-owner", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.isUserCreator(conversation)) { // Check if user is a creator of the conversation.
+          if (conversation.removeOwner(userName)) {
+            System.out.println(userName + "'s owner privileges have been revoked.");
+          } else {
+            System.out.println("Command failed.");
+          }
+        } else {
+          System.out.println("User is not authorised to do this.");
         }
       }
     });

@@ -83,9 +83,20 @@ public final class UserContext {
   }
 
   public boolean isUserMember(ConversationContext conversationContext) {
-     Uuid conversationId = conversationContext.conversation.id;
-     Uuid userId = user.id;
-     return view.isUserMember(conversationId, userId);
+    Uuid conversationId = conversationContext.conversation.id;
+    Uuid userId = user.id;
+    return view.isUserMember(conversationId, userId);
   }
 
+  public boolean isUserCreator(ConversationContext conversationContext) {
+    Uuid conversationId = conversationContext.conversation.id;
+    Uuid userId = user.id;
+    return view.isUserCreator(conversationId, userId);
+  }
+
+  public boolean isUserOwner(ConversationContext conversationContext) {
+    Uuid conversationId = conversationContext.conversation.id;
+    Uuid userId = user.id;
+    return view.isUserOwner(conversationId, userId);
+  }
 }

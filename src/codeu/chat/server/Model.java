@@ -299,8 +299,43 @@ public final class Model {
     return true;
   }
 
+  // Helper functions to add/remove owners from a conversation.
+
+  public boolean addOwner(Uuid conversationId, String userName) {
+    User user = userByText.first(userName);
+    if (user == null) {
+      return false;
+    }
+    Uuid userId = user.id;
+    ConversationHeader conversation = conversationById().first(conversationId);
+    conversation.owners.add(userId);
+    return true;
+  }
+
+  public boolean removeOwner(Uuid conversationId, String userName) {
+    User user = userByText.first(userName);
+    if (user == null) {
+      return false;
+    }
+    Uuid userId = user.id;
+    ConversationHeader conversation = conversationById().first(conversationId);
+    if (!isUserOwner(conversation, userId)) {
+      return false;
+    }
+    conversation.owners.remove(userId);
+    return true;
+  }
+
   public boolean isUserMember(ConversationHeader conversation, Uuid userId) {
     return conversation.members.contains(userId);
+  }
+
+  public boolean isUserOwner(ConversationHeader conversation, Uuid userId) {
+    return conversation.owners.contains(userId);
+  }
+
+  public boolean isUserCreator(ConversationHeader conversation, Uuid userId) {
+    return conversation.creator.contains(userId);
   }
 
 }
