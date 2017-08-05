@@ -20,9 +20,10 @@ import java.util.HashSet;
 
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.User;
+import codeu.chat.common.PlayInfo;
+import codeu.chat.common.PlayInfo;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.PlayInfo;
+import codeu.chat.common.User;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
 
@@ -63,7 +64,7 @@ public final class Context {
     return titles;
   }
 
-  public Iterable<PlayInfo> allPlays() {
+  public Collection<PlayInfo> allPlays() {
     final Collection<PlayInfo> plays = new ArrayList<>();
     plays.addAll(view.getPlays());
     return plays;

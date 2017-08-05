@@ -35,7 +35,7 @@ public class PlayContext {
   }
 
   public String parseLine() {
-    return view.parseLine();
+    return controller.parseLine(conversation.title);
   }
 
   public void printLines() {

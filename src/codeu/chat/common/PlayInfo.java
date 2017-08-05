@@ -1,4 +1,8 @@
-package codeu.chat.util;
+package codeu.chat.common;
+
+import codeu.chat.util.Serializer;
+import codeu.chat.util.Serializers;
+import codeu.chat.util.Uuid;
 
 import codeu.chat.common.ConversationHeader;
 

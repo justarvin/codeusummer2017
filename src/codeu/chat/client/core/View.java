@@ -328,23 +328,4 @@ final class View implements BasicView {
     }
     return false;
   }
-
-  @Override
-  public String parseLine() {
-    try (final Connection connection = source.connect()) {
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_FILLED_REQUEST);
-
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_FILLED_RESPONSE) {
-        return Serializers.STRING.read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-
-    } catch (Exception e) {
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(e, "Exception during call on server.");
-    }
-    return "";
-  }
 }
