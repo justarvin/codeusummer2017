@@ -4,10 +4,20 @@ import codeu.chat.util.Serializer;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Uuid;
 
-import codeu.chat.common.ConversationHeader;
-
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Info to store information about an instance of a play
@@ -53,6 +63,8 @@ public class PlayInfo {
     loadRoles(playTitle);
   }
 
+  // Added a boolean to the params to differentiate it from the above
+  // This constructor is used for the Serializer
   public PlayInfo(String title, String status, boolean b) {
     this.title = title;
     this.status = status;

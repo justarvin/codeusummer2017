@@ -14,7 +14,6 @@
 
 package codeu.chat.client.core;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,9 +24,13 @@ import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.NetworkCode;
-import codeu.chat.common.User;
+import codeu.chat.common.PlayInfo;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.*;
+import codeu.chat.common.User;
+import codeu.chat.util.Logger;
+import codeu.chat.util.Serializers;
+import codeu.chat.util.Time;
+import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
 

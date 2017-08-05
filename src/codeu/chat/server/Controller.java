@@ -14,13 +14,7 @@
 
 package codeu.chat.server;
 
-import codeu.chat.common.BasicController;
-import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.ConversationPayload;
-import codeu.chat.common.Message;
-import codeu.chat.common.RandomUuidGenerator;
-import codeu.chat.common.RawController;
-import codeu.chat.common.User;
+import codeu.chat.common.*;
 import codeu.chat.util.*;
 
 import java.io.BufferedWriter;
@@ -92,7 +86,7 @@ public final class Controller implements RawController, BasicController {
     return newConversation(id, title, owner, time);
   }
 
-  public ConversationHeader newPlayConversation(Uuid member, String title) {
+  private ConversationHeader newPlayConversation(Uuid member, String title) {
     Uuid id = createId();
     Time time = Time.now();
 
