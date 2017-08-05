@@ -21,7 +21,7 @@ import codeu.chat.client.core.PlayContext;
 import codeu.chat.client.core.UserContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.PlayInfo;
+import codeu.chat.common.PlayInfo;
 import codeu.chat.util.Tokenizer;
 
 import java.io.Console;
@@ -523,6 +523,7 @@ public final class Chat {
       }
     });
 
+    // prints out titles of all the plays available
     panel.register("titles", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
@@ -532,6 +533,7 @@ public final class Chat {
       }
     });
 
+    // prints out title and current status of each active play
     panel.register("all", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
@@ -541,32 +543,22 @@ public final class Chat {
       }
     });
 
+    // creates a new play with the given name and joins it as a member
     panel.register("new", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < args.size(); i++) {
-          builder.append(args.get(i));
-          builder.append(" ");
-        }
-        builder.deleteCharAt(builder.length() - 1);
-        String title = builder.toString();
+        String title = getTitleFromArgs(args);
         ConversationHeader play = context.newPlay(user.user.id, title);
         System.out.println("Successfully created new play. Waiting for more users to join...");
       }
     });
 
+    // joins the play with the given title. if already in it, it shows
+    // all the lines that have been said already.
     panel.register("join", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < args.size(); i++) {
-          builder.append(args.get(i));
-          builder.append(" ");
-        }
-        // delete extra space
-        builder.deleteCharAt(builder.length() - 1);
-        String title = builder.toString();
+        String title = getTitleFromArgs(args);
         ConversationHeader play = context.joinPlay(user.user.id, title);
 
         if (context.getStatus(play.title).equals("recruiting")) {
@@ -579,6 +571,16 @@ public final class Chat {
     });
 
     return panel;
+  }
+
+  // Helper function to get full play title
+  private String getTitleFromArgs(List<String> args) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < args.size(); i++) {
+      builder.append(args.get(i)).append(" ");
+    }
+    builder.deleteCharAt(builder.length() - 1);
+    return builder.toString();
   }
 
   private Panel createPlayConversationPanel(final PlayContext play) {
