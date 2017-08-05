@@ -14,7 +14,6 @@
 
 package codeu.chat.server;
 
-import codeu.chat.client.core.MessageContext;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
@@ -25,7 +24,7 @@ import codeu.chat.common.ServerInfo;
 import codeu.chat.common.User;
 import codeu.chat.util.Logger;
 import codeu.chat.util.PasswordUtils;
-import codeu.chat.util.PlayInfo;
+import codeu.chat.common.PlayInfo;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Time;
 import codeu.chat.util.Timeline;

@@ -14,7 +14,6 @@
 
 package codeu.chat.server;
 
-import codeu.chat.client.core.MessageContext;
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -26,7 +25,7 @@ import codeu.chat.util.InterestStore;
 import codeu.chat.util.Logger;
 import codeu.chat.util.PasswordUtils;
 import codeu.chat.util.PersistenceLog;
-import codeu.chat.util.PlayInfo;
+import codeu.chat.common.PlayInfo;
 import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
@@ -99,7 +98,7 @@ public final class Controller implements RawController, BasicController {
     return newConversation(id, title, owner, time);
   }
 
-  public ConversationHeader newPlayConversation(Uuid member, String title) {
+  private ConversationHeader newPlayConversation(Uuid member, String title) {
     Uuid id = createId();
     Time time = Time.now();
 

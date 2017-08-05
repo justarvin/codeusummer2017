@@ -3,8 +3,6 @@ package codeu.chat.common;
 import codeu.chat.util.Serializer;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Uuid;
-
-import codeu.chat.common.ConversationHeader;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -68,6 +66,8 @@ public class PlayInfo {
     loadRoles();
   }
 
+  // Added a boolean to the params to differentiate it from the above
+  // This constructor is used for the Serializer
   public PlayInfo(String title, String status, boolean b) {
     this.title = title;
     this.status = status;
