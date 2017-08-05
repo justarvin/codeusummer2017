@@ -155,10 +155,10 @@ public class PlayInfo {
   private void load50Lines(int part) {
     if (part <= parts) {
       try {
-        File part_x = new File(PLAYS, shortTitle + "-" + part + ".txt");
+        File partX = new File(PLAYS, shortTitle + "-" + part + ".txt");
         File temp = new File(PLAYS, "temp.txt");
         temp.createNewFile();
-        BufferedReader reader = new BufferedReader(new FileReader(part_x));
+        BufferedReader reader = new BufferedReader(new FileReader(partX));
         BufferedWriter writer = new BufferedWriter(new FileWriter(temp));
         String line;
         int i = 0;
@@ -178,8 +178,8 @@ public class PlayInfo {
         }
         writer.close();
         reader.close();
-        part_x.delete();
-        temp.renameTo(part_x);
+        partX.delete();
+        temp.renameTo(partX);
       } catch (IOException e) {
         e.printStackTrace();
       }
