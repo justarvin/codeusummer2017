@@ -14,11 +14,6 @@
 
 package codeu.chat.client.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -33,6 +28,11 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 // VIEW
 //
@@ -249,7 +249,7 @@ final class View implements BasicView {
     return admins;
   }
 
-  public Collection<String> getPlayTitles() {
+public Collection<String> getPlayTitles() {
     final HashSet<String> titles = new HashSet<>();
 
     try (final Connection connection = source.connect()) {
@@ -312,14 +312,35 @@ final class View implements BasicView {
   }
 
   @Override
-  public boolean checkFilled(Uuid id, String title) {
+  public String getStatus(String title) {
     try (final Connection connection = source.connect()) {
 
-      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_FILLED_REQUEST);
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_STATUS_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_STATUS_RESPONSE) {
+        LOG.info("Successfully got status");
+        return Serializers.STRING.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return "";
+  }
+
+  @Override
+  public boolean myTurn(Uuid id, String title) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_TURN_REQUEST);
       Uuid.SERIALIZER.write(connection.out(), id);
       Serializers.STRING.write(connection.out(), title);
 
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_FILLED_RESPONSE) {
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_TURN_RESPONSE) {
         return Serializers.BOOLEAN.read(connection.in());
       } else {
         LOG.error("Response from server failed.");

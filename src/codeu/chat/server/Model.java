@@ -88,11 +88,6 @@ public final class Model {
   private Store<String, PlayInfo> plays = new Store<>(STRING_COMPARE);
   private Set<String> availableTitles = new HashSet<>();
 
-  // check if there is a play with this title that needs more characters
-  public boolean isOpen(String title) {
-    return plays.first(title) != null;
-  }
-
   public PlayInfo getPlay(String title) {
     return plays.first(title);
   }
@@ -101,26 +96,39 @@ public final class Model {
     availableTitles.add(title);
   }
 
-  //return uuid of play conversation
   public PlayInfo newPlay(Uuid member, String title) {
-    //TODO: change earnest
-    PlayInfo play = new PlayInfo(title, "earnest");
+    String shortTitle = "";
+    int totalParts = 0;
+    if (title.equals("The Importance of Being Earnest")) {
+      shortTitle = "earnest";
+      totalParts = 3;
+    }
+    PlayInfo play = new PlayInfo(title, shortTitle);
     play.setRole(member);
     play.setStatus("recruiting");
+    play.setTotalParts(totalParts);
     plays.insert(title, play);
     return play;
   }
 
-  //return uuid of play conversation
   public PlayInfo joinPlay(Uuid member, String title) {
-    if (isOpen(title)) {
-      PlayInfo play = plays.first(title);
-      boolean success = play.setRole(member);
-      if (!success) {
-        play.setStatus("closed");
+    PlayInfo play = null;
+    for (PlayInfo p : plays.at(title)) {
+      // if the user is joining a play they are already in
+      if (p.hasRole(member)) {
+        return p;
       }
+      // if the user is joining to get a role
+      if (p.getStatus().equals("recruiting")) {
+        play = p;
+      }
+    }
+
+    if (play != null) {
+      play.setRole(member);
       return play;
     } else {
+      // no more spots in any of the plays with this title
       return newPlay(member, title);
     }
   }
@@ -279,10 +287,13 @@ public final class Model {
     messageByTime = new Store<>(TIME_COMPARE);
     messageByText = new Store<>(STRING_COMPARE);
 
+    plays = new Store<>(STRING_COMPARE);
+
     watching.clear();
     interestsByID.clear();
     newAdmins.clear();
     admins.clear();
     passwords.clear();
+    availableTitles.clear();
   }
 }

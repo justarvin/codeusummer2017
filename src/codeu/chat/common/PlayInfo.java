@@ -3,7 +3,6 @@ package codeu.chat.common;
 import codeu.chat.util.Serializer;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.Uuid;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,12 +24,15 @@ import java.util.Queue;
 public class PlayInfo {
 
   private static final File PLAYS = new File("plays");
-  private Map<Uuid, String> roles;
+  private Map<String, Uuid> roles;
+  // map from name in play to full name in character list
+  private Map<String, String> textToCharacter;
   private List<String> openRoles;
   private Uuid next;
   private Uuid id;
   private ConversationHeader play;
   private String title;
+  private String shortTitle;
   private String status;
   private Queue<String> lines;
   private int parts;
@@ -51,16 +53,17 @@ public class PlayInfo {
     }
   };
 
-  public PlayInfo(String title, String playTitle) {
+  public PlayInfo(String title, String shortTitle) {
     this.title = title;
+    this.shortTitle = shortTitle;
 
     roles = new HashMap<>();
+    textToCharacter = new HashMap<>();
     openRoles = new ArrayList<>();
     current_part = 1;
-    this.parts = 3;
     lines = new ArrayDeque<>();
-    load50Lines(playTitle, current_part);
-    loadRoles(playTitle);
+    load50Lines(current_part);
+    loadRoles();
   }
 
   // Added a boolean to the params to differentiate it from the above
@@ -78,19 +81,27 @@ public class PlayInfo {
     return play;
   }
 
-  //returns true if there was a role to fill.
-  public boolean setRole(Uuid user) {
-    if (openRoles.size() == 0) {
-      return false;
-    } else {
+  public void setRole(Uuid user) {
+    if (openRoles.size() != 0 && !roles.keySet().contains(user)) {
       String character = openRoles.remove(0);
-      roles.put(user, character);
-      return true;
+      roles.put(character, user);
+    }
+    if (openRoles.size() == 0) {
+      setStatus("closed");
     }
   }
 
+  public boolean hasRole(Uuid user) {
+    return roles.values().contains(user);
+  }
+
   public String getRole(Uuid user) {
-    return roles.get(user);
+    for (String key : roles.keySet()) {
+      if (roles.get(key).equals(user)) {
+        return key;
+      }
+    }
+    return null;
   }
 
   public void setNext(Uuid user) {
@@ -99,10 +110,6 @@ public class PlayInfo {
 
   public Uuid getNext() {
     return next;
-  }
-
-  public boolean filled() {
-    return openRoles.isEmpty();
   }
 
   public String getTitle() {
@@ -129,13 +136,15 @@ public class PlayInfo {
     this.parts = parts;
   }
 
-  private void loadRoles(String fileTitle) {
-    File characters = new File(PLAYS, fileTitle+"-chars.txt");
+  private void loadRoles() {
+    File characters = new File(PLAYS, shortTitle+"-chars.txt");
     try {
       BufferedReader reader = new BufferedReader(new FileReader(characters));
       String line;
       while ((line = reader.readLine()) != null) {
         openRoles.add(line);
+        String shortened = reader.readLine();
+        textToCharacter.put(shortened, line);
       }
 
     } catch (Exception e) {
@@ -143,13 +152,13 @@ public class PlayInfo {
     }
   }
 
-  private void load50Lines(String fileTitle, int part) {
+  private void load50Lines(int part) {
     if (part <= parts) {
       try {
-        File part_x = new File(PLAYS, fileTitle + "-" + part + ".txt");
+        File partX = new File(PLAYS, shortTitle + "-" + part + ".txt");
         File temp = new File(PLAYS, "temp.txt");
         temp.createNewFile();
-        BufferedReader reader = new BufferedReader(new FileReader(part_x));
+        BufferedReader reader = new BufferedReader(new FileReader(partX));
         BufferedWriter writer = new BufferedWriter(new FileWriter(temp));
         String line;
         int i = 0;
@@ -157,7 +166,7 @@ public class PlayInfo {
           lines.add(line);
           i++;
         }
-        // file did not have at least 50 lines left
+        // file did not have at least 50 lines left, so move to next file
         if (i < 49) {
           current_part++;
         } else {
@@ -169,10 +178,41 @@ public class PlayInfo {
         }
         writer.close();
         reader.close();
-        System.out.println("Renaming:" + temp.renameTo(part_x));
+        partX.delete();
+        temp.renameTo(partX);
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
+  }
+
+  public String parseLine() {
+    if (setNextCharacter()) {
+      return "";
+    } else {
+      return lines.poll();
+    }
+  }
+
+  // return the next line to be said and then find next speaker
+  public String speak() {
+    String line = lines.poll();
+    setNextCharacter();
+    return line;
+  }
+
+  // returns true if the next line is a user's line
+  private boolean setNextCharacter() {
+    if (lines.isEmpty()) {
+      load50Lines(current_part);
+    }
+    String nextLine = lines.peek();
+    String firstWord = nextLine.substring(0, nextLine.indexOf('.'));
+    if (textToCharacter.keySet().contains(firstWord)) {
+      String character = textToCharacter.get(firstWord);
+      next = roles.get(character);
+      return true;
+    }
+    return false;
   }
 }

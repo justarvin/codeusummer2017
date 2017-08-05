@@ -14,8 +14,20 @@
 
 package codeu.chat.server;
 
-import codeu.chat.common.*;
-import codeu.chat.util.*;
+import codeu.chat.common.BasicController;
+import codeu.chat.common.ConversationHeader;
+import codeu.chat.common.ConversationPayload;
+import codeu.chat.common.Message;
+import codeu.chat.common.RandomUuidGenerator;
+import codeu.chat.common.RawController;
+import codeu.chat.common.User;
+import codeu.chat.util.InterestStore;
+import codeu.chat.util.Logger;
+import codeu.chat.util.PasswordUtils;
+import codeu.chat.util.PersistenceLog;
+import codeu.chat.common.PlayInfo;
+import codeu.chat.util.Time;
+import codeu.chat.util.Uuid;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -350,10 +362,18 @@ public final class Controller implements RawController, BasicController {
     return playConversation;
   }
 
-  //return uuid, then on chat.java side push the panel. make command for checking if server is ready.
   ConversationHeader joinPlay(Uuid member, String title) {
     PlayInfo play = model.joinPlay(member, title);
     return play.getPlay();
+  }
+
+  void setStatus(String title, String status) {
+    PlayInfo info = model.getPlay(title);
+    info.setStatus(status);
+  }
+
+  String speak(PlayInfo info) {
+    return info.speak();
   }
 
   void clean(File persistentPath) {
