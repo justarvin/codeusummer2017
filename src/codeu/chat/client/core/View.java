@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
@@ -26,10 +27,7 @@ import codeu.chat.common.Message;
 import codeu.chat.common.NetworkCode;
 import codeu.chat.common.User;
 import codeu.chat.common.ServerInfo;
-import codeu.chat.util.Logger;
-import codeu.chat.util.Serializers;
-import codeu.chat.util.Time;
-import codeu.chat.util.Uuid;
+import codeu.chat.util.*;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
 
@@ -207,27 +205,6 @@ final class View implements BasicView {
   }
 
   @Override
-  public String getAuthInfo(Uuid id) {
-    String password = "";
-    try (final Connection connection = source.connect()) {
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.AUTH_REQUEST);
-      Uuid.SERIALIZER.write(connection.out(), id);
-
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.AUTH_RESPONSE) {
-        password = Serializers.nullable(Serializers.STRING).read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-
-    } catch (IOException e) {
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(e, "Exception during call on server.");
-    }
-    return password;
-  }
-
-  @Override
   public Collection<Uuid> getAdmins() {
     final HashSet<Uuid> admins = new HashSet<>();
 
@@ -267,5 +244,88 @@ final class View implements BasicView {
       LOG.error(e, "Exception during call on server.");
     }
     return admins;
+  }
+
+  public Collection<String> getPlayTitles() {
+    final HashSet<String> titles = new HashSet<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.PLAY_TITLE_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.PLAY_TITLE_RESPONSE) {
+        titles.addAll(Serializers.collection(Serializers.STRING).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+
+    return titles;
+  }
+
+  public Collection<PlayInfo> getPlays() {
+    final List<PlayInfo> plays = new ArrayList<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_PLAYS_REQUEST);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_PLAYS_RESPONSE) {
+        plays.addAll(Serializers.collection(PlayInfo.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+
+    return plays;
+  }
+
+  String getRole(String title, Uuid player) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_ROLE_REQUEST);
+      Serializers.STRING.write(connection.out(), title);
+      Uuid.SERIALIZER.write(connection.out(), player);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_ROLE_RESPONSE) {
+        return Serializers.STRING.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return null;
+  }
+
+  @Override
+  public boolean checkFilled(Uuid id, String title) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.CHECK_FILLED_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), id);
+      Serializers.STRING.write(connection.out(), title);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.CHECK_FILLED_RESPONSE) {
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
   }
 }

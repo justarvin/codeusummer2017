@@ -14,12 +14,10 @@
 
 package codeu.chat.client.commandline;
 
-import codeu.chat.client.core.Context;
-import codeu.chat.client.core.ConversationContext;
-import codeu.chat.client.core.MessageContext;
-import codeu.chat.client.core.UserContext;
+import codeu.chat.client.core.*;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.common.PlayInfo;
 import codeu.chat.util.Tokenizer;
 
 import java.io.Console;
@@ -268,6 +266,8 @@ public final class Chat {
           System.out.println("    Display all info for the current user");
           System.out.println("  interest");
           System.out.println("    Display the panel for managing interests and status updates.");
+          System.out.println("  plays");
+          System.out.println("    Display options for enacting a play with other users.");
           System.out.println("  back");
           System.out.println("    Go back to ROOT MODE.");
           System.out.println("  exit");
@@ -477,6 +477,13 @@ public final class Chat {
         }
       });
 
+      panel.register("plays", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          panels.push(createPlayPanel(user));
+        }
+      });
+
     // Now that the panel has all its commands registered, return the panel
     // so that it can be used.
     return panel;
@@ -489,6 +496,114 @@ public final class Chat {
       }
     }
     return null;
+  }
+
+  private Panel createPlayPanel(final UserContext user) {
+
+    final Panel panel = new Panel();
+
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("  titles");
+        System.out.println("    Display titles of all available plays.");
+        System.out.println("  all");
+        System.out.println("    Display all ongoing plays and their statuses.");
+        System.out.println("  new <title>");
+        System.out.println("    Create and join a new play enactment for the given title.");
+        System.out.println("  join <title>");
+        System.out.println("    Join an ongoing play enactment for the given title.");
+        System.out.println("  back");
+        System.out.println("    Go back to the user panel.");
+      }
+    });
+
+    // prints out titles of all the plays available
+    panel.register("titles", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        for (final String title : context.allPlayTitles()) {
+          System.out.println(title);
+        }
+      }
+    });
+
+    // prints out title and current status of each active play
+    panel.register("all", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        for (final PlayInfo p : context.allPlays()) {
+          System.out.format("%s - %s\n", p.getTitle(), p.getStatus());
+        }
+      }
+    });
+
+    // creates a new play with the given name and joins it as a member
+    panel.register("new", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        String title = getTitleFromArgs(args);
+        ConversationHeader play = context.newPlay(user.user.id, title);
+        System.out.println("Successfully created new play. Waiting for more users to join...");
+      }
+    });
+
+    // joins the play with the given title. if already in it, it shows
+    // all the lines that have been said already.
+    panel.register("join", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        String title = getTitleFromArgs(args);
+        ConversationHeader play = context.joinPlay(user.user.id, title);
+
+        boolean filled = context.checkFilled(play.id, play.title);
+        if (!filled) {
+          System.out.println("Successfully joined. Waiting for more users to join...");
+        } else {
+          panels.push(createPlayConversationPanel(new PlayContext(user.user.id, play, context.getView(), context.getController())));
+        }
+      }
+    });
+
+    return panel;
+  }
+
+  // Helper function to get full play title
+  private String getTitleFromArgs(List<String> args) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < args.size(); i++) {
+      builder.append(args.get(i)).append(" ");
+    }
+    builder.deleteCharAt(builder.length() - 1);
+    return builder.toString();
+  }
+
+  private Panel createPlayConversationPanel(final PlayContext play) {
+
+    final Panel panel = new Panel();
+    play.printHeading();
+    String line = play.parseLine();
+
+    //play.printLines();
+
+    panel.register("help", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        System.out.println("  speak");
+        System.out.println("    Say your character's next line.");
+        System.out.println("  back");
+        System.out.println("    Return to all plays.");
+      }
+    });
+
+    panel.register("speak", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        play.speak();
+      }
+    });
+
+    return panel;
   }
 
   private Panel createInterestPanel(final UserContext user) {

@@ -16,6 +16,7 @@ package codeu.chat.common;
 
 import java.util.Collection;
 
+import codeu.chat.util.PlayInfo;
 import codeu.chat.util.Uuid;
 
 // BASIC VIEW
@@ -54,9 +55,13 @@ public interface BasicView {
 
   int getConversationUpdate(Uuid owner, String title);
 
-  String getAuthInfo(Uuid id);
-
   Collection<Uuid> getAdmins();
 
   Collection<Uuid> getNewAdmins();
+
+  Collection<String> getPlayTitles();
+
+  Collection<PlayInfo> getPlays();
+
+  boolean checkFilled(Uuid id, String title);
 }

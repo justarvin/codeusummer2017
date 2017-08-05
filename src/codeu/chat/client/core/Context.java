@@ -20,8 +20,10 @@ import java.util.HashSet;
 
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.User;
+import codeu.chat.common.PlayInfo;
+import codeu.chat.common.PlayInfo;
 import codeu.chat.common.ServerInfo;
+import codeu.chat.common.User;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.ConnectionSource;
 
@@ -56,6 +58,18 @@ public final class Context {
     return conversations;
   }
 
+  public Iterable<String> allPlayTitles() {
+    final Collection<String> titles = new ArrayList<>();
+    titles.addAll(view.getPlayTitles());
+    return titles;
+  }
+
+  public Collection<PlayInfo> allPlays() {
+    final Collection<PlayInfo> plays = new ArrayList<>();
+    plays.addAll(view.getPlays());
+    return plays;
+  }
+
   public void clean() {
     controller.clean();
   }
@@ -80,6 +94,10 @@ public final class Context {
     return (View)view;
   }
 
+  public Controller getController() {
+    return controller;
+  }
+
   public HashSet<Uuid> getNewAdmins() {
     return (HashSet<Uuid>) view.getNewAdmins();
   }
@@ -102,5 +120,17 @@ public final class Context {
 
   public boolean setPassword(Uuid id, String input) {
     return controller.setPassword(id, input);
+  }
+
+  public ConversationHeader newPlay(Uuid member, String title) {
+    return controller.newPlay(member, title);
+  }
+
+  public ConversationHeader joinPlay(Uuid member, String title) {
+    return controller.joinPlay(member, title);
+  }
+
+  public boolean checkFilled(Uuid id, String title) {
+    return view.checkFilled(id, title);
   }
 }
