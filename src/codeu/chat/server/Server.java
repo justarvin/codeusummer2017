@@ -14,14 +14,7 @@
 
 package codeu.chat.server;
 
-import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.ConversationPayload;
-import codeu.chat.common.Message;
-import codeu.chat.common.NetworkCode;
-import codeu.chat.common.Relay;
-import codeu.chat.common.Secret;
-import codeu.chat.common.ServerInfo;
-import codeu.chat.common.User;
+import codeu.chat.common.*;
 import codeu.chat.util.*;
 import codeu.chat.util.connections.Connection;
 
@@ -74,6 +67,9 @@ public final class Server {
       User user = controller.newUser("admin");
       model.addAdmin(user.id);
     }
+
+    // Add available play titles
+    model.addPlayTitle("The Importance of Being Earnest");
 
     //Request info version - user asks server for current info version
     this.commands.put(NetworkCode.SERVER_INFO_REQUEST, new Command() {
@@ -396,6 +392,78 @@ public final class Server {
         final String name = Serializers.STRING.read(in);
         controller.removeAdmin(name);
         Serializers.INTEGER.write(out, NetworkCode.REMOVE_ADMIN_RESPONSE);
+      }
+    });
+
+    this.commands.put(NetworkCode.PLAY_TITLE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.PLAY_TITLE_RESPONSE);
+        Serializers.collection(Serializers.STRING).write(out, view.getPlayTitles());
+      }
+    });
+
+    this.commands.put(NetworkCode.GET_PLAYS_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        Serializers.INTEGER.write(out, NetworkCode.GET_PLAYS_RESPONSE);
+        Serializers.collection(PlayInfo.SERIALIZER).write(out, view.getPlays());
+      }
+    });
+
+    this.commands.put(NetworkCode.NEW_PLAY_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid member = Uuid.SERIALIZER.read(in);
+        final String title = Serializers.STRING.read(in);
+        ConversationHeader c = controller.newPlay(member, title);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_PLAY_RESPONSE);
+        ConversationHeader.SERIALIZER.write(out, c);
+      }
+    });
+
+    this.commands.put(NetworkCode.JOIN_PLAY_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid member = Uuid.SERIALIZER.read(in);
+        final String title = Serializers.STRING.read(in);
+        ConversationHeader c = controller.joinPlay(member, title);
+
+        Serializers.INTEGER.write(out, NetworkCode.JOIN_PLAY_RESPONSE);
+        ConversationHeader.SERIALIZER.write(out, c);
+      }
+    });
+
+    this.commands.put(NetworkCode.SPEAK_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+
+        Serializers.INTEGER.write(out, NetworkCode.SPEAK_RESPONSE);
+      }
+    });
+
+    this.commands.put(NetworkCode.GET_ROLE_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final String playTitle = Serializers.STRING.read(in);
+        final Uuid player = Uuid.SERIALIZER.read(in);
+
+        String role = view.getRole(playTitle, player);
+        Serializers.INTEGER.write(out, NetworkCode.GET_ROLE_RESPONSE);
+        Serializers.STRING.write(out, role);
+      }
+    });
+
+    this.commands.put(NetworkCode.CHECK_FILLED_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final String title = Serializers.STRING.read(in);
+        boolean filled = view.checkFilled(id, title);
+
+        Serializers.INTEGER.write(out, NetworkCode.CHECK_FILLED_RESPONSE);
+        Serializers.BOOLEAN.write(out, filled);
       }
     });
 

@@ -115,7 +115,6 @@ public class PersistenceLog {
     File passwords = new File(path, "passwords.txt");
     try {
       boolean created = passwords.createNewFile();
-      System.out.println(created);
       if (!created) {
         String line;
         BufferedReader reader = new BufferedReader(new FileReader(passwords));

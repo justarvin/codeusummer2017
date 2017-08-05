@@ -14,13 +14,7 @@
 
 package codeu.chat.server;
 
-import codeu.chat.common.BasicController;
-import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.ConversationPayload;
-import codeu.chat.common.Message;
-import codeu.chat.common.RandomUuidGenerator;
-import codeu.chat.common.RawController;
-import codeu.chat.common.User;
+import codeu.chat.common.*;
 import codeu.chat.util.*;
 
 import java.io.BufferedWriter;
@@ -90,6 +84,13 @@ public final class Controller implements RawController, BasicController {
     PersistenceLog.writeTransaction(PersistenceLog.CONVERSATION, id, title, time.inMs(), owner, null);
 
     return newConversation(id, title, owner, time);
+  }
+
+  private ConversationHeader newPlayConversation(Uuid member, String title) {
+    Uuid id = createId();
+    Time time = Time.now();
+
+    return newConversation(id, title, member, time);
   }
 
   public void removeConversation(ConversationHeader c) {
@@ -338,6 +339,21 @@ public final class Controller implements RawController, BasicController {
     } catch (PasswordUtils.CannotPerformOperationException e) {
       return false;
     }
+  }
+
+  // Returns Uuid
+  ConversationHeader newPlay(Uuid member, String title) {
+    PlayInfo play = model.newPlay(member, title);
+    ConversationHeader playConversation = newPlayConversation(member, title);
+    play.setConversation(playConversation);
+    play.setUuid(playConversation.id);
+    return playConversation;
+  }
+
+  //return uuid, then on chat.java side push the panel. make command for checking if server is ready.
+  ConversationHeader joinPlay(Uuid member, String title) {
+    PlayInfo play = model.joinPlay(member, title);
+    return play.getPlay();
   }
 
   void clean(File persistentPath) {

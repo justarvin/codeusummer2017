@@ -14,7 +14,6 @@
 
 package codeu.chat.server;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -84,34 +83,45 @@ public final class Model {
   private Set<Uuid> admins = new HashSet<>();
   private Map<Uuid, String> passwords = new HashMap<>();
 
-  //map of plays lacking members so any user who decides to join a certain play
-  //will be added as a character in that play
-  private Map<String, PlayInfo> openPlays = new HashMap<>();
-  private Set<String> availablePlays = new HashSet<>();
+  // store from play title to playinfo object, since there could be multiple instances of
+  // the same play in the future
+  private Store<String, PlayInfo> plays = new Store<>(STRING_COMPARE);
+  private Set<String> availableTitles = new HashSet<>();
 
   // check if there is a play with this title that needs more characters
   public boolean isOpen(String title) {
-    return openPlays.containsKey(title);
+    return plays.first(title) != null;
   }
 
   public PlayInfo getPlay(String title) {
-    return openPlays.get(title);
+    return plays.first(title);
   }
 
-  public void newPlay(Uuid member, String title) {
-    ArrayList<String> roles = new ArrayList<>();
-    PlayInfo play = new PlayInfo(title, roles);
+  public void addPlayTitle(String title) {
+    availableTitles.add(title);
+  }
+
+  //return uuid of play conversation
+  public PlayInfo newPlay(Uuid member, String title) {
+    //TODO: change earnest
+    PlayInfo play = new PlayInfo(title, "earnest");
     play.setRole(member);
-    openPlays.put(title, play);
+    play.setStatus("recruiting");
+    plays.insert(title, play);
+    return play;
   }
 
-  public void joinPlay(Uuid member, String title) {
-    PlayInfo play = openPlays.get(title);
-    if (!play.filled()) {
-      play.setRole(member);
+  //return uuid of play conversation
+  public PlayInfo joinPlay(Uuid member, String title) {
+    if (isOpen(title)) {
+      PlayInfo play = plays.first(title);
+      boolean success = play.setRole(member);
+      if (!success) {
+        play.setStatus("closed");
+      }
+      return play;
     } else {
-      //start(play);
-      newPlay(member, title);
+      return newPlay(member, title);
     }
   }
 
@@ -125,6 +135,10 @@ public final class Model {
     userById.clear(user.id);
     userByTime.clear(user.creation);
     userByText.clear(user.name);
+  }
+
+  public StoreAccessor<String, PlayInfo> plays() {
+    return plays;
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -247,7 +261,7 @@ public final class Model {
   }
 
   public Collection<String> getPlayTitles() {
-    return availablePlays;
+    return availableTitles;
   }
 
   public void clearStores() {

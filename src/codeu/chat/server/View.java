@@ -18,14 +18,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import codeu.chat.common.BasicView;
-import codeu.chat.common.ConversationHeader;
-import codeu.chat.common.ConversationPayload;
-import codeu.chat.common.Message;
-import codeu.chat.common.SinglesView;
-import codeu.chat.common.User;
+import codeu.chat.common.*;
 
-import codeu.chat.common.ServerInfo;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.StoreAccessor;
@@ -129,11 +123,6 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
-  public String getAuthInfo(Uuid id) {
-    return null;
-  }
-
-  @Override
   public Collection<Uuid> getAdmins() {
     return model.getAdmins();
   }
@@ -147,4 +136,28 @@ public final class View implements BasicView, SinglesView {
     return model.getPassword(id);
   }
 
+  @Override
+  public Collection<String> getPlayTitles() {
+    return model.getPlayTitles();
+  }
+
+  @Override
+  public Collection<PlayInfo> getPlays() {
+    return all(model.plays());
+  }
+
+  @Override
+  public boolean checkFilled(Uuid id, String title) {
+    for (PlayInfo p : model.plays().at(title)) {
+      if (p.getID().equals(id)) {
+        return p.filled();
+      }
+    }
+    return false;
+  }
+
+  public String getRole(String title, Uuid player) {
+    PlayInfo play = model.getPlay(title);
+    return play.getRole(player);
+  }
 }
