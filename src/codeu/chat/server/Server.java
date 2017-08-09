@@ -432,6 +432,54 @@ public final class Server {
       }
     });
 
+    //OWNERS
+
+    this.commands.put(NetworkCode.ADD_OWNER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final String userName = Serializers.STRING.read(in);
+        boolean success = controller.addOwner(conversationId, userName);
+        Serializers.INTEGER.write(out, NetworkCode.ADD_OWNER_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
+      }
+    });
+
+    this.commands.put(NetworkCode.REMOVE_OWNER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final String userName = Serializers.STRING.read(in);
+        boolean success = controller.removeOwner(conversationId, userName);
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_OWNER_RESPONSE);
+        Serializers.BOOLEAN.write(out, success);
+      }
+    });
+
+    this.commands.put(NetworkCode.CHECK_OWNER_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final Uuid memberId = Uuid.SERIALIZER.read(in);
+        boolean isUserOwner = view.isUserOwner(conversationId, memberId);
+        Serializers.INTEGER.write(out, NetworkCode.CHECK_MEMBER_RESPONSE);
+        Serializers.BOOLEAN.write(out, isUserOwner);
+      }
+    });
+
+    //CREATOR
+
+    this.commands.put(NetworkCode.CHECK_CREATOR_REQUEST, new Command() {
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid conversationId = Uuid.SERIALIZER.read(in);
+        final Uuid memberId = Uuid.SERIALIZER.read(in);
+        boolean isUserCreator = view.isUserCreator(conversationId, memberId);
+        Serializers.INTEGER.write(out, NetworkCode.CHECK_CREATOR_RESPONSE);
+        Serializers.BOOLEAN.write(out, isUserOwner);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {

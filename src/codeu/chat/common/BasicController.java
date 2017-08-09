@@ -65,4 +65,8 @@ public interface BasicController {
   // Removes the given user from members of the given conversation.
   boolean removeMember(Uuid conversationId, String userName);
 
+  boolean addOwner(Uuid conversationId, String userName);
+
+  boolean removeOwner(Uuid conversationId, String userName);
+
 }

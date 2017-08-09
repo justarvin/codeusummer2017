@@ -617,6 +617,10 @@ public final class Chat {
         System.out.println("    Add the current user as a new member to the current conversation.");
         System.out.println("  remove-member <user>");
         System.out.println("    Remove the current user as a new member to the current conversation.");
+        System.out.println("  add-owner <user>");
+        System.out.println("    Add the current user as an owner to the current conversation.");
+        System.out.println("  remove-owner <user>");
+        System.out.println("    Remove the current user from being an owner to the current conversation.");
         System.out.println("  info");
         System.out.println("    Display all info about the current conversation.");
         System.out.println("  back");
@@ -681,13 +685,41 @@ public final class Chat {
     });
 
     // REMOVE_MEMBER
-    // Adds the current user as a new member to the current conversation.
+    // Remove the current user as a new member to the current conversation.
     panel.register("remove-member", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
         final String userName = args.get(0);
         if (conversation.removeMember(userName)) {
           System.out.println("Removed member " + userName + " successfully.");
+        } else {
+          System.out.println("Command failed.");
+        }
+      }
+    });
+
+    // ADD_OWNER
+    // Adds the current user as a new member to the current conversation.
+    panel.register("add-owner", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.addOwner(userName)) {
+          System.out.println("Added owner " + userName + " successfully.");
+        } else {
+          System.out.println("Command failed.");
+        }
+      }
+    });
+
+    // REMOVE_OWNER
+    // Add the current user as an owner to the current conversation.
+    panel.register("remove-owner", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String userName = args.get(0);
+        if (conversation.removeOwner(userName)) {
+          System.out.println("Removed owner " + userName + " successfully.");
         } else {
           System.out.println("Command failed.");
         }

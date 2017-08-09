@@ -396,4 +396,42 @@ public final class Controller implements BasicController {
     }
     return false;
   }
+
+  @Override
+  public boolean addOwner(Uuid conversationId, String userName) {
+    try (final Connection connection = source.connect()) {
+      Serializers.INTEGER.write(connection.out(), NetworkCode.ADD_OWNER_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), conversationId);
+      Serializers.STRING.write(connection.out(), userName);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.ADD_OWNER_RESPONSE) {
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
+  }
+
+  @Override
+  public boolean removeOwner(Uuid conversationId, String userName) {
+    try (final Connection connection = source.connect()) {
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_OWNER_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), conversationId);
+      Serializers.STRING.write(connection.out(), userName);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_OWNER_RESPONSE) {
+        return Serializers.BOOLEAN.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (IOException e) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(e, "Exception during call on server.");
+    }
+    return false;
+  }
 }

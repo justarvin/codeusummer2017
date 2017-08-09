@@ -266,4 +266,41 @@ public final class Model {
     return conversation.members.contains(userId);
   }
 
+  //OWNERS
+
+  public boolean addOwner(Uuid conversationId, String userName) {
+    User user = userByText.first(userName);
+    if (user == null) {
+      return false;
+    }
+    Uuid userId = user.id;
+    ConversationHeader conversation = conversationById().first(conversationId);
+    conversation.owners.add(userId);
+    return true;
+  }
+
+  public boolean removeOwner(Uuid conversationId, String userName) {
+    User user = userByText.first(userName);
+    if (user == null) {
+      return false;
+    }
+    Uuid userId = user.id;
+    ConversationHeader conversation = conversationById().first(conversationId);
+    if (!isUserOwner(conversation, userId)) {
+      return false;
+    }
+    conversation.owners.remove(userId);
+    return true;
+  }
+
+  public boolean isUserOwner(ConversationHeader conversation, Uuid userId) {
+    return conversation.owners.contains(userId);
+  }
+
+  //CREATOR
+
+  public boolean isUserCreator(ConversationHeader conversation, Uuid userId) {
+    return conversation.creator.contains(userId);
+  }
+
 }
